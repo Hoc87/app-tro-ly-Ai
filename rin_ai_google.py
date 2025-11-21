@@ -35,7 +35,7 @@ if final_key:
     try:
         genai.configure(api_key=final_key)
         # Dùng model Flash cho nhanh
-        model = genai.GenerativeModel("gemini-1.5-flash")
+        model = genai.GenerativeModel("gemini-pro")
         
         # Khung chat
         user_input = st.text_area("Nhập nội dung cần Rin.Ai hỗ trợ:", height=120)
