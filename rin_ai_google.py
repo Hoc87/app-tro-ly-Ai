@@ -1,73 +1,43 @@
 import streamlit as st
 import google.generativeai as genai
 
-# --- CẤU HÌNH TRANG WEB ---
-st.set_page_config(page_title="Rin.Ai Google", page_icon="✨")
-st.title("✨ Rin.Ai Google")
-st.caption("Trợ lý AI thông minh - Enter là gửi!")
+st.set_page_config(page_title="Kiểm tra Model", page_icon="🛠️")
+st.title("🛠️ CÔNG CỤ KIỂM TRA MODEL")
 
-# --- THANH BÊN (SIDEBAR) ---
-with st.sidebar:
-    st.header("⚙️ Cấu hình")
-    option = st.radio(
-        "Chọn chế độ:",
-        ["🚀 Dùng thử miễn phí", "🔑 Dùng Key cá nhân"],
-        index=0
-    )
-    st.divider()
-    st.markdown("Dev by **Học Viện Rin.Ai**")
+# 1. Lấy Key
+try:
+    # Thử lấy từ Secrets
+    api_key = st.secrets["GOOGLE_API_KEY"]
+    st.success("✅ Đã tìm thấy Key trong Két sắt.")
+except:
+    st.warning("⚠️ Chưa có Key trong Secrets.")
+    api_key = st.text_input("Nhập Key của bạn vào đây để test:", type="password")
 
-# --- XỬ LÝ LOGIC KEY ---
-final_key = None
-
-if option == "🚀 Dùng thử miễn phí":
+# 2. Kiểm tra
+if api_key:
     try:
-        final_key = st.secrets["GOOGLE_API_KEY"]
-        st.success("✅ Đang dùng chế độ Dùng Thử.")
-    except:
-        st.error("❌ Giảng viên chưa cài Key vào Secrets.")
-else:
-    st.markdown("### 🔑 Nhập API Key")
-    user_api_key = st.text_input("Dán Key vào đây:", type="password")
-    if user_api_key:
-        final_key = user_api_key
-        st.success("✅ Đã nhận Key cá nhân.")
-
-# --- LỊCH SỬ CHAT (Để lưu tin nhắn cũ trên màn hình) ---
-if "messages" not in st.session_state:
-    st.session_state.messages = []
-
-# Hiển thị lại các tin nhắn cũ
-for message in st.session_state.messages:
-    with st.chat_message(message["role"]):
-        st.markdown(message["content"])
-
-# --- PHẦN XỬ LÝ CHAT CHÍNH (QUAN TRỌNG) ---
-if final_key:
-    try:
-        genai.configure(api_key=final_key)
-        # Dùng gemini-pro cho ổn định (hoặc flash nếu bạn đã fix xong requirements)
-        model = genai.GenerativeModel("gemini-pro")
-
-        # 🌟 ĐÂY LÀ CHỖ THAY ĐỔI: Dùng st.chat_input (Enter là gửi)
-        if prompt := st.chat_input("Nhập câu hỏi ở đây rồi Enter..."):
+        genai.configure(api_key=api_key)
+        
+        st.write("⏳ Đang kết nối với Google để lấy danh sách...")
+        
+        # Lệnh liệt kê tất cả model
+        found_models = []
+        for m in genai.list_models():
+            if 'generateContent' in m.supported_generation_methods:
+                found_models.append(m.name)
+        
+        if found_models:
+            st.success(f"🎉 Thành công! Tìm thấy {len(found_models)} model khả dụng:")
+            st.divider()
+            for name in found_models:
+                # Hiển thị tên model dạng Code để bạn copy
+                st.code(name)
+                # Gợi ý model nên dùng
+                if "gemini" in name:
+                    st.caption("👆 Đây là model Gemini!")
+        else:
+            st.error("❌ Kết nối thành công nhưng không tìm thấy model nào. Có thể Key bị hạn chế.")
             
-            # 1. Hiển thị tin nhắn người dùng ngay lập tức
-            with st.chat_message("user"):
-                st.markdown(prompt)
-            # Lưu vào lịch sử
-            st.session_state.messages.append({"role": "user", "content": prompt})
-
-            # 2. AI suy nghĩ và trả lời
-            with st.chat_message("assistant"):
-                with st.spinner("Rin.Ai đang soạn tin..."):
-                    try:
-                        response = model.generate_content(prompt)
-                        st.markdown(response.text)
-                        # Lưu câu trả lời vào lịch sử
-                        st.session_state.messages.append({"role": "assistant", "content": response.text})
-                    except Exception as e:
-                        st.error(f"Lỗi: {e}")
-                        
     except Exception as e:
-        st.error(f"Lỗi cấu hình Key: {e}")
+        st.error(f"❌ Lỗi kết nối nghiêm trọng: {e}")
+        st.info("Gợi ý: Hãy kiểm tra lại file requirements.txt xem đã có dòng 'google-generativeai>=0.8.3' chưa.")
