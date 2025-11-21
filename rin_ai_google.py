@@ -47,7 +47,7 @@ if final_key:
     try:
         genai.configure(api_key=final_key)
         # Dùng gemini-pro cho ổn định (hoặc flash nếu bạn đã fix xong requirements)
-        model = genai.GenerativeModel("gemini-1.5-flash")
+        model = genai.GenerativeModel("gemini-pro")
 
         # 🌟 ĐÂY LÀ CHỖ THAY ĐỔI: Dùng st.chat_input (Enter là gửi)
         if prompt := st.chat_input("Nhập câu hỏi ở đây rồi Enter..."):
