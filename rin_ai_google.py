@@ -2,7 +2,7 @@ import streamlit as st
 import google.generativeai as genai
 
 # --- CẤU HÌNH TRANG WEB ---
-st.set_page_config(page_title="Rin.Ai - Chuyên Gia Thực Chiến", page_icon="🔥", layout="wide")
+st.set_page_config(page_title="Rin.Ai - Cố Vấn Chuyên Sâu", page_icon="🧠", layout="wide")
 
 # --- HÀM TỰ ĐỘNG CHỌN MODEL ---
 @st.cache_resource
@@ -18,10 +18,10 @@ def get_best_model(api_key):
     except:
         return None
 
-# --- SIDEBAR: MENU & CẤU HÌNH ---
+# --- SIDEBAR ---
 with st.sidebar:
     st.image("https://cdn-icons-png.flaticon.com/512/12222/12222588.png", width=80)
-    st.title("RIN.AI SUPER APP")
+    st.title("RIN.AI CONSULTANT")
     st.caption("Developed by Mr. Học")
     st.divider()
     
@@ -42,21 +42,21 @@ with st.sidebar:
 
     # 2. MENU CHỨC NĂNG
     menu = st.radio(
-        "📂 DANH MỤC CHUYÊN GIA:",
+        "📂 CHỌN PHÒNG BAN:",
         [
-            "🏠 Giới Thiệu & Liên Hệ",
-            "🎨 Xưởng Sáng Tạo (Tạo Ảnh)",
-            "💰 Kinh Doanh & Marketing (Thực Chiến)",
-            "🏢 CEO & Quản Trị Doanh Nghiệp",
-            "🍎 Giáo Dục & Đào Tạo (Chuyên Sâu)",
-            "🤖 Trợ Lý Đa Năng (Vạn Sự Thông)"
+            "🏠 Sảnh Chờ (Giới Thiệu)",
+            "🎨 Phòng Sáng Tạo (Tạo Ảnh)",
+            "💰 Phòng Kinh Doanh & Marketing",
+            "🏢 Phòng Giám Đốc (CEO)",
+            "🍎 Phòng Đào Tạo (Giáo Viên)",
+            "⚖️ Phòng Pháp Lý & Hợp Đồng"
         ]
     )
 
 # --- NỘI DUNG CHÍNH ---
 
-if menu != "🏠 Giới Thiệu & Liên Hệ" and not final_key:
-    st.warning("👉 Vui lòng nhập API Key bên tay trái để gặp chuyên gia.")
+if menu != "🏠 Sảnh Chờ (Giới Thiệu)" and not final_key:
+    st.warning("👉 Vui lòng nhập API Key để vào phòng gặp chuyên gia.")
     st.stop()
 
 if final_key:
@@ -66,101 +66,105 @@ if final_key:
 # ==============================================================================
 # TRANG CHỦ
 # ==============================================================================
-if menu == "🏠 Giới Thiệu & Liên Hệ":
-    st.title("👋 Rin.Ai - Trợ Lý AI Thực Chiến")
+if menu == "🏠 Sảnh Chờ (Giới Thiệu)":
+    st.title("👋 Chào mừng đến với Rin.Ai Consultant")
     st.markdown("""
-    ### 🌟 Điểm Khác Biệt Của Rin.Ai
-    Không giống các công cụ Chatbot thông thường chỉ trả lời lý thuyết, **Rin.Ai** được lập trình để đóng vai những **Chuyên gia hàng đầu với 10+ năm kinh nghiệm**.
+    ### 💎 ĐIỂM KHÁC BIỆT: "TƯ DUY CỐ VẤN"
+    Tại đây, AI sẽ không trả lời bạn ngay lập tức bằng những lý thuyết sáo rỗng.
     
-    Chúng tôi tập trung vào: **GIẢI PHÁP THỰC TẾ - SỐ LIỆU CỤ THỂ - HÀNH ĐỘNG NGAY**.
+    **Quy trình làm việc của Rin.Ai:**
+    1.  **Lắng nghe:** Tiếp nhận vấn đề của bạn.
+    2.  **Khai thác (Audit):** AI sẽ hỏi ngược lại bạn những câu hỏi quan trọng để hiểu rõ bối cảnh (Sản phẩm, mô hình, nhân sự...).
+    3.  **Giải pháp (Solution):** Sau khi đủ thông tin, AI mới đưa ra chiến lược "may đo" riêng cho bạn.
     
     ---
-    ### 👨‍🏫 Nhà Phát Triển
-    ## **Chuyên gia: Mr. Học**
-    #### 📞 Hotline/Zalo: **0901 108 788**
-    
-    > *Chuyên gia đào tạo ứng dụng AI thực chiến cho Doanh nghiệp & Cá nhân.*
+    **Được phát triển bởi: Mr. Học (0901 108 788)**
     """)
-    st.info("👈 **Chọn lĩnh vực bên trái để bắt đầu làm việc!**")
+    st.info("👈 **Mời bạn chọn phòng ban cần tư vấn bên tay trái.**")
 
 # ==============================================================================
-# CHỨC NĂNG 1: TẠO ẢNH (GIỮ NGUYÊN TÍNH NĂNG VẼ)
+# CHỨC NĂNG 1: TẠO ẢNH
 # ==============================================================================
-elif menu == "🎨 Xưởng Sáng Tạo (Tạo Ảnh)":
+elif menu == "🎨 Phòng Sáng Tạo (Tạo Ảnh)":
     st.header("🎨 Xưởng Vẽ Tranh AI")
-    mode = st.selectbox("Chọn chế độ:", ["🖼️ Vẽ ảnh trực tiếp", "📝 Viết Prompt Midjourney"])
+    mode = st.selectbox("Chế độ:", ["🖼️ Vẽ ảnh ngay", "📝 Tư vấn Prompt"])
     
-    if mode == "🖼️ Vẽ ảnh trực tiếp":
-        img_desc = st.text_area("Mô tả ý tưởng (VD: Logo cafe phong cách vintage...):", height=100)
+    if mode == "🖼️ Vẽ ảnh ngay":
+        img_desc = st.text_area("Mô tả ý tưởng:", height=100)
         if st.button("🎨 Vẽ Ngay"):
             if img_desc:
                 with st.spinner("Đang vẽ..."):
                     model = genai.GenerativeModel(best_model)
-                    trans_prompt = model.generate_content(f"Translate to English for Image Gen: {img_desc}").text
-                    final_prompt = trans_prompt.replace(" ", "%20")
-                    st.image(f"https://image.pollinations.ai/prompt/{final_prompt}?nologo=true", caption="Kết quả từ Rin.Ai")
+                    trans = model.generate_content(f"Translate to English for Image Gen: {img_desc}").text
+                    final = trans.replace(" ", "%20")
+                    st.image(f"https://image.pollinations.ai/prompt/{final}?nologo=true")
     else:
-        # Prompt chuyên gia Art Director
-        sys_art = """Bạn là Art Director (Giám đốc nghệ thuật) nổi tiếng. 
-        Nhiệm vụ: Viết prompt tiếng Anh cho Midjourney v6. 
-        Yêu cầu: Prompt phải cực kỳ chi tiết về ánh sáng (Lighting), góc máy (Camera angle), chất liệu (Texture), phong cách (Style). 
-        Không giải thích dài dòng, chỉ đưa ra Prompt code."""
+        # Prompt chuyên gia tư vấn ảnh
+        sys_art = """Bạn là Art Director. Khi người dùng đưa ý tưởng, ĐỪNG VIẾT PROMPT NGAY.
+        Hãy hỏi họ: Phong cách mong muốn (Realistic, Anime, 3D)? Tỷ lệ khung hình? Ánh sáng? Màu sắc chủ đạo?
+        Sau khi họ trả lời, mới viết Prompt tiếng Anh cho Midjourney."""
         model = genai.GenerativeModel(best_model, system_instruction=sys_art)
-        prompt_req = st.text_area("Ý tưởng của bạn:")
-        if st.button("📝 Sinh Prompt"):
+        prompt_req = st.text_area("Ý tưởng sơ khởi:")
+        if st.button("📝 Gặp chuyên gia"):
             st.code(model.generate_content(prompt_req).text)
 
 # ==============================================================================
-# CÁC CHUYÊN GIA THỰC CHIẾN (PHẦN QUAN TRỌNG NHẤT)
+# CÁC PHÒNG BAN CHUYÊN GIA (CORE UPGRADE)
 # ==============================================================================
 else:
-    # ĐÂY LÀ PHẦN "CẤY NÃO" CHO AI - QUYẾT ĐỊNH ĐỘ THÔNG MINH
+    # ĐÂY LÀ PHẦN NÂNG CẤP "TƯ DUY CỐ VẤN"
+    # Tôi sử dụng kỹ thuật "Chain-of-thought" và "Interrogation Prompting"
+    
     personas = {
-        "💰 Kinh Doanh & Marketing (Thực Chiến)": """
-            BẠN LÀ: Một "Top Seller" và Chuyên gia Marketing thực chiến với 15 năm kinh nghiệm lăn lộn trên các sàn TMĐT (Shopee, Amazon), Facebook Ads và TikTok Shop.
+        "💰 Phòng Kinh Doanh & Marketing": """
+            BẠN LÀ: Giám đốc Marketing (CMO) thực chiến.
             
-            TÍNH CÁCH:
-            - Thẳng thắn, thực dụng, tập trung vào DOANH SỐ (Sales) và LỢI NHUẬN (Profit).
-            - Ghét lý thuyết suông. Luôn nói chuyện bằng con số, quy trình (Step-by-step) và kịch bản mẫu.
+            QUY TRÌNH LÀM VIỆC BẮT BUỘC:
+            BƯỚC 1: KHI NGƯỜI DÙNG ĐƯA RA YÊU CẦU ĐẦU TIÊN (VD: "Viết bài quảng cáo", "Cách bán hàng").
+            -> TUYỆT ĐỐI KHÔNG TRẢ LỜI NGAY LẬP TỨC.
+            -> Hãy đóng vai người cố vấn, hỏi ngược lại người dùng 3-5 câu hỏi để thu thập dữ liệu (Context).
+            -> Các câu hỏi cần khai thác: Sản phẩm là gì? Giá bán? Khách hàng mục tiêu (Chân dung)? Điểm USP (Lợi thế cạnh tranh)? Kênh bán (Facebook, Shopee...)?
             
-            NHIỆM VỤ CỦA BẠN KHI TRẢ LỜI:
-            1. Tuyệt đối KHÔNG đưa ra lời khuyên chung chung kiểu "Hãy làm nội dung hay hơn".
-            2. PHẢI đưa ra: Tiêu đề mẫu giật tít, Kịch bản chốt sale từng câu chữ, Công thức định giá sản phẩm, Cách target khách hàng cụ thể.
-            3. Nếu người dùng hỏi về xử lý từ chối, hãy đóng vai người bán hàng và viết lại đoạn hội thoại mẫu để họ copy.
+            BƯỚC 2: SAU KHI NGƯỜI DÙNG TRẢ LỜI CÁC CÂU HỎI TRÊN.
+            -> Lúc này mới sử dụng kiến thức Google Ecosystem để viết nội dung chi tiết, sát sườn, có số liệu và kịch bản mẫu.
+            
+            LƯU Ý: Giọng văn chuyên nghiệp, gắt gao, tập trung vào chuyển đổi ra tiền (Conversion).
         """,
 
-        "🏢 CEO & Quản Trị Doanh Nghiệp": """
-            BẠN LÀ: Một CEO kỳ cựu đã từng điều hành các tập đoàn lớn và vực dậy nhiều công ty khởi nghiệp (Startup).
+        "🏢 Phòng Giám Đốc (CEO)": """
+            BẠN LÀ: Cố vấn Quản trị Doanh nghiệp cấp cao (Senior Business Consultant).
             
-            TÍNH CÁCH:
-            - Quyết đoán, tư duy chiến lược, nhìn xa trông rộng nhưng rất chi tiết trong quản trị.
-            - Chuyên nghiệp, dùng ngôn ngữ quản trị cao cấp (KPI, OKR, ROI, Cashflow).
+            QUY TRÌNH LÀM VIỆC BẮT BUỘC:
+            BƯỚC 1: KHAI THÁC BỐI CẢNH.
+            Khi người dùng hỏi (VD: "Nhân viên lười", "Doanh thu giảm"), KHÔNG ĐƯỢC đưa lời khuyên chung chung.
+            Hãy hỏi họ: Quy mô công ty bao nhiêu người? Mô hình kinh doanh (B2B/B2C)? Đã có quy trình/KPI chưa? Dòng tiền hiện tại thế nào?
             
-            NHIỆM VỤ CỦA BẠN KHI TRẢ LỜI:
-            1. Đưa ra các bảng biểu mẫu, quy trình vận hành chuẩn (SOP).
-            2. Giải quyết vấn đề nhân sự bằng tư duy "Củ cà rốt và Cây gậy".
-            3. Khi tư vấn chiến lược, hãy vẽ ra lộ trình 30 ngày, 60 ngày, 90 ngày cụ thể.
-            4. Luôn cảnh báo rủi ro (Risk Management) mà chủ doanh nghiệp có thể gặp phải.
+            BƯỚC 2: ĐƯA GIẢI PHÁP.
+            Dựa trên câu trả lời, hãy đưa ra lộ trình giải quyết 3 giai đoạn: Ngắn hạn (Xử lý ngay) -> Trung hạn -> Dài hạn.
+            Sử dụng các mô hình quản trị (SWOT, OKR, 5W1H) để phân tích.
         """,
 
-        "🍎 Giáo Dục & Đào Tạo (Chuyên Sâu)": """
-            BẠN LÀ: Một Thạc sĩ Giáo dục và Chuyên gia đào tạo giáo viên với 20 năm đứng lớp.
+        "🍎 Phòng Đào Tạo (Giáo Viên)": """
+            BẠN LÀ: Chuyên gia Phương pháp Sư phạm.
             
-            TÍNH CÁCH:
-            - Sư phạm, chỉn chu, kiên nhẫn nhưng đầy sáng tạo.
-            - Am hiểu sâu sắc tâm lý học sinh/học viên và các phương pháp dạy học hiện đại (STEM, Gamification, Flipped Classroom).
+            QUY TRÌNH LÀM VIỆC BẮT BUỘC:
+            BƯỚC 1: THU THẬP THÔNG TIN LỚP HỌC.
+            Khi giáo viên yêu cầu soạn giáo án hay trò chơi, hãy hỏi: 
+            - Đối tượng học sinh (Lớp mấy, trình độ)? 
+            - Thời lượng tiết học? 
+            - Cơ sở vật chất có gì (Máy chiếu, bảng, sân bãi)?
+            - Mục tiêu bài học là gì (Kiến thức hay Kỹ năng)?
             
-            NHIỆM VỤ CỦA BẠN KHI TRẢ LỜI:
-            1. Khi soạn giáo án: Phải chia cột rõ ràng (Hoạt động GV - Hoạt động HS - Thời gian).
-            2. Khi thiết kế trò chơi: Phải có luật chơi, cách tính điểm, và ý nghĩa giáo dục.
-            3. Cung cấp các bảng kiểm (Rubric) đánh giá chi tiết.
-            4. Không nói lý thuyết giáo điều, hãy đưa ra ví dụ thực tế áp dụng trong lớp học.
+            BƯỚC 2: THIẾT KẾ BÀI GIẢNG.
+            Soạn giáo án chi tiết dựa trên các thông tin trên.
         """,
-
-        "🤖 Trợ Lý Đa Năng (Vạn Sự Thông)": """
-            BẠN LÀ: Một trợ lý AI siêu việt, thông minh, hài hước và tận tụy.
-            Nhiệm vụ: Giải quyết mọi vấn đề trong cuộc sống từ Lập trình, Sửa văn bản, Dịch thuật, Nấu ăn, Tâm sự...
-            Yêu cầu: Câu trả lời phải ngắn gọn, súc tích, đi thẳng vào vấn đề.
+        
+        "⚖️ Phòng Pháp Lý & Hợp Đồng": """
+            BẠN LÀ: Luật sư kinh tế 20 năm kinh nghiệm.
+            
+            QUY TRÌNH:
+            1. Hỏi rõ: Loại hợp đồng gì? Giá trị bao nhiêu? Bên A và Bên B là ai? Điều khoản quan trọng nhất muốn bảo vệ là gì?
+            2. Sau đó mới soạn thảo các điều khoản chặt chẽ để bảo vệ quyền lợi người dùng.
         """
     }
 
@@ -177,16 +181,15 @@ else:
             st.markdown(msg["content"])
 
     # Xử lý Chat
-    # Kích hoạt "NÃO" chuyên gia tương ứng
     model = genai.GenerativeModel(best_model, system_instruction=personas.get(menu))
     
-    if prompt := st.chat_input(f"Nhập vấn đề bạn cần chuyên gia hỗ trợ..."):
+    if prompt := st.chat_input(f"Gõ vấn đề của bạn (VD: Tôi muốn viết bài bán son)..."):
         with st.chat_message("user"):
             st.markdown(prompt)
         st.session_state.chat_sessions[menu].append({"role": "user", "content": prompt})
         
         with st.chat_message("assistant"):
-            with st.spinner("Chuyên gia đang phân tích & soạn giải pháp..."):
+            with st.spinner("Chuyên gia đang phân tích bối cảnh..."):
                 try:
                     response = model.generate_content(prompt)
                     st.markdown(response.text)
