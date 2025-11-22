@@ -2,7 +2,8 @@ import streamlit as st
 import google.generativeai as genai
 from gtts import gTTS
 import io
-import re  # Thư viện xử lý văn bản (cắt bỏ ngoặc đơn)
+import re
+import requests # <-- MỚI: Thư viện gọi API ảnh
 from PIL import Image
 import PyPDF2
 import pandas as pd
@@ -31,14 +32,22 @@ def process_uploaded_file(uploaded_file):
         else: return uploaded_file.getvalue().decode("utf-8")
     except Exception as e: return f"Lỗi đọc file: {e}"
 
-# --- HÀM LÀM SẠCH VĂN BẢN (TTS) ---
+# --- HÀM LÀM SẠCH VĂN BẢN (CẬP NHẬT: KHÔNG ĐỌC MÃ LỆNH VẼ ẢNH) ---
 def clean_text_for_tts(text):
-    """Loại bỏ nội dung trong ngoặc đơn (...) để AI không đọc hướng dẫn diễn xuất."""
     if not text: return ""
-    clean = re.sub(r'\([^)]*\)', '', text) # Xóa (...)
-    clean = re.sub(r'\[[^]]*\]', '', clean) # Xóa [...]
-    clean = clean.replace('*', '').replace('#', '') # Xóa ký tự markdown
+    # Xóa các thẻ prompt ảnh (###PROMPT...) để AI không đọc nó lên
+    clean = re.sub(r'###PROMPT_[23]D###.*?###END_PROMPT###', '', text, flags=re.DOTALL)
+    clean = re.sub(r'\([^)]*\)', '', clean)
+    clean = re.sub(r'\[[^]]*\]', '', clean)
+    clean = clean.replace('*', '').replace('#', '').replace('`', '')
     return clean.strip()
+
+# --- HÀM TẠO LINK ẢNH TỪ PROMPT (MỚI) ---
+def generate_image_url(prompt):
+    """Chuyển đổi prompt tiếng Anh thành URL ảnh của Pollinations."""
+    # Thêm tham số model=turbo để vẽ nhanh và đẹp hơn
+    clean_prompt = prompt.replace(" ", "%20")
+    return f"https://image.pollinations.ai/prompt/{clean_prompt}?nologo=true&model=turbo"
 
 # --- HÀM ĐỌC VĂN BẢN (TTS) - ĐÃ NÂNG CẤP TỐC ĐỘ ---
 def play_text_to_speech(text_content, speed_slow=False):
@@ -98,12 +107,22 @@ def get_expert_system_instruction(menu_name):
 
         # --- 2. NHÓM KỸ THUẬT & XÂY DỰNG (NÂNG CẤP) ---
         "🏗️ Kiến Trúc - Nội Thất - Xây Dựng": """
-            BẠN LÀ: Kiến trúc sư trưởng kiêm Kỹ sư Xây dựng (20 năm kinh nghiệm thực chiến).
-            NHIỆM VỤ:
-            - Tư vấn thiết kế: Mô tả chi tiết bản vẽ 2D (công năng), ý tưởng 3D (Màu sắc, ánh sáng, vật liệu), cảnh quan sân vườn.
-            - Dự toán chi phí: Tính toán khối lượng vật liệu (sắt, thép, xi măng), nhân công, chi phí móng/mái sát với giá thị trường.
-            - Phong thủy: Tư vấn hướng nhà, màu sắc hợp mệnh gia chủ.
-            PHONG CÁCH: Chuyên nghiệp, tỉ mỉ, dùng từ ngữ gợi hình (Visual) để người dùng hình dung ra ngôi nhà.
+            BẠN LÀ: Kiến trúc sư trưởng kiêm Kỹ sư Xây dựng (20 năm kinh nghiệm).
+            
+            NHIỆM VỤ ĐẶC BIỆT (TỰ ĐỘNG VẼ MINH HỌA):
+            Khi tư vấn thiết kế, bạn PHẢI tự suy luận chi tiết và sinh ra mã lệnh vẽ ảnh ở cuối câu trả lời theo quy tắc sau:
+            
+            1. Để vẽ mặt bằng 2D:
+               ###PROMPT_2D### [Mô tả Tiếng Anh về bản vẽ kỹ thuật 2D, floor plan blueprint, top-down view, ghi rõ kích thước] ###END_PROMPT###
+            
+            2. Để vẽ phối cảnh 3D:
+               ###PROMPT_3D### [Mô tả Tiếng Anh về ảnh render 3D photorealistic, architectural visualization, ánh sáng đẹp, vật liệu chi tiết] ###END_PROMPT###
+            
+            VÍ DỤ:
+            "...Tôi đề xuất phương án nhà mái Thái...(Nội dung tư vấn)...
+            ###PROMPT_2D### Floor plan of a house with 3 bedrooms, 1 living room, blueprint style. ###END_PROMPT###
+            ###PROMPT_3D### Photorealistic exterior of a Thai-roof house, modern style, garden with flowers, sunny day. ###END_PROMPT###"
+      
         """,
         "💻 Lập Trình - Freelancer - Digital": """
             BẠN LÀ: Senior Solutions Architect & Full-stack Developer (Google Expert).
@@ -469,8 +488,9 @@ else:
             with st.chat_message(msg["role"]):
                 st.markdown(msg["content"])
 
-        # Ô nhập liệu
-        if prompt := st.chat_input("Nhập câu hỏi cho chuyên gia..."):
+       # Ô nhập liệu
+        if prompt := st.chat_input("Nhập câu hỏi (VD: Thiết kế nhà cấp 4 mái thái 3 phòng ngủ)..."):
+            # Hiển thị câu hỏi người dùng
             with st.chat_message("user"):
                 st.markdown(prompt)
                 if file_content: st.caption("📎 [Đã đính kèm file]")
@@ -478,19 +498,46 @@ else:
 
             # Xử lý trả lời
             with st.chat_message("assistant"):
-                with st.spinner("Chuyên gia đang phân tích..."):
+                with st.spinner("Chuyên gia đang tính toán và phác thảo bản vẽ..."):
                     try:
                         # Ghép Prompt + File + Edu Logic
                         full_prompt = [prompt + edu_append]
                         if file_content:
                             if isinstance(file_content, str): full_prompt.append(f"\n\nCONTEXT FILE:\n{file_content}")
-                            else: full_prompt.append(file_content) # Nếu là ảnh
+                            else: full_prompt.append(file_content)
 
-                        # Gọi Model với System Instruction chuyên sâu
+                        # Gọi Model
                         model = genai.GenerativeModel(best_model, system_instruction=expert_instruction)
                         response = model.generate_content(full_prompt)
+                        full_text = response.text
+
+                        # --- LOGIC TÁCH ẢNH VÀ HIỂN THỊ (MỚI) ---
                         
-                        st.markdown(response.text)
-                        st.session_state.history[menu].append({"role": "assistant", "content": response.text})
+                        # 1. Tìm mã lệnh ảnh 2D và 3D ẩn trong câu trả lời
+                        p2d = re.search(r'###PROMPT_2D###(.*?)###END_PROMPT###', full_text, re.DOTALL)
+                        p3d = re.search(r'###PROMPT_3D###(.*?)###END_PROMPT###', full_text, re.DOTALL)
+                        
+                        # 2. Lọc bỏ mã lệnh để lấy văn bản tư vấn thuần túy
+                        text_show = re.sub(r'###PROMPT_[23]D###.*?###END_PROMPT###', '', full_text, flags=re.DOTALL)
+                        
+                        # 3. Hiện văn bản trước
+                        st.markdown(text_show.strip())
+                        
+                        # 4. Hiện ảnh (nếu AI có vẽ)
+                        if p2d or p3d:
+                            st.divider()
+                            st.caption("🎨 AI Phác thảo minh họa:")
+                            col_a, col_b = st.columns(2)
+                            
+                            if p2d:
+                                with col_a: 
+                                    st.image(generate_image_url("Blueprint, floor plan. " + p2d.group(1)), caption="Bản vẽ 2D (Mặt bằng)", use_column_width=True)
+                            if p3d:
+                                with col_b: 
+                                    st.image(generate_image_url("Photorealistic architecture render. " + p3d.group(1)), caption="Phối cảnh 3D", use_column_width=True)
+
+                        # Lưu vào lịch sử (Lưu bản gốc chứa mã lệnh để lần sau load lại vẫn hiểu)
+                        st.session_state.history[menu].append({"role": "assistant", "content": full_text})
+                        
                     except Exception as e:
                         st.error(f"Lỗi kết nối: {e}")
