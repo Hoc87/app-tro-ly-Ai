@@ -236,6 +236,12 @@ with st.sidebar:
     
     st.divider()
     
+    # --- CHÈN NÚT LINK CHATGPT (MỚI) ---
+    st.info("🤖 Bạn muốn dùng App ChatGPT chuyên sâu?")
+    # Thay đường link bên dưới bằng Link Custom GPT của bạn
+    st.link_button("👉 Mở Trợ Lý ChatGPT (App Riêng)", "https://chatgpt.com/g/g-69004bb8428481918ecf4ade89a9216c-rin-ai-center-trung-tam-tro-ly-ai")
+    st.divider()
+    
     # --- 2. UPLOAD FILE ---
     st.subheader("📎 Tài liệu đính kèm")
     uploaded_file = st.file_uploader("Ảnh/PDF/Excel...", type=['png', 'jpg', 'pdf', 'txt', 'csv', 'xlsx'], label_visibility="collapsed")
