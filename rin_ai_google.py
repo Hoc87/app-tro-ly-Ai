@@ -211,7 +211,18 @@ else:
         # Chat Input & Processing
         sys_prompt = f"Bạn là chuyên gia {menu}. {consultant_logic}"
         model = genai.GenerativeModel(best_model, system_instruction=sys_prompt)
-        
+
+       # ... (Đoạn code hiển thị lịch sử chat ở trên)
+
+    # THÊM ĐOẠN NÀY ĐỂ NHẮC NGƯỜI DÙNG
+    if not file_content:
+        st.caption("💡 Mẹo: Bạn có thể tải ảnh/tài liệu lên ở cột bên trái 👈 để AI phân tích.")
+    else:
+        st.info(f"📎 Đang đính kèm file: {uploaded_file.name}. Hãy đặt câu hỏi bên dưới 👇")
+
+    # Khung nhập liệu (Giữ nguyên)
+    if prompt := st.chat_input("Nhập yêu cầu..."):
+        # ... 
         if prompt := st.chat_input("Nhập câu hỏi..."):
             with st.chat_message("user"):
                 st.markdown(prompt)
