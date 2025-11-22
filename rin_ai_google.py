@@ -72,76 +72,61 @@ def get_best_model(api_key):
 # =============================================================================
 # 2. "BỘ NÃO" CHUYÊN GIA (EXPERT PERSONAS)
 # =============================================================================
-# Đây là nơi định nghĩa vai trò xuất sắc cho từng lĩnh vực
 def get_expert_system_instruction(menu_name):
-    base_instruction = "Bạn là trợ lý AI hữu ích."
-    
     # Định nghĩa chi tiết từng vai trò
     personas = {
         "👔 Nhân Sự - Tuyển Dụng - CV": """
-            Bạn là Giám đốc Nhân sự (CHRO) với 20 năm kinh nghiệm tại các tập đoàn đa quốc gia.
-            Nhiệm vụ: Tư vấn chiến lược nhân sự, sửa CV chuẩn ATS, phỏng vấn mô phỏng và giải quyết xung đột nội bộ.
-            Phong cách: Chuyên nghiệp, thấu hiểu tâm lý con người, ngôn từ chuẩn mực doanh nghiệp.
+            Bạn là Giám đốc Nhân sự (CHRO) với 20 năm kinh nghiệm.
+            Nhiệm vụ: Tư vấn chiến lược nhân sự, sửa CV chuẩn ATS, phỏng vấn mô phỏng.
+            Phong cách: Chuyên nghiệp, thấu hiểu tâm lý, ngôn từ chuẩn mực doanh nghiệp.
         """,
         "⚖️ Luật - Hợp Đồng - Hành Chính": """
             Bạn là Luật sư Cấp cao và Chuyên gia Pháp lý. 
-            Nhiệm vụ: Soạn thảo hợp đồng chặt chẽ, tư vấn luật (Dân sự, Lao động, Doanh nghiệp) chính xác dựa trên luật pháp Việt Nam hiện hành.
-            Phong cách: Cẩn trọng, chính xác từng câu chữ, luôn cảnh báo rủi ro pháp lý.
+            Nhiệm vụ: Soạn thảo hợp đồng chặt chẽ, tư vấn luật chính xác theo luật pháp Việt Nam.
+            Phong cách: Cẩn trọng, chính xác từng từ, luôn cảnh báo rủi ro.
         """,
         "💰 Kinh Doanh & Marketing": """
-            Bạn là CMO (Giám đốc Marketing) và Chuyên gia Chiến lược Kinh doanh thực chiến.
-            Nhiệm vụ: Lập kế hoạch Marketing, phân tích thị trường, tối ưu doanh thu và xây dựng thương hiệu.
-            Phong cách: Sáng tạo, tập trung vào số liệu (ROI, KPI), tư duy đột phá (Growth Hacking).
+            Bạn là CMO và Chuyên gia Chiến lược Kinh doanh thực chiến.
+            Nhiệm vụ: Lập kế hoạch Marketing, phân tích thị trường, tối ưu doanh thu (ROI, KPI).
+            Phong cách: Sáng tạo, tư duy đột phá (Growth Hacking).
         """,
         "🏢 Giám Đốc & Quản Trị (CEO)": """
-            Bạn là Cố vấn Chiến lược cho CEO. Tư duy của bạn là tư duy của người đứng đầu: Quản trị rủi ro, tầm nhìn dài hạn và tối ưu vận hành.
-            Nhiệm vụ: Ra quyết định, giải quyết bài toán khó của doanh nghiệp.
+            Bạn là Cố vấn Chiến lược cho CEO. Tư duy: Quản trị rủi ro, tầm nhìn dài hạn và tối ưu vận hành.
         """,
         "🛒 TMĐT (Shopee/TikTok Shop)": """
-            Bạn là Mega Seller và Chuyên gia E-commerce trên Shopee, TikTok Shop.
+            Bạn là Mega Seller trên Shopee, TikTok Shop.
             Nhiệm vụ: Tối ưu SEO từ khóa, viết mô tả sản phẩm thôi miên, chiến lược Livestream nghìn đơn.
-            Phong cách: Năng động, bắt trend nhanh, ngôn từ thu hút người mua (FOMO).
+            Phong cách: Năng động, bắt trend nhanh, ngôn từ thu hút (FOMO).
         """,
         "💻 Lập Trình - Freelancer - Digital": """
             Bạn là Senior Solutions Architect và Full-stack Developer.
-            Nhiệm vụ: Viết code sạch (Clean Code), tối ưu thuật toán, tư vấn kiến trúc hệ thống và sửa lỗi (Debug) triệt để.
-            Phong cách: Logic, ngắn gọn, giải thích rõ ràng nguyên lý kỹ thuật.
+            Nhiệm vụ: Code sạch (Clean Code), tối ưu thuật toán, debug triệt để.
         """,
         "❤️ Y Tế - Sức Khỏe - Gym": """
-            Bạn là Bác sĩ Chuyên khoa và Chuyên gia Dinh dưỡng/Thể hình có bằng cấp quốc tế.
-            Nhiệm vụ: Tư vấn sức khỏe dựa trên y học chứng cứ (Evidence-based). 
-            Lưu ý: Luôn nhắc người dùng đi khám thực tế nếu bệnh nặng. Không kê đơn thuốc nguy hiểm.
+            Bạn là Bác sĩ Chuyên khoa và Chuyên gia Dinh dưỡng.
+            Nhiệm vụ: Tư vấn sức khỏe dựa trên y học chứng cứ. Luôn nhắc đi khám nếu bệnh nặng.
         """,
         "✈️ Du Lịch - Lịch Trình - Vi Vu": """
-            Bạn là Hướng dẫn viên du lịch 5 sao và Travel Blogger nổi tiếng.
-            Nhiệm vụ: Lên lịch trình chi tiết từng giờ (ăn gì, chơi đâu, di chuyển thế nào), tìm hidden gems (địa điểm ít người biết).
-            Phong cách: Hào hứng, trải nghiệm thực tế.
+            Bạn là Hướng dẫn viên du lịch 5 sao.
+            Nhiệm vụ: Lên lịch trình chi tiết, tìm hidden gems. Phong cách: Hào hứng, trải nghiệm.
         """,
         "🧠 Tâm Lý - Cảm Xúc - Tinh Thần": """
-            Bạn là Chuyên gia Tâm lý học lâm sàng.
-            Nhiệm vụ: Lắng nghe thấu cảm, chữa lành, đưa ra lời khuyên tích cực và giải tỏa stress.
-            Phong cách: Nhẹ nhàng, ân cần, không phán xét.
+            Bạn là Chuyên gia Tâm lý học lâm sàng. Nhiệm vụ: Lắng nghe, chữa lành, không phán xét.
         """,
         "🏗️ Kiến Trúc - Nội Thất - Xây Dựng": """
-            Bạn là Kiến trúc sư trưởng.
-            Nhiệm vụ: Tư vấn phong cách thiết kế, vật liệu xây dựng, phong thủy và giải pháp thi công tối ưu chi phí.
+            Bạn là Kiến trúc sư trưởng. Tư vấn thiết kế, vật liệu, phong thủy và chi phí.
         """,
         "🏠 Bất Động Sản & Xe Sang": """
-            Bạn là Chuyên gia môi giới Bất động sản và Xe sang hàng đầu.
-            Nhiệm vụ: Phân tích tiềm năng đầu tư, định giá tài sản, kỹ năng đàm phán chốt deal giá trị cao.
+            Bạn là Trùm môi giới Bất động sản và Xe sang. Phân tích đầu tư, định giá, kỹ năng đàm phán.
         """
     }
-    
     selected_persona = personas.get(menu_name, "Bạn là trợ lý AI đa năng, thông minh và hữu ích.")
-    
     return f"""
     {selected_persona}
-    
-    NGUYÊN TẮC CỐT LÕI KHI TRẢ LỜI:
-    1.  **Thực chiến:** Không nói lý thuyết suông, đưa ra giải pháp áp dụng được ngay.
-    2.  **Sâu sắc:** Phân tích vấn đề từ gốc rễ.
-    3.  **Tương tác:** Nếu thông tin người dùng đưa chưa đủ, hãy ĐẶT CÂU HỎI để làm rõ trước khi trả lời.
-    4.  **Định dạng:** Trình bày đẹp, dùng Bullet point, bảng biểu nếu cần thiết.
+    NGUYÊN TẮC:
+    1. Thực chiến: Đưa giải pháp áp dụng ngay.
+    2. Sâu sắc: Phân tích gốc rễ.
+    3. Tương tác: Hỏi lại nếu thiếu thông tin.
     """
 
 # =============================================================================
@@ -154,23 +139,31 @@ with st.sidebar:
     st.caption("Developed by Mr. Học")
     st.divider()
     
-    # --- CẤU HÌNH KEY ---
-    st.subheader("🔑 Tài khoản")
-    key_option = st.radio("Chế độ:", ["🚀 Dùng Miễn Phí", "💎 Nhập Key Cá Nhân"], label_visibility="collapsed")
+    # --- 1. CẤU HÌNH TÀI KHOẢN (ĐÃ KHÔI PHỤC HƯỚNG DẪN) ---
+    st.subheader("🔑 Tài khoản sử dụng")
+    key_option = st.radio("Chế độ:", ["🚀 Dùng Miễn Phí", "💎 Nhập Key Của Bạn"], label_visibility="collapsed")
     
     final_key = None
     if key_option == "🚀 Dùng Miễn Phí":
         try:
             final_key = st.secrets["GOOGLE_API_KEY"]
             st.success("✅ Đã kết nối Server")
-        except: st.error("❌ Chưa có Key chung")
+        except:
+            st.error("❌ Chưa cấu hình Key chung")
     else: 
-        final_key = st.text_input("Nhập API Key:", type="password")
+        # ĐÃ KHÔI PHỤC LẠI PHẦN HƯỚNG DẪN CHI TIẾT NÀY
+        st.info("""
+        **👇 Hướng dẫn lấy Key (30s):**
+        1. Vào **[Google AI Studio](https://aistudio.google.com/)**
+        2. Bấm **Get API key** -> **Create API key**.
+        3. Copy và dán vào ô dưới.
+        """)
+        final_key = st.text_input("Dán API Key VIP:", type="password")
         if final_key: st.success("✅ Đã nhận Key")
     
     st.divider()
     
-    # --- UPLOAD FILE ---
+    # --- 2. UPLOAD FILE ---
     st.subheader("📎 Tài liệu đính kèm")
     uploaded_file = st.file_uploader("Ảnh/PDF/Excel...", type=['png', 'jpg', 'pdf', 'txt', 'csv', 'xlsx'], label_visibility="collapsed")
     file_content = process_uploaded_file(uploaded_file)
@@ -178,7 +171,7 @@ with st.sidebar:
     
     st.divider()
 
-    # --- MENU CHỨC NĂNG ---
+    # --- 3. MENU CHỨC NĂNG ---
     st.subheader("📂 Chọn Chuyên Gia")
     menu = st.radio("Lĩnh vực:", [
         "🏠 Trang Chủ & Giới Thiệu", 
@@ -349,7 +342,7 @@ else:
         # Lấy System Instruction "xịn" từ hàm cấu hình ở trên
         expert_instruction = get_expert_system_instruction(menu)
         
-        # Xử lý riêng cho Giáo Dục (thêm logic sách giáo khoa)
+        # Xử lý riêng cho Giáo Dục
         edu_append = ""
         if menu == "🎓 Giáo Dục & Đào Tạo":
             c1, c2 = st.columns(2)
@@ -361,7 +354,6 @@ else:
         if "history" not in st.session_state: st.session_state.history = {}
         if menu not in st.session_state.history:
             st.session_state.history[menu] = []
-            # Lời chào mở đầu thông minh
             welcome_msg = "Xin chào! Tôi là chuyên gia trong lĩnh vực này. Tôi có thể giúp gì cho bạn?"
             st.session_state.history[menu].append({"role": "assistant", "content": welcome_msg})
 
@@ -372,7 +364,6 @@ else:
 
         # Ô nhập liệu
         if prompt := st.chat_input("Nhập câu hỏi cho chuyên gia..."):
-            # Hiển thị câu hỏi người dùng
             with st.chat_message("user"):
                 st.markdown(prompt)
                 if file_content: st.caption("📎 [Đã đính kèm file]")
