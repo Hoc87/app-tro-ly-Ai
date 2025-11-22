@@ -1,1 +1,7 @@
+streamlit
 google-generativeai>=0.8.3
+gTTS
+PyPDF2
+pandas
+openpyxl
+Pillow
