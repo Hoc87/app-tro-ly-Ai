@@ -87,7 +87,7 @@ if menu == "🏠 Trang Chủ & Giới Thiệu":
         st.markdown("""
         ### 🚀 Rin.Ai - Siêu Ứng Dụng Đa Năng
         
-        Chào mừng bạn đến với đội ngũ Chuyên gia AI hàng đầu. Chúng tôi không nói lý thuyết, chúng tôi **GIẢI QUYẾT VẤN ĐỀ** cho bạn.
+        Chào mừng bạn đến với danh sách trợ lý AI hàng đầu. Chúng tôi không nói lý thuyết, chúng tôi **GIẢI QUYẾT VẤN ĐỀ** cho bạn.
         
         **Quy trình tư vấn chuẩn chuyên gia:**
         1.  **Tiếp nhận:** Lắng nghe vấn đề.
@@ -95,9 +95,9 @@ if menu == "🏠 Trang Chủ & Giới Thiệu":
         3.  **Giải pháp:** Đưa ra kế hoạch, quy trình, tài liệu mẫu.
         
         ---
-        ### 👨‍🏫 Bảo trợ chuyên môn:
-        ## **Mr. Học** (Chuyên gia AI Ứng Dụng)
-        #### 📞 Liên hệ: **0901 108 788**
+        ### 👨‍🏫 Hỗ trợ chuyên môn:
+        ## **Mr. Học** (Chuyên gia AI Ứng Dụng). 
+        #### Nếu bạn muốn áp dụng Ai vào công việc thì vui lòng 📞 Liên hệ: **0901 108 788**
         """)
         st.info("👈 **Mời chọn Chuyên gia bên tay trái để bắt đầu!**")
     with col2:
