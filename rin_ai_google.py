@@ -25,9 +25,9 @@ with st.sidebar:
     st.caption("Developed by Mr. Học")
     st.divider()
     
-    # 1. CẤU HÌNH KEY
-    st.subheader("🔑 Cấu hình tài khoản")
-    key_option = st.radio("Chế độ:", ["🚀 Dùng Miễn Phí", "💎 Nhập Key VIP"], label_visibility="collapsed")
+    # 1. CẤU HÌNH TÀI KHOẢN
+    st.subheader("🔑 Tài khoản sử dụng") # <-- Tiêu đề chuẩn
+    key_option = st.radio("Chế độ:", ["🚀 Dùng Miễn Phí", "💎 Nhập Key Của Bạn"], label_visibility="collapsed")
     
     final_key = None
     if key_option == "🚀 Dùng Miễn Phí":
@@ -37,8 +37,14 @@ with st.sidebar:
         except:
             st.error("❌ Chưa cấu hình Key chung")
     else: 
-        st.info("👉 [Bấm đây lấy Key Google AI (Miễn phí)](https://aistudio.google.com/)")
-        final_key = st.text_input("Dán API Key VIP:", type="password")
+        # HIỂN THỊ HƯỚNG DẪN LẤY KEY
+        st.markdown("""
+        **👇 Hướng dẫn lấy Key (30s):**
+        1. Vào **[Google AI Studio](https://aistudio.google.com/)**
+        2. Bấm **Get API key** -> **Create API key**.
+        3. Copy và dán vào ô dưới.
+        """)
+        final_key = st.text_input("Dán API Key của bạn:", type="password") # <-- Sửa label theo yêu cầu
         if final_key: st.success("✅ Đã nhận Key")
 
     st.divider()
@@ -58,7 +64,7 @@ with st.sidebar:
             "💻 Lập Trình (IT)",
             "💸 Tài Chính & Startup",
             "🏠 Bất Động Sản & Xe Sang",
-            "🎨 Thiết Kế & Media (Ảnh/Video)",
+            "🎨 Thiết Kế & Media (Ảnh/Voice)",
             "❤️ Y Tế & Sức Khỏe",
             "🎓 Giáo Dục & Đào Tạo"
         ]
@@ -75,12 +81,12 @@ if menu == "🏠 Trang Chủ & Giới Thiệu":
         st.markdown("""
         ### 🚀 Rin.Ai - Không Lý Thuyết, Chỉ Thực Chiến.
         
-        Đây không phải là Chatbot hỏi đáp thông thường. Đây là đội ngũ chuyên gia ảo được lập trình để **GIẢI QUYẾT VẤN ĐỀ** cho bạn.
+        Đây là đội ngũ chuyên gia ảo được lập trình chuyên biệt để **GIẢI QUYẾT VẤN ĐỀ** cho bạn.
         
         **Quy trình làm việc:**
-        1.  **Tiếp nhận:** Bạn nêu vấn đề (ngắn gọn cũng được).
-        2.  **Phân tích:** AI tự động xác định bối cảnh.
-        3.  **Giải pháp:** Đưa ra kế hoạch hành động, bảng biểu, kịch bản mẫu ngay lập tức.
+        1.  **Tiếp nhận:** Lắng nghe vấn đề và bối cảnh.
+        2.  **Phân tích:** Đóng vai chuyên gia (CEO, Giáo viên, Marketer...) để tư vấn sát sườn.
+        3.  **Giải pháp:** Đưa ra kế hoạch hành động, bảng biểu, kịch bản mẫu.
         
         ---
         ### 👨‍🏫 Bảo trợ chuyên môn:
@@ -100,114 +106,158 @@ else:
     best_model = get_best_model(final_key)
     genai.configure(api_key=final_key)
 
-    # --- MODULE MEDIA (TẠO ẢNH) - ĐÃ NÂNG CẤP TƯ VẤN ---
-    if menu == "🎨 Thiết Kế & Media (Ảnh/Video)":
-        st.header("🎨 Giám Đốc Nghệ Thuật (Art Director)")
+    # --- MODULE MEDIA (TẠO ẢNH & VOICE NÂNG CẤP) ---
+    if menu == "🎨 Thiết Kế & Media (Ảnh/Voice)":
+        st.header("🎨 Studio Sáng Tạo Đa Phương Tiện")
+        st.success("Chào bạn! Bạn muốn vẽ ảnh, viết Prompt hay tạo kịch bản Voice/Hội thoại?")
         
-        # AI đóng vai tư vấn trước
-        st.markdown("""
-        **Chào bạn! Tôi là chuyên gia hình ảnh.**
-        Bạn muốn tôi **Vẽ ngay tại đây** (nhanh, miễn phí) hay **Viết Prompt chuyên nghiệp** để bạn mang sang Midjourney/Canva dùng?
-        """)
-        
-        media_mode = st.radio("👉 Lựa chọn của bạn:", ["🖼️ Vẽ Ngay Lập Tức (Tại đây)", "📝 Viết Prompt (Mang đi nơi khác)"], horizontal=True)
+        media_mode = st.radio("👉 Chọn công cụ:", 
+                              ["🖼️ Vẽ Ngay Lập Tức", 
+                               "📝 Viết Prompt Ảnh",
+                               "🎙️ Kịch Bản Voice (1 Người)",
+                               "🗣️ Kịch Bản Hội Thoại (2 Người)"], horizontal=True)
         st.divider()
 
-        if media_mode == "🖼️ Vẽ Ngay Lập Tức (Tại đây)":
-            desc = st.text_area("Mô tả ý tưởng của bạn (Tiếng Việt):", height=100, placeholder="VD: Một con mèo máy Doraemon ngầu, phong cách Cyberpunk...")
-            if st.button("🎨 Tiến hành Vẽ"):
+        # MODE 1: VẼ ẢNH
+        if media_mode == "🖼️ Vẽ Ngay Lập Tức":
+            desc = st.text_area("Mô tả ý tưởng (Tiếng Việt):", height=100, placeholder="VD: Mèo máy Doraemon phong cách Cyberpunk...")
+            if st.button("🎨 Vẽ Ngay"):
                 if desc:
                     with st.spinner("Đang phác thảo..."):
                         model = genai.GenerativeModel(best_model)
-                        trans = model.generate_content(f"Translate this to detailed English prompt for image generation: {desc}").text
+                        trans = model.generate_content(f"Translate to detailed English prompt: {desc}").text
                         final = trans.replace(" ", "%20")
-                        st.image(f"https://image.pollinations.ai/prompt/{final}?nologo=true", caption="Tác phẩm do Rin.Ai thực hiện")
+                        st.image(f"https://image.pollinations.ai/prompt/{final}?nologo=true", caption="Rin.Ai generated")
                         st.success("Đã xong! Chuột phải để tải về.")
                 else:
-                    st.warning("Vui lòng nhập mô tả!")
-                    
-        else: # Viết Prompt
+                    st.warning("Nhập mô tả đi bạn ơi!")
+        
+        # MODE 2: PROMPT ẢNH
+        elif media_mode == "📝 Viết Prompt Ảnh":
             model = genai.GenerativeModel(best_model)
-            prompt_topic = st.text_area("Bạn muốn tạo ảnh gì? (Midjourney/Dall-E)", placeholder="VD: Logo quán cafe, Poster quảng cáo giày...")
-            if st.button("📝 Viết Prompt Chuyên Nghiệp"):
-                with st.spinner("Đang tối ưu Prompt..."):
-                    res = model.generate_content(f"""
-                    Bạn là Chuyên gia Prompt Engineering.
-                    Nhiệm vụ: Viết 3 lựa chọn Prompt tiếng Anh tốt nhất cho Midjourney v6 dựa trên ý tưởng: "{prompt_topic}".
-                    Yêu cầu: Thêm các thông số kỹ thuật (--ar 16:9, --v 6.0, --style raw).
-                    Giải thích ngắn gọn tiếng Việt cho từng lựa chọn.
-                    """).text
+            prompt_topic = st.text_area("Ý tưởng ảnh của bạn:", placeholder="VD: Logo cafe, Poster quảng cáo...")
+            if st.button("📝 Viết Prompt"):
+                with st.spinner("Đang tối ưu..."):
+                    res = model.generate_content(f"Viết 3 prompt tiếng Anh cho Midjourney v6 về: {prompt_topic}. Thêm thông số --ar 16:9 --v 6.0. Giải thích tiếng Việt.").text
                     st.markdown(res)
 
-    # --- CÁC MODULE CHATBOT (LOGIC MỚI: HỎI ÍT - LÀM NHIỀU) ---
+        # MODE 3: VOICE 1 NGƯỜI (NÂNG CẤP)
+        elif media_mode == "🎙️ Kịch Bản Voice (1 Người)":
+            st.info("Dành cho Podcast đơn, Lời bình video, Thuyết minh.")
+            col1, col2 = st.columns(2)
+            gender = col1.radio("Chọn giọng đọc:", ["Nam 👨", "Nữ 👩"])
+            tone = col2.selectbox("Cảm xúc:", ["Trầm ấm/Truyền cảm", "Vui tươi/Hào hứng", "Nghiêm túc/Thời sự", "Buồn/Sâu lắng"])
+            
+            topic = st.text_area("Nội dung/Chủ đề cần đọc:", placeholder="VD: Giới thiệu sản phẩm mới, Tâm sự đêm khuya...")
+            
+            if st.button("🎙️ Viết Kịch Bản"):
+                if topic:
+                    model = genai.GenerativeModel(best_model)
+                    prompt = f"""
+                    Viết kịch bản lời bình (Voiceover) cho 1 người đọc.
+                    - Giọng: {gender}.
+                    - Cảm xúc: {tone}.
+                    - Chủ đề: {topic}.
+                    Yêu cầu: Đánh dấu rõ các chỗ cần [Ngắt nghỉ], [Nhấn mạnh], [Thở dài], [Cười] để người đọc hoặc AI TTS thực hiện đúng cảm xúc.
+                    """
+                    st.markdown(model.generate_content(prompt).text)
+                else:
+                    st.warning("Nhập chủ đề nhé!")
+
+        # MODE 4: HỘI THOẠI 2 NGƯỜI (NÂNG CẤP)
+        else:
+            st.info("Dành cho Podcast đối thoại, Video phỏng vấn, Kịch bản TikTok 2 người.")
+            col1, col2 = st.columns(2)
+            with col1:
+                st.markdown("### Nhân vật A")
+                gender_a = st.radio("Giới tính A:", ["Nam 👨", "Nữ 👩"], key="ga")
+            with col2:
+                st.markdown("### Nhân vật B")
+                gender_b = st.radio("Giới tính B:", ["Nam 👨", "Nữ 👩"], key="gb")
+            
+            topic = st.text_area("Chủ đề cuộc trò chuyện:", placeholder="VD: Tranh luận về AI thay thế con người...")
+            
+            if st.button("🗣️ Tạo Hội Thoại"):
+                if topic:
+                    model = genai.GenerativeModel(best_model)
+                    prompt = f"""
+                    Viết kịch bản hội thoại giữa 2 người: Nhân vật A ({gender_a}) và Nhân vật B ({gender_b}).
+                    - Chủ đề: {topic}.
+                    - Độ dài: Khoảng 500 từ.
+                    - Yêu cầu: Ngôn ngữ tự nhiên, đời thường. Có chỉ dẫn cảm xúc trong ngoặc đơn (Cười lớn), (Ngạc nhiên).
+                    """
+                    st.markdown(model.generate_content(prompt).text)
+                else:
+                    st.warning("Nhập chủ đề nhé!")
+
+    # --- CÁC MODULE CHATBOT KHÁC (LOGIC CỐ VẤN) ---
     else:
         st.header(menu)
         
-        # --- 1. LỜI CHÀO CHỦ ĐỘNG (GREETINGS) ---
+        # 1. LỜI CHÀO CHỦ ĐỘNG
         initial_greetings = {
             "✨ Trợ Lý Đa Lĩnh Vực (Chung)": "Xin chào! Tôi là Gemini. Bạn cần tra cứu thông tin hay giải quyết vấn đề gì ngay bây giờ?",
-            "🏢 Giám Đốc Chiến Lược (CEO)": "Chào Sếp! Tôi đã sẵn sàng. Hôm nay Sếp cần xử lý vấn đề gì: Nhân sự, Dòng tiền hay Chiến lược phát triển?",
-            "✍️ Marketing & Content": "Hello! Đồng đội Marketing đây. Bạn cần viết bài Facebook, Kịch bản TikTok hay Lên kế hoạch quảng cáo?",
-            "💰 Bán Hàng & Telesales": "Sẵn sàng chiến đấu! Bạn đang gặp khó khăn gì: Khách chê đắt, Cần kịch bản gọi điện hay Xử lý từ chối?",
-            "🛒 Kinh Doanh Online (Shopee/TikTok)": "Chào Shop! Tình hình đơn hàng thế nào? Cần tôi tối ưu SEO sản phẩm hay Phân tích đối thủ?",
-            "💻 Lập Trình (IT)": "Chào Dev! Cần fix bug, viết code Python hay tạo Script tự động hóa?",
-            "❤️ Y Tế & Sức Khỏe": "Chào bạn! Cần thực đơn giảm cân, Lịch tập gym hay Tư vấn sức khỏe?",
-            "🎓 Giáo Dục & Đào Tạo": "Kính chào Thầy/Cô! Cần soạn giáo án, đề thi hay ý tưởng bài giảng mới?"
+            "🏢 Giám Đốc Chiến Lược (CEO)": "Chào Sếp! Hôm nay chúng ta bàn về chiến lược, nhân sự hay dòng tiền?",
+            "✍️ Marketing & Content": "Hello! Đồng đội Marketing đây. Cần viết content hay lên kế hoạch quảng cáo?",
+            "💰 Bán Hàng & Telesales": "Sát thủ Sales đã sẵn sàng! Khách hàng nào đang làm khó bạn?",
+            "🛒 Kinh Doanh Online (Shopee/TikTok)": "Chào Shop! Cần tối ưu SEO sản phẩm hay Phân tích đối thủ?",
+            "💻 Lập Trình (IT)": "Chào Dev! Cần fix bug hay viết code?",
+            "❤️ Y Tế & Sức Khỏe": "Chào bạn! Cần thực đơn giảm cân hay lịch tập gym?",
+            "🎓 Giáo Dục & Đào Tạo": "Chào bạn! Cho tôi biết bạn là **Giáo viên, Phụ huynh hay Học sinh** để tôi hỗ trợ tốt nhất nhé?"
         }
 
-        # --- 2. SYSTEM INSTRUCTION MỚI (QUYẾT ĐOÁN HƠN) ---
-        # Logic: NẾU người dùng đã cung cấp thông tin -> TRẢ LỜI NGAY. KHÔNG HỎI LẠI.
+        # 2. SYSTEM INSTRUCTION (NÂNG CẤP GIÁO DỤC & CỐ VẤN)
         
-        core_logic = """
-        QUY TẮC ỨNG XỬ QUAN TRỌNG:
-        1. PHÂN TÍCH INPUT: Nếu người dùng đã cung cấp đủ bối cảnh (Sản phẩm, Vấn đề, Mục tiêu) -> HÃY ĐƯA RA GIẢI PHÁP NGAY LẬP TỨC.
-        2. CẤM HỎI LẠI KHI KHÔNG CẦN THIẾT: Tuyệt đối không hỏi kiểu "Bạn có muốn tôi làm không?", "Ngân sách bao nhiêu" nếu vấn đề có thể giải quyết sơ bộ ngay.
-        3. PHONG CÁCH TRẢ LỜI: Đi thẳng vào vấn đề. Sử dụng gạch đầu dòng, bảng biểu, quy trình bước 1-2-3.
-        4. TONE GIỌNG: Chuyên gia thực chiến, tự tin, không lý thuyết suông.
+        # Logic chung cho các ngành Kinh doanh/CEO...
+        consultant_logic = """
+        QUY TẮC: 
+        1. Nếu thông tin sơ sài -> HỎI LẠI NGAY ĐỂ LẤY BỐI CẢNH.
+        2. Nếu đủ thông tin -> ĐƯA GIẢI PHÁP CHI TIẾT (Không nói lý thuyết).
         """
         
+        # Logic đặc biệt cho GIÁO DỤC (Theo yêu cầu mới)
+        edu_logic = """
+        QUY TẮC CỐT LÕI CHO CHUYÊN GIA GIÁO DỤC:
+        1. XÁC ĐỊNH ĐỐI TƯỢNG: 
+           - Nếu người dùng là HỌC SINH/PHỤ HUYNH: Đóng vai Giáo viên giỏi, tận tâm. GIẢI THÍCH CHI TIẾT, KHÔNG ĐƯA ĐÁP ÁN NGAY. Hướng dẫn từng bước tư duy theo Sách Giáo Khoa Việt Nam. Kiên nhẫn, dễ hiểu.
+           - Nếu người dùng là GIÁO VIÊN: Đóng vai Đồng nghiệp chuyên môn cao. Hỗ trợ soạn giáo án, phương pháp dạy học mới (STEM, 5E).
+        2. PHƯƠNG PHÁP: Luôn đi từ lý thuyết -> ví dụ -> bài tập vận dụng.
+        """
+
         personas = {
-            "✨ Trợ Lý Đa Lĩnh Vực (Chung)": f"Bạn là Trợ lý AI thông minh. {core_logic}",
-            
-            "🏢 Giám Đốc Chiến Lược (CEO)": f"""Bạn là Cố vấn Quản trị cấp cao. {core_logic}
-            Khi Sếp hỏi về vấn đề công ty, hãy đưa ra mô hình phân tích (SWOT, 5W1H) và lộ trình hành động cụ thể.""",
-            
-            "✍️ Marketing & Content": f"""Bạn là Copywriter & CMO 10 năm kinh nghiệm. {core_logic}
-            Nhiệm vụ: Viết content phải có Tiêu đề giật tít (Hook), Thân bài đánh vào nỗi đau, Kết bài kêu gọi hành động (CTA).""",
-            
-            "💰 Bán Hàng & Telesales": f"""Bạn là Top Sales. {core_logic}
-            Nếu người dùng đưa tình huống khách từ chối, hãy viết ngay 3 mẫu câu đối đáp cụ thể để họ copy nói lại với khách.""",
-            
-            "🛒 Kinh Doanh Online (Shopee/TikTok)": f"Bạn là Chuyên gia E-commerce. {core_logic} Tập trung vào SEO từ khóa và Tối ưu chuyển đổi.",
-            
-            "💻 Lập Trình (IT)": "Bạn là Senior Developer. Chỉ đưa ra Code block chuẩn và giải thích cực ngắn gọn.",
-            
-            "❤️ Y Tế & Sức Khỏe": f"Bạn là Bác sĩ dinh dưỡng & PT. {core_logic} Đưa ra thực đơn/lịch tập cụ thể theo ngày.",
-            
-            "🎓 Giáo Dục & Đào Tạo": f"Bạn là Chuyên gia Sư phạm. {core_logic} Soạn giáo án phải chia cột rõ ràng."
+            "✨ Trợ Lý Đa Lĩnh Vực (Chung)": f"Bạn là Trợ lý AI thông minh. {consultant_logic}",
+            "🏢 Giám Đốc Chiến Lược (CEO)": f"Bạn là Cố vấn Quản trị cấp cao. {consultant_logic}",
+            "✍️ Marketing & Content": f"Bạn là CMO thực chiến. {consultant_logic}",
+            "💰 Bán Hàng & Telesales": f"Bạn là Top Sales. {consultant_logic}",
+            "🛒 Kinh Doanh Online (Shopee/TikTok)": f"Bạn là Chuyên gia E-commerce. {consultant_logic}",
+            "💻 Lập Trình (IT)": "Bạn là Senior Developer. Code chuẩn, giải thích ngắn.",
+            "❤️ Y Tế & Sức Khỏe": f"Bạn là Bác sĩ & PT. {consultant_logic}",
+            "🎓 Giáo Dục & Đào Tạo": f"{edu_logic}" # <-- Đã áp dụng logic giáo dục mới
         }
 
-        # --- 3. KHỞI TẠO LỊCH SỬ & CHÈN LỜI CHÀO ---
+        # 3. LỊCH SỬ CHAT
         if "history" not in st.session_state:
             st.session_state.history = {}
         
         if menu not in st.session_state.history:
             st.session_state.history[menu] = []
-            # Chỉ chèn lời chào nếu có trong danh sách
             greeting_msg = initial_greetings.get(menu, "Xin chào! Tôi có thể giúp gì cho bạn?")
             st.session_state.history[menu].append({"role": "assistant", "content": greeting_msg})
 
-        # Hiển thị lịch sử
         for msg in st.session_state.history[menu]:
             with st.chat_message(msg["role"]):
                 st.markdown(msg["content"])
 
-        # --- 4. XỬ LÝ CHAT ---
-        # Lấy System Prompt đúng
-        sys_prompt = personas.get(menu, f"Bạn là chuyên gia. {core_logic}")
+        # 4. XỬ LÝ CHAT
+        # Tự động thêm ngữ cảnh vào prompt nếu là Giáo dục để AI biết cách ứng xử
+        user_prompt_wrapper = ""
+        if menu == "🎓 Giáo Dục & Đào Tạo":
+            user_prompt_wrapper = " (Hãy xác định tôi là GV hay HS/PH để trả lời phù hợp. Nếu là HS, hãy giảng giải chi tiết, đừng chỉ đưa đáp án)"
+
+        sys_prompt = personas.get(menu, f"Bạn là chuyên gia. {consultant_logic}")
         model = genai.GenerativeModel(best_model, system_instruction=sys_prompt)
         
-        if prompt := st.chat_input("Nhập yêu cầu..."):
+        if prompt := st.chat_input("Nhập nội dung..."):
             with st.chat_message("user"):
                 st.markdown(prompt)
             st.session_state.history[menu].append({"role": "user", "content": prompt})
@@ -215,7 +265,9 @@ else:
             with st.chat_message("assistant"):
                 with st.spinner("Chuyên gia đang thực hiện..."):
                     try:
-                        response = model.generate_content(prompt)
+                        # Gửi prompt kèm wrapper (nếu có)
+                        final_prompt = prompt + user_prompt_wrapper
+                        response = model.generate_content(final_prompt)
                         st.markdown(response.text)
                         st.session_state.history[menu].append({"role": "assistant", "content": response.text})
                     except Exception as e:
