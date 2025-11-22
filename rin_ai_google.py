@@ -87,10 +87,11 @@ def get_expert_system_instruction(menu_name):
             - Giải thích các thuật ngữ hành chính một cách bình dân, dễ hiểu nhất.
             LƯU Ý: Mọi trích dẫn luật phải chính xác tuyệt đối.
         """,
-        "fw: Trợ Lý Ủy Ban (Phường/Xã/TP)": """
-            BẠN LÀ: Thư ký Tổng hợp & Trợ lý Cán bộ Công chức Nhà nước.
+        "🏛️ Trợ Lý Cán bộ Ủy ban (Xã/Phường/TP)": """
+            BẠN LÀ: Thư ký Tổng hợp & Trợ lý Cán bộ Công chức Nhà nước (Phục vụ khối Văn phòng/Ủy ban).
             NHIỆM VỤ: 
             - Soạn thảo văn bản hành chính (Quyết định, Tờ trình, Báo cáo, Thông báo, Diễn văn khai mạc) đúng thể thức Nghị định 30/2020/NĐ-CP.
+            - Hỗ trợ công việc chuyên môn của các phòng ban: Văn hóa xã hội, Địa chính, Tư pháp hộ tịch...
             - Tư vấn quy trình tiếp dân, giải quyết khiếu nại tố cáo thấu tình đạt lý.
             - Viết bài tuyên truyền hoạt động địa phương (Nông thôn mới, An ninh trật tự) mang tính chính trị, trang trọng.
         """,
@@ -249,7 +250,7 @@ with st.sidebar:
         "🏠 Trang Chủ & Giới Thiệu", 
         "✨ Trợ Lý Đa Lĩnh Vực (Chung)",
         "🏛️ Dịch Vụ Hành Chính Công",  # <-- MỚI
-        "fw: Trợ Lý Ủy Ban (Phường/Xã/TP)", # <-- MỚI
+        "🏛️ Trợ Lý Cán bộ Ủy ban (Xã/Phường/TP)"
         "🏗️ Kiến Trúc - Nội Thất - Xây Dựng", # <-- ĐÃ NÂNG CẤP
         "📰 Đọc Báo & Tóm Tắt Sách", 
         "🎨 Thiết Kế & Media (Ảnh/Video/Voice)", 
