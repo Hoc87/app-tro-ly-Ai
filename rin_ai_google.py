@@ -96,18 +96,31 @@ with st.sidebar:
     
     st.divider()
 
-    # 2. LINK NGOÀI
-    st.info("🤖 AI Nâng Cao")
-    st.link_button("👉 Mở App ChatGPT", "https://chatgpt.com/") 
-    with st.expander("🌐 Google AI Tools"):
-        st.link_button("📚 NotebookLM", "https://notebooklm.google.com/")
-        st.link_button("🛠️ AI Studio", "https://aistudio.google.com/")
-        st.link_button("🎨 ImageFX", "https://aitestkitchen.withgoogle.com/tools/image-fx")
-        st.link_button("🎥 VideoFX", "https://aitestkitchen.withgoogle.com/tools/video-fx")
+    # 2. LIÊN KẾT MẠNH MẼ (ĐÃ CẬP NHẬT THEO ẢNH BẠN GỬI)
+    st.subheader("🔥 Bộ Công Cụ Google AI")
     
+    # Sử dụng Expander để nhóm lại cho gọn, hoặc để lộ thiên tùy bạn.
+    # Ở đây tôi để lộ thiên các tool quan trọng nhất để dễ bấm.
+    
+    st.link_button("💎 Gemini (Chat & Code)", "https://gemini.google.com/")
+    st.link_button("📚 NotebookLM (Học tập)", "https://notebooklm.google.com/")
+    st.link_button("🛠️ AI Studio (Dev)", "https://aistudio.google.com/")
+    
+    with st.expander("🎨 Sáng tạo (Ảnh/Video/Nhạc)"):
+        st.link_button("🖼️ ImageFX (Imagen 3)", "https://aitestkitchen.withgoogle.com/tools/image-fx")
+        st.link_button("🎥 VideoFX (Veo)", "https://aitestkitchen.withgoogle.com/tools/video-fx")
+        st.link_button("🎵 MusicFX (Lyria)", "https://aitestkitchen.withgoogle.com/tools/music-fx")
+    
+    with st.expander("📝 Văn phòng (Workspace AI)"):
+        st.link_button("Google Docs AI", "https://docs.google.com/")
+        st.link_button("Google Sheets AI", "https://sheets.google.com/")
+        st.link_button("Google Slides AI", "https://slides.google.com/")
+
+    st.divider()
+    st.link_button("👉 Mở App ChatGPT", "https://chatgpt.com/") 
     st.divider()
     
-    # 3. UPLOAD FILE (QUAN TRỌNG)
+    # 3. UPLOAD FILE
     st.subheader("📎 Đính Kèm Tài Liệu")
     st.caption("👇 Tải File Word, Excel, PDF, Ảnh tại đây:")
     uploaded_file = st.file_uploader("Chọn file...", type=['png', 'jpg', 'pdf', 'txt', 'csv', 'xlsx', 'docx'], label_visibility="collapsed")
@@ -115,41 +128,43 @@ with st.sidebar:
     file_content = None
     if uploaded_file:
         file_content = process_uploaded_file(uploaded_file)
-        st.success(f"✅ Đã đọc xong: {uploaded_file.name}")
-        st.caption("Bây giờ hãy nhập câu hỏi bên khung chat phải 👉")
-    else:
-        st.info("Chưa có file nào được chọn.")
+        st.success(f"✅ Đã đọc: {uploaded_file.name}")
     
     st.divider()
 
-    # 4. MENU CHỨC NĂNG (ĐÃ THÊM OFFICE)
+    # 4. MENU CHỨC NĂNG (ĐÃ ĐỔI SANG SELECTBOX - SỔ XUỐNG)
     st.subheader("📂 Chọn Chuyên Gia")
-    menu = st.radio("Lĩnh vực:", [
-        "🏠 Trang Chủ & Giới Thiệu", 
-        "✨ Trợ Lý Đa Lĩnh Vực (Chung)",
-        "🖥️ Chuyên Gia Tin Học Văn Phòng (Office)", # <-- MỚI THÊM
-        "🏛️ Trợ Lý Cán bộ Ủy ban (Xã/Phường/TP)",
-        "🏛️ Dịch Vụ Hành Chính Công",
-        "🏗️ Kiến Trúc - Nội Thất - Xây Dựng",
-        "📰 Đọc Báo & Tóm Tắt Sách", 
-        "🎨 Thiết Kế & Media (Ảnh/Video/Voice)", 
-        "🎓 Giáo Dục & Đào Tạo", 
-        "🎥 Chuyên Gia Video Google Veo",
-        "👔 Nhân Sự - Tuyển Dụng - CV",
-        "⚖️ Luật - Hợp Đồng - Hành Chính",
-        "💰 Kinh Doanh & Marketing", 
-        "🏢 Giám Đốc & Quản Trị (CEO)",
-        "🛒 TMĐT (Shopee/TikTok Shop)",
-        "💻 Lập Trình - Freelancer - Digital",
-        "❤️ Y Tế - Sức Khỏe - Gym",
-        "✈️ Du Lịch - Lịch Trình - Vi Vu",
-        "🧠 Tâm Lý - Cảm Xúc - Tinh Thần",
-        "🍽️ Nhà Hàng - F&B - Ẩm Thực",
-        "📦 Logistic - Vận Hành - Kho Bãi",
-        "📊 Kế Toán - Báo Cáo - Số Liệu",
-        "🎤 Sự Kiện - MC - Hội Nghị",
-        "🏠 Bất Động Sản & Xe Sang"
-    ])
+    
+    # --- THAY ĐỔI Ở ĐÂY: st.radio -> st.selectbox ---
+    menu = st.selectbox(
+        "Hãy chọn lĩnh vực bạn cần hỗ trợ:",
+        [
+            "🏠 Trang Chủ & Giới Thiệu", 
+            "✨ Trợ Lý Đa Lĩnh Vực (Chung)",
+            "🖥️ Chuyên Gia Tin Học Văn Phòng (Office)",
+            "🏛️ Trợ Lý Cán bộ Ủy ban (Xã/Phường/TP)",
+            "🏛️ Dịch Vụ Hành Chính Công",
+            "🏗️ Kiến Trúc - Nội Thất - Xây Dựng",
+            "📰 Đọc Báo & Tóm Tắt Sách", 
+            "🎨 Thiết Kế & Media (Ảnh/Video/Voice)", 
+            "🎓 Giáo Dục & Đào Tạo", 
+            "🎥 Chuyên Gia Video Google Veo",
+            "👔 Nhân Sự - Tuyển Dụng - CV",
+            "⚖️ Luật - Hợp Đồng - Hành Chính",
+            "💰 Kinh Doanh & Marketing", 
+            "🏢 Giám Đốc & Quản Trị (CEO)",
+            "🛒 TMĐT (Shopee/TikTok Shop)",
+            "💻 Lập Trình - Freelancer - Digital",
+            "❤️ Y Tế - Sức Khỏe - Gym",
+            "✈️ Du Lịch - Lịch Trình - Vi Vu",
+            "🧠 Tâm Lý - Cảm Xúc - Tinh Thần",
+            "🍽️ Nhà Hàng - F&B - Ẩm Thực",
+            "📦 Logistic - Vận Hành - Kho Bãi",
+            "📊 Kế Toán - Báo Cáo - Số Liệu",
+            "🎤 Sự Kiện - MC - Hội Nghị",
+            "🏠 Bất Động Sản & Xe Sang"
+        ]
+    )
 
 # =============================================================================
 # LOGIC CHÍNH
@@ -158,13 +173,17 @@ with st.sidebar:
 if menu == "🏠 Trang Chủ & Giới Thiệu":
     st.title("💎 Hệ Sinh Thái AI Thực Chiến - Rin.Ai")
     st.markdown("""
-    ### 🚀 Các tính năng nổi bật:
-    1. **Chuyên gia Office:** Xử lý Excel, Word, PPT.
-    2. **Kiến Trúc Sư AI:** Tự vẽ bản vẽ 2D/3D.
-    3. **Trợ Lý Ủy Ban:** Soạn thảo văn bản chuẩn Nghị định 30.
-    4. **Media Pro:** Tạo Prompt Video & Voice AI cảm xúc.
+    ### 🚀 Chào mừng đến với Rin.Ai PRO
     
-    👉 **LƯU Ý:** Để AI xử lý tài liệu (Tóm tắt, Phân tích Excel), vui lòng **Tải file lên ở thanh bên trái** trước khi chat.
+    Đây là "Super App" tích hợp mọi sức mạnh AI của Google:
+    
+    1.  **Thanh bên trái:** Bộ công cụ Google AI chính hãng (Gemini, NotebookLM, ImageFX...).
+    2.  **Menu chuyên gia:** Hơn 20 trợ lý ảo đóng vai chuyên gia thực chiến (Có quy trình làm việc cụ thể).
+    3.  **Tính năng đặc biệt:** * Vẽ bản vẽ nhà 2D/3D.
+        * Soạn thảo văn bản chuẩn Nghị định 30.
+        * Xử lý Excel/Word tự động.
+    
+    👉 **HƯỚNG DẪN:** Chọn chuyên gia ở menu xổ xuống bên trái, tải file lên (nếu có) và bắt đầu chat!
     """)
 
 elif not final_key:
@@ -200,7 +219,7 @@ else:
                     play_text_to_speech(res)
 
     # -------------------------------------------------------------------------
-    # MODULE 2: MEDIA (ĐÃ KHÔI PHỤC NÚT CHỌN ĐỘC THOẠI/HỘI THOẠI)
+    # MODULE 2: MEDIA
     # -------------------------------------------------------------------------
     elif menu == "🎨 Thiết Kế & Media (Ảnh/Video/Voice)":
         st.header("🎨 Studio Đa Phương Tiện")
@@ -223,13 +242,10 @@ else:
 
         elif mode == "🎙️ Voice AI (Kịch bản & Đọc)":
             st.subheader("🎙️ Tạo giọng đọc AI")
-            
-            # 1. Cấu hình giọng
             c_conf1, c_conf2 = st.columns(2)
             is_slow = c_conf1.checkbox("🐢 Đọc chậm rãi", value=False)
             tone = c_conf2.selectbox("Cảm xúc:", ["Truyền cảm", "Vui tươi", "Nghiêm túc", "Hào hứng", "Buồn"])
             
-            # 2. Chọn loại kịch bản (ĐÃ KHÔI PHỤC)
             v_type = st.radio("Loại kịch bản:", ["🗣️ Độc thoại (Lời bình)", "👥 Hội thoại (2 người)"], horizontal=True)
 
             if v_type == "🗣️ Độc thoại (Lời bình)":
@@ -251,30 +267,25 @@ else:
 
 
     # -------------------------------------------------------------------------
-    # MODULE 3: CHUYÊN GIA (BAO GỒM OFFICE & GIÁO DỤC ĐÃ SỬA)
+    # MODULE 3: CHUYÊN GIA (CORE)
     # -------------------------------------------------------------------------
     else:
         st.header(menu)
         expert_instruction = get_expert_prompt(menu)
         
-        # --- LOGIC GIÁO DỤC (ĐÃ SỬA LỖI VIẾT TẮT & THIẾU NÚT) ---
         edu_append = ""
         if menu == "🎓 Giáo Dục & Đào Tạo":
             c1, c2 = st.columns(2)
-            # Sửa tên sách đầy đủ
             sach = c1.selectbox("Bộ sách giáo khoa:", ["Cánh Diều", "Kết Nối Tri Thức Với Cuộc Sống", "Chân Trời Sáng Tạo"])
-            # Khôi phục nút chọn vai trò
             role = c2.radio("Bạn là:", ["Học sinh", "Phụ huynh", "Giáo viên"], horizontal=True)
             edu_append = f".\nLƯU Ý: Tôi đang sử dụng bộ sách '{sach}'. Vai trò của tôi là: {role}. Hãy trả lời phù hợp với lứa tuổi và vai trò này."
 
-        # --- CHAT HISTORY ---
+        # CHAT HISTORY
         if "history" not in st.session_state: st.session_state.history = {}
         if menu not in st.session_state.history:
             st.session_state.history[menu] = []
-            # Lời chào thông minh
-            greeting = "Xin chào! Tôi là chuyên gia lĩnh vực này. "
+            greeting = "Xin chào! Tôi là chuyên gia lĩnh vực này (Quy trình chuẩn). "
             if file_content: greeting += "Tôi đã nhận được file bạn gửi. "
-            else: greeting += "Nếu cần xử lý tài liệu (Excel, Word...), hãy tải lên ở thanh bên trái nhé."
             st.session_state.history[menu].append({"role": "assistant", "content": greeting})
 
         for msg in st.session_state.history[menu]:
@@ -292,7 +303,7 @@ else:
             st.session_state.history[menu].append({"role": "user", "content": prompt})
 
             with st.chat_message("assistant"):
-                with st.spinner("Đang xử lý..."):
+                with st.spinner("Đang xử lý theo quy trình..."):
                     try:
                         full_p = [prompt + edu_append]
                         if file_content: full_p.append(f"DỮ LIỆU TỪ FILE:\n{file_content}")
@@ -301,7 +312,6 @@ else:
                         response = model.generate_content(full_p)
                         full_txt = response.text
 
-                        # Tách ảnh & Text
                         p2d = re.search(r'###PROMPT_2D###(.*?)###END_PROMPT###', full_txt, re.DOTALL)
                         p3d = re.search(r'###PROMPT_3D###(.*?)###END_PROMPT###', full_txt, re.DOTALL)
                         txt_show = re.sub(r'###PROMPT_[23]D###.*?###END_PROMPT###', '', full_txt, flags=re.DOTALL)
