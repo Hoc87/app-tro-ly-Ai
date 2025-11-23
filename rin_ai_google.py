@@ -194,27 +194,66 @@ else:
     best_model = get_best_model(final_key)
     genai.configure(api_key=final_key)
 
-    # -------------------------------------------------------------------------
-    # MODULE 1: TIN TỨC & SÁCH
+   # -------------------------------------------------------------------------
+    # MODULE 1: TIN TỨC & SÁCH (ĐÃ NÂNG CẤP TÌM KIẾM THỰC TẾ - REALTIME)
     # -------------------------------------------------------------------------
     if menu == "📰 Đọc Báo & Tóm Tắt Sách":
-        st.header("📰 Chuyên Gia Tri Thức")
-        task = st.radio("Chế độ:", ["🔎 Tin Tức", "📚 Tóm tắt Sách"], horizontal=True)
-        if task == "🔎 Tin Tức":
-            topic = st.text_input("Chủ đề:")
-            if st.button("🔎 Tổng hợp"):
-                with st.spinner("Đang xử lý..."):
-                    model = genai.GenerativeModel(best_model)
-                    res = model.generate_content(f"Tổng hợp tin tức mới nhất về: {topic}").text
-                    st.markdown(res)
-                    play_text_to_speech(res)
+        st.header("📰 Chuyên Gia Tri Thức & Tin Tức")
+        
+        # Hiển thị ngày giờ hiện tại
+        from datetime import datetime
+        today_str = datetime.now().strftime("%d/%m/%Y")
+        st.caption(f"📅 Hôm nay là: {today_str}")
+
+        task = st.radio("Chế độ:", ["🔎 Tin Tức Thời Sự (Real-time)", "📚 Tóm tắt Sách/Tài liệu"], horizontal=True)
+        
+        if task == "🔎 Tin Tức Thời Sự (Real-time)":
+            st.info("💡 Tính năng này sẽ kích hoạt Google Search để tìm tin tức mới nhất, đã được kiểm chứng.")
+            topic = st.text_input("Nhập chủ đề muốn xem (VD: Bão lũ miền Trung hôm nay, Giá vàng hôm nay...):")
+            
+            if st.button("🔎 Tìm kiếm & Tổng hợp ngay"):
+                if topic:
+                    with st.spinner("Đang truy cập Google Search để lọc tin chính thống..."):
+                        try:
+                            # KÍCH HOẠT CÔNG CỤ GOOGLE SEARCH
+                            tools_config = {'google_search_retrieval': {}}
+                            
+                            # Khởi tạo model với công cụ tìm kiếm
+                            search_model = genai.GenerativeModel(best_model, tools=[tools_config])
+                            
+                            # Prompt ép buộc lấy tin xác thực
+                            search_prompt = f"""
+                            Hãy tìm kiếm và tổng hợp thông tin THỜI SỰ, MỚI NHẤT tính đến thời điểm hiện tại ({today_str}) về chủ đề: "{topic}".
+                            
+                            YÊU CẦU BẮT BUỘC:
+                            1. TÍNH THỜI ĐIỂM: Chỉ lấy những tin tức mới nhất (trong 24-48h qua).
+                            2. NGUỒN TIN: Chỉ tổng hợp từ các báo chính thống, uy tín.
+                            3. TRÌNH BÀY: Ngắn gọn, gạch đầu dòng các ý chính.
+                            """
+                            
+                            response = search_model.generate_content(search_prompt)
+                            res_text = response.text
+                            
+                            st.success("✅ Đã cập nhật tin mới nhất:")
+                            st.markdown(res_text)
+                            st.divider()
+                            play_text_to_speech(res_text)
+                            
+                        except Exception as e:
+                            st.error(f"Lỗi kết nối Google Search: {e}")
+                            st.caption("Lưu ý: Hãy đảm bảo Model bạn chọn là 'gemini-1.5-flash' hoặc 'gemini-1.5-pro' để hỗ trợ tính năng này.")
+                else:
+                    st.warning("Vui lòng nhập chủ đề tin tức!")
+
         else:
+            # Phần tóm tắt sách giữ nguyên
+            st.info("Tải file PDF lên hoặc dán văn bản vào dưới.")
             txt = st.text_area("Văn bản (Nếu không có file):")
             inp = file_content if file_content else txt
             if st.button("📚 Tóm tắt") and inp:
-                with st.spinner("Đang đọc..."):
+                with st.spinner("Đang đọc hiểu..."):
                     model = genai.GenerativeModel(best_model)
-                    res = model.generate_content(f"Tóm tắt: {inp}").text
+                    res = model.generate_content(f"Tóm tắt nội dung sau, rút ra 5 bài học cốt lõi: {inp}").text
                     st.markdown(res)
                     play_text_to_speech(res)
 
