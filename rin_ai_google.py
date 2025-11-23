@@ -172,19 +172,37 @@ with st.sidebar:
 
 if menu == "🏠 Trang Chủ & Giới Thiệu":
     st.title("💎 Hệ Sinh Thái AI Thực Chiến - Rin.Ai")
-    st.markdown("""
-    ### 🚀 Chào mừng đến với Rin.Ai PRO
+    st.markdown("---")
     
-    Đây là "Super App" tích hợp mọi sức mạnh AI của Google:
+    # Chia cột: Bên trái là chữ, bên phải là ảnh
+    col1, col2 = st.columns([2, 1])
     
-    1.  **Thanh bên trái:** Bộ công cụ Google AI chính hãng (Gemini, NotebookLM, ImageFX...).
-    2.  **Menu chuyên gia:** Hơn 20 trợ lý ảo đóng vai chuyên gia thực chiến (Có quy trình làm việc cụ thể).
-    3.  **Tính năng đặc biệt:** * Vẽ bản vẽ nhà 2D/3D.
-        * Soạn thảo văn bản chuẩn Nghị định 30.
-        * Xử lý Excel/Word tự động.
-    
-    👉 **HƯỚNG DẪN:** Chọn chuyên gia ở menu xổ xuống bên trái, tải file lên (nếu có) và bắt đầu chat!
-    """)
+    with col1:
+        st.markdown("""
+        ### 👋 Chào mừng đến với Rin.Ai PRO
+        **Sản phẩm tâm huyết được phát triển bởi: Mr. Học**
+        
+        Rin.Ai là "Super App" tích hợp sức mạnh Google AI phục vụ công việc thực tế:
+        
+        * 🤖 **Đội ngũ Chuyên gia:** Hơn 20 trợ lý ảo (Luật, Xây dựng, Hành chính...) có quy trình chuẩn.
+        * 🎨 **Studio Sáng tạo:** Vẽ bản vẽ 2D/3D, Tạo Prompt Video, Giọng đọc AI cảm xúc.
+        * 💼 **Văn phòng:** Soạn thảo văn bản Nghị định 30, xử lý Excel/Word.
+        
+        ---
+        ### 🚀 DỊCH VỤ THIẾT KẾ AI RIÊNG BIỆT (CUSTOM AI)
+        
+        > **💡 Anh/Chị muốn sở hữu "Bộ não AI" riêng cho Doanh nghiệp?**
+        >
+        > Nếu cần xây dựng hệ thống AI chuyên sâu, bảo mật dữ liệu riêng, vui lòng liên hệ trực tiếp để được tư vấn.
+        
+        ## 📞 Liên hệ Chuyên gia: **Mr. Học**
+        #### ☎️ Hotline/Zalo: **0901 108 788**
+        """)
+        
+        st.link_button("👉 Chat Zalo Ngay Với Mr. Học", "https://zalo.me/0901108788")
+
+    with col2:
+        st.image("https://cdn.dribbble.com/users/527451/screenshots/14972580/media/7f4288f6c3eb988a2879a953e5b12854.jpg", caption="Power of AI - Developed by Mr. Học")
 
 elif not final_key:
     st.warning("👋 Vui lòng nhập Key bên tay trái để bắt đầu.")
