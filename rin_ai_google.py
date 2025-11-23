@@ -118,14 +118,14 @@ with st.sidebar:
     
     st.divider()
 
-    # --- MENU ---
+    # 3. MENU CHỨC NĂNG (ĐÃ SỬA LỖI DÍNH DÒNG)
     st.subheader("📂 Chọn Chuyên Gia")
     menu = st.radio("Lĩnh vực:", [
         "🏠 Trang Chủ & Giới Thiệu", 
         "✨ Trợ Lý Đa Lĩnh Vực (Chung)",
-        "🏗️ Kiến Trúc - Nội Thất - Xây Dựng",
-        "🏛️ Trợ Lý Cán bộ Ủy ban (Xã/Phường/TP)",
         "🏛️ Dịch Vụ Hành Chính Công",
+        "🏛️ Trợ Lý Cán bộ Ủy ban (Xã/Phường/TP)", # <--- NHỚ DẤU PHẨY NÀY
+        "🏗️ Kiến Trúc - Nội Thất - Xây Dựng",     # <--- ĐÃ TÁCH RA THÀNH DÒNG RIÊNG
         "📰 Đọc Báo & Tóm Tắt Sách", 
         "🎨 Thiết Kế & Media (Ảnh/Video/Voice)", 
         "🎓 Giáo Dục & Đào Tạo", 
