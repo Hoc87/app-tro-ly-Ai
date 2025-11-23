@@ -117,7 +117,7 @@ with st.sidebar:
         st.link_button("Google Slides AI", "https://slides.google.com/")
 
     st.divider()
-    st.link_button("👉 Mở App ChatGPT", "https://chatgpt.com/") 
+    st.link_button("👉 Danh sách Trợ lý Ai ChatGPT", "https://chatgpt.com/g/g-69004bb8428481918ecf4ade89a9216c-rin-ai-center-trung-tam-tro-ly-ai") 
     st.divider()
     
     # 3. UPLOAD FILE
