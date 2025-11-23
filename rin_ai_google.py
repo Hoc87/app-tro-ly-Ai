@@ -212,8 +212,8 @@ else:
     best_model = get_best_model(final_key)
     genai.configure(api_key=final_key)
 
-   # -------------------------------------------------------------------------
-    # MODULE 1: TIN TỨC & SÁCH (BẢN FINAL: TÓM TẮT SÂU + LINK NGUỒN)
+  # -------------------------------------------------------------------------
+    # MODULE 1: TIN TỨC & SÁCH (BẢN FIX LỖI KẾT NỐI SEARCH)
     # -------------------------------------------------------------------------
     if menu == "📰 Đọc Báo & Tóm Tắt Sách":
         st.header("📰 Chuyên Gia Tri Thức & Tin Tức")
@@ -225,52 +225,56 @@ else:
         task = st.radio("Chế độ:", ["🔎 Tin Tức Thời Sự (Real-time)", "📚 Tóm tắt Sách/Tài liệu"], horizontal=True)
         
         if task == "🔎 Tin Tức Thời Sự (Real-time)":
-            st.info("💡 AI sẽ tìm tin mới nhất trong ngày, tóm tắt nội dung và đính kèm Link nguồn.")
-            topic = st.text_input("Nhập chủ đề (VD: Tình hình thời tiết hôm nay, Giá vàng SJC...):")
+            st.info("💡 AI sẽ tìm tin mới nhất, tóm tắt và đính kèm Link nguồn.")
+            topic = st.text_input("Nhập chủ đề (VD: Tình hình thời tiết hôm nay...):")
             
             if st.button("🔎 Tìm kiếm & Tóm tắt ngay"):
                 if topic:
-                    with st.spinner(f"Đang quét tin tức ngày {today_str} và tổng hợp..."):
+                    with st.spinner(f"Đang quét tin tức ngày {today_str}..."):
                         try:
-                            # Cấu hình Google Search
-                            tools_config = {'google_search': {}} 
+                            # --- CẤU HÌNH TÌM KIẾM (Dùng từ khóa chuẩn của thư viện) ---
+                            # Lưu ý: Dùng google_search_retrieval cho tương thích thư viện hiện tại
+                            tools_config = {'google_search_retrieval': {
+                                'dynamic_retrieval_config': {
+                                    'mode': 'dynamic',
+                                    'dynamic_threshold': 0.3,
+                                }
+                            }}
                             
-                            search_model = genai.GenerativeModel(best_model, tools=[tools_config])
+                            # Ép dùng model PRO để tìm kiếm ổn định hơn
+                            search_model = genai.GenerativeModel('gemini-1.5-pro', tools=[tools_config])
                             
-                            # Prompt được tối ưu để TÓM TẮT KÈM LINK
                             search_prompt = f"""
-                            Hãy đóng vai Biên tập viên Thời sự. Nhiệm vụ của bạn là tìm kiếm và báo cáo tin tức về chủ đề: "{topic}".
+                            Hãy đóng vai Biên tập viên Thời sự. Tìm kiếm và báo cáo về: "{topic}".
+                            THỜI GIAN: Chỉ lấy tin tức diễn ra trong ngày hôm nay ({today_str}) hoặc 24h qua.
                             
-                            THỜI GIAN: Chỉ lấy tin tức diễn ra trong ngày hôm nay ({today_str}) hoặc 24h qua. Tuyệt đối không lấy tin cũ.
+                            YÊU CẦU TRÌNH BÀY:
+                            ### 1. [Tiêu đề tin tức]
+                            - **Tóm tắt:** Viết đoạn văn 3-5 câu tóm tắt nội dung chính.
+                            - **👉 Nguồn:** [Tên Báo](URL)
                             
-                            YÊU CẦU TRÌNH BÀY (BẮT BUỘC TUÂN THỦ):
-                            Hãy trình bày kết quả thành các mục tin riêng biệt. Với mỗi tin, cấu trúc như sau:
-                            
-                            ### 1. [Tiêu đề tin tức ngắn gọn, giật tít]
-                            - **Tóm tắt nội dung:** Hãy viết một đoạn văn khoảng 3-5 câu tóm tắt đầy đủ diễn biến, số liệu, sự kiện chính của tin này. Đừng viết quá ngắn, hãy viết đủ để người đọc hiểu chuyện gì đang xảy ra.
-                            - **👉 Nguồn xác thực:** [Tên Báo/Trang Web](URL_CỦA_BÀI_VIẾT)
-                            
-                            ---
-                            
-                            ### 2. [Tiêu đề tin tiếp theo]
-                            ... (Tương tự như trên)
-                            
-                            Lưu ý: Chỉ chọn lọc 3-5 tin quan trọng và uy tín nhất.
+                            (Liệt kê 3-5 tin quan trọng nhất).
                             """
                             
                             response = search_model.generate_content(search_prompt)
                             res_text = response.text
                             
-                            st.success("✅ Tin tức mới nhất đã được tổng hợp:")
+                            st.success("✅ Tin tức mới nhất:")
                             st.markdown(res_text)
-                            
                             st.divider()
-                            # Đọc nội dung
                             play_text_to_speech(res_text)
                             
                         except Exception as e:
-                            st.error(f"Lỗi kết nối Google Search: {e}")
-                            st.caption("Mẹo: Hãy thử lại lần nữa hoặc đổi chủ đề cụ thể hơn.")
+                            # CƠ CHẾ FALLBACK (CHỐNG SẬP)
+                            st.warning(f"⚠️ Google Search đang quá tải hoặc gặp lỗi phiên bản. AI sẽ trả lời bằng kiến thức nội bộ.")
+                            st.caption(f"Chi tiết lỗi: {e}")
+                            
+                            # Gọi model thường không có tools để trả lời thay thế
+                            fallback_model = genai.GenerativeModel('gemini-1.5-pro')
+                            res = fallback_model.generate_content(f"Bạn hãy cho tôi biết những thông tin mới nhất mà bạn biết về: {topic}. Lưu ý: Nếu không có tin realtime, hãy phân tích dựa trên bối cảnh gần nhất.").text
+                            st.markdown(res)
+                            play_text_to_speech(res)
+
                 else:
                     st.warning("Vui lòng nhập chủ đề tin tức!")
 
