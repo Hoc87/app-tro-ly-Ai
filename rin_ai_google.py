@@ -8,11 +8,11 @@ from PIL import Image
 import PyPDF2
 import pandas as pd
 
-# --- IMPORT FILE PROMPTS (GỌI TRỢ LÝ TỪ FILE BÊN KIA) ---
+# IMPORT FILE PROMPTS
 from prompts import get_expert_prompt
 
 # =============================================================================
-# 1. CẤU HÌNH & HÀM HỖ TRỢ
+# CẤU HÌNH & HÀM HỖ TRỢ
 # =============================================================================
 
 st.set_page_config(page_title="Rin.Ai - Siêu Trợ Lý AI", page_icon="💎", layout="wide")
@@ -71,7 +71,7 @@ def get_best_model(api_key):
     except: return None
 
 # =============================================================================
-# 2. GIAO DIỆN CHÍNH
+# GIAO DIỆN SIDEBAR (THANH BÊN TRÁI)
 # =============================================================================
 
 with st.sidebar:
@@ -80,8 +80,8 @@ with st.sidebar:
     st.caption("Developed by Mr. Học")
     st.divider()
     
-    # --- KEY ---
-    st.subheader("🔑 Tài khoản sử dụng")
+    # 1. KEY
+    st.subheader("🔑 Tài khoản")
     key_option = st.radio("Chế độ:", ["🚀 Dùng Miễn Phí", "💎 Nhập Key Của Bạn"], label_visibility="collapsed")
     final_key = None
     if key_option == "🚀 Dùng Miễn Phí":
@@ -90,42 +90,47 @@ with st.sidebar:
             st.success("✅ Đã kết nối Server")
         except: st.error("❌ Chưa cấu hình Key chung")
     else: 
-        st.info("Nhập Google API Key của bạn:")
-        final_key = st.text_input("API Key:", type="password")
+        st.info("Nhập Google API Key:")
+        final_key = st.text_input("Dán Key vào đây:", type="password")
         if final_key: st.success("✅ Đã nhận Key")
     
     st.divider()
 
-    # --- LIÊN KẾT NGOÀI ---
-    st.info("🤖 AI Nâng Cao & ChatGPT")
-    st.link_button("👉 Trợ Lý ChatGPT (App Riêng)", "https://chatgpt.com/") 
-    st.divider()
-    
-    st.subheader("🌐 Hệ Sinh Thái Google AI")
-    with st.expander("Mở công cụ Google"):
-        st.link_button("📚 NotebookLM (Tài liệu)", "https://notebooklm.google.com/")
-        st.link_button("🛠️ Google AI Studio", "https://aistudio.google.com/")
-        st.link_button("🎨 ImageFX (Tạo ảnh)", "https://aitestkitchen.withgoogle.com/tools/image-fx")
-        st.link_button("🎥 VideoFX (Tạo Video)", "https://aitestkitchen.withgoogle.com/tools/video-fx")
+    # 2. LINK NGOÀI
+    st.info("🤖 AI Nâng Cao")
+    st.link_button("👉 Mở App ChatGPT", "https://chatgpt.com/") 
+    with st.expander("🌐 Google AI Tools"):
+        st.link_button("📚 NotebookLM", "https://notebooklm.google.com/")
+        st.link_button("🛠️ AI Studio", "https://aistudio.google.com/")
+        st.link_button("🎨 ImageFX", "https://aitestkitchen.withgoogle.com/tools/image-fx")
+        st.link_button("🎥 VideoFX", "https://aitestkitchen.withgoogle.com/tools/video-fx")
     
     st.divider()
     
-    # --- UPLOAD ---
-    st.subheader("📎 Tài liệu đính kèm")
-    uploaded_file = st.file_uploader("Upload...", type=['png', 'jpg', 'pdf', 'txt', 'csv', 'xlsx'], label_visibility="collapsed")
-    file_content = process_uploaded_file(uploaded_file)
-    if file_content: st.info(f"✅ Đã đọc: {uploaded_file.name}")
+    # 3. UPLOAD FILE (QUAN TRỌNG)
+    st.subheader("📎 Đính Kèm Tài Liệu")
+    st.caption("👇 Tải File Word, Excel, PDF, Ảnh tại đây:")
+    uploaded_file = st.file_uploader("Chọn file...", type=['png', 'jpg', 'pdf', 'txt', 'csv', 'xlsx', 'docx'], label_visibility="collapsed")
+    
+    file_content = None
+    if uploaded_file:
+        file_content = process_uploaded_file(uploaded_file)
+        st.success(f"✅ Đã đọc xong: {uploaded_file.name}")
+        st.caption("Bây giờ hãy nhập câu hỏi bên khung chat phải 👉")
+    else:
+        st.info("Chưa có file nào được chọn.")
     
     st.divider()
 
-    # 3. MENU CHỨC NĂNG (ĐÃ SỬA LỖI DÍNH DÒNG)
+    # 4. MENU CHỨC NĂNG (ĐÃ THÊM OFFICE)
     st.subheader("📂 Chọn Chuyên Gia")
     menu = st.radio("Lĩnh vực:", [
         "🏠 Trang Chủ & Giới Thiệu", 
         "✨ Trợ Lý Đa Lĩnh Vực (Chung)",
+        "🖥️ Chuyên Gia Tin Học Văn Phòng (Office)", # <-- MỚI THÊM
+        "🏛️ Trợ Lý Cán bộ Ủy ban (Xã/Phường/TP)",
         "🏛️ Dịch Vụ Hành Chính Công",
-        "🏛️ Trợ Lý Cán bộ Ủy ban (Xã/Phường/TP)", # <--- NHỚ DẤU PHẨY NÀY
-        "🏗️ Kiến Trúc - Nội Thất - Xây Dựng",     # <--- ĐÃ TÁCH RA THÀNH DÒNG RIÊNG
+        "🏗️ Kiến Trúc - Nội Thất - Xây Dựng",
         "📰 Đọc Báo & Tóm Tắt Sách", 
         "🎨 Thiết Kế & Media (Ảnh/Video/Voice)", 
         "🎓 Giáo Dục & Đào Tạo", 
@@ -146,20 +151,20 @@ with st.sidebar:
         "🏠 Bất Động Sản & Xe Sang"
     ])
 
-# --- LOGIC ---
+# =============================================================================
+# LOGIC CHÍNH
+# =============================================================================
 
 if menu == "🏠 Trang Chủ & Giới Thiệu":
     st.title("💎 Hệ Sinh Thái AI Thực Chiến - Rin.Ai")
     st.markdown("""
-    ### 🚀 Rin.Ai - Super App Đa Phương Tiện
-    Chào mừng bạn đến với phiên bản Rin.Ai PRO.
-    * **Kiến Trúc Sư AI:** Tự vẽ 2D/3D.
-    * **Trợ Lý Ủy Ban:** Soạn thảo văn bản chuẩn Nghị định 30.
-    * **Media Pro:** Tạo Prompt Video & Voice AI cảm xúc.
+    ### 🚀 Các tính năng nổi bật:
+    1. **Chuyên gia Office:** Xử lý Excel, Word, PPT.
+    2. **Kiến Trúc Sư AI:** Tự vẽ bản vẽ 2D/3D.
+    3. **Trợ Lý Ủy Ban:** Soạn thảo văn bản chuẩn Nghị định 30.
+    4. **Media Pro:** Tạo Prompt Video & Voice AI cảm xúc.
     
-    ---
-    ### 👨‍🏫 Liên hệ đào tạo & Hợp tác:
-    ## **Mr. Học** - 📞 Hotline/Zalo: **0901 108 788**
+    👉 **LƯU Ý:** Để AI xử lý tài liệu (Tóm tắt, Phân tích Excel), vui lòng **Tải file lên ở thanh bên trái** trước khi chat.
     """)
 
 elif not final_key:
@@ -170,7 +175,9 @@ else:
     best_model = get_best_model(final_key)
     genai.configure(api_key=final_key)
 
-    # 1. MODULE TIN TỨC
+    # -------------------------------------------------------------------------
+    # MODULE 1: TIN TỨC & SÁCH
+    # -------------------------------------------------------------------------
     if menu == "📰 Đọc Báo & Tóm Tắt Sách":
         st.header("📰 Chuyên Gia Tri Thức")
         task = st.radio("Chế độ:", ["🔎 Tin Tức", "📚 Tóm tắt Sách"], horizontal=True)
@@ -183,7 +190,7 @@ else:
                     st.markdown(res)
                     play_text_to_speech(res)
         else:
-            txt = st.text_area("Văn bản:")
+            txt = st.text_area("Văn bản (Nếu không có file):")
             inp = file_content if file_content else txt
             if st.button("📚 Tóm tắt") and inp:
                 with st.spinner("Đang đọc..."):
@@ -192,10 +199,12 @@ else:
                     st.markdown(res)
                     play_text_to_speech(res)
 
-    # 2. MODULE MEDIA
+    # -------------------------------------------------------------------------
+    # MODULE 2: MEDIA (ĐÃ KHÔI PHỤC NÚT CHỌN ĐỘC THOẠI/HỘI THOẠI)
+    # -------------------------------------------------------------------------
     elif menu == "🎨 Thiết Kế & Media (Ảnh/Video/Voice)":
         st.header("🎨 Studio Đa Phương Tiện")
-        mode = st.radio("Công cụ:", ["🖼️ Tạo Ảnh", "🎬 Tạo Video", "🎙️ Voice AI"], horizontal=True)
+        mode = st.radio("Công cụ:", ["🖼️ Tạo Ảnh", "🎬 Tạo Video", "🎙️ Voice AI (Kịch bản & Đọc)"], horizontal=True)
         
         if mode == "🖼️ Tạo Ảnh":
             desc = st.text_area("Mô tả ảnh:")
@@ -212,38 +221,62 @@ else:
                 p = model.generate_content(f"Create English Video Prompt (Sora/Runway) for: {idea}. Structure: [Subject] [Movement] [Style]").text
                 st.code(p)
 
-        elif mode == "🎙️ Voice AI":
-            c1, c2 = st.columns(2)
-            is_slow = c1.checkbox("🐢 Đọc chậm", value=False)
-            tone = c2.selectbox("Cảm xúc:", ["Truyền cảm", "Vui tươi", "Nghiêm túc", "Hào hứng", "Buồn"])
-            topic = st.text_area("Nội dung:")
-            if st.button("🎙️ Tạo & Đọc"):
-                with st.spinner("Đang xử lý..."):
-                    model = genai.GenerativeModel(best_model)
-                    res = model.generate_content(f"Viết kịch bản ngắn. Cảm xúc: {tone}. Chủ đề: {topic}. Ghi chú diễn xuất trong ngoặc đơn.").text
-                    st.markdown(res)
-                    play_text_to_speech(res, is_slow)
+        elif mode == "🎙️ Voice AI (Kịch bản & Đọc)":
+            st.subheader("🎙️ Tạo giọng đọc AI")
+            
+            # 1. Cấu hình giọng
+            c_conf1, c_conf2 = st.columns(2)
+            is_slow = c_conf1.checkbox("🐢 Đọc chậm rãi", value=False)
+            tone = c_conf2.selectbox("Cảm xúc:", ["Truyền cảm", "Vui tươi", "Nghiêm túc", "Hào hứng", "Buồn"])
+            
+            # 2. Chọn loại kịch bản (ĐÃ KHÔI PHỤC)
+            v_type = st.radio("Loại kịch bản:", ["🗣️ Độc thoại (Lời bình)", "👥 Hội thoại (2 người)"], horizontal=True)
 
-    # 3. MODULE CHUYÊN GIA (CHATBOTS) - GỌI TỪ FILE PROMPTS
+            if v_type == "🗣️ Độc thoại (Lời bình)":
+                topic = st.text_area("Nội dung/Chủ đề:")
+                if st.button("📝 Viết & Đọc"):
+                    with st.spinner("Đang xử lý..."):
+                        model = genai.GenerativeModel(best_model)
+                        res = model.generate_content(f"Viết kịch bản độc thoại. Cảm xúc: {tone}. Chủ đề: {topic}. Ghi chú diễn xuất trong ngoặc đơn.").text
+                        st.markdown(res)
+                        play_text_to_speech(res, is_slow)
+            else:
+                topic = st.text_area("Chủ đề cuộc trò chuyện:")
+                if st.button("📝 Viết & Đọc Hội Thoại"):
+                     with st.spinner("Đang xử lý..."):
+                        model = genai.GenerativeModel(best_model)
+                        res = model.generate_content(f"Viết hội thoại 2 người. Cảm xúc: {tone}. Chủ đề: {topic}. Ghi chú diễn xuất trong ngoặc đơn.").text
+                        st.markdown(res)
+                        play_text_to_speech(res, is_slow)
+
+
+    # -------------------------------------------------------------------------
+    # MODULE 3: CHUYÊN GIA (BAO GỒM OFFICE & GIÁO DỤC ĐÃ SỬA)
+    # -------------------------------------------------------------------------
     else:
         st.header(menu)
-        
-        # --- GỌI HÀM LẤY PROMPT TỪ FILE PROMPTS.PY ---
         expert_instruction = get_expert_prompt(menu)
         
-        # Logic Giáo dục
+        # --- LOGIC GIÁO DỤC (ĐÃ SỬA LỖI VIẾT TẮT & THIẾU NÚT) ---
         edu_append = ""
         if menu == "🎓 Giáo Dục & Đào Tạo":
-            sach = st.selectbox("Sách:", ["Cánh Diều", "KNTT", "CTST"])
-            edu_append = f". Sách: {sach}."
+            c1, c2 = st.columns(2)
+            # Sửa tên sách đầy đủ
+            sach = c1.selectbox("Bộ sách giáo khoa:", ["Cánh Diều", "Kết Nối Tri Thức Với Cuộc Sống", "Chân Trời Sáng Tạo"])
+            # Khôi phục nút chọn vai trò
+            role = c2.radio("Bạn là:", ["Học sinh", "Phụ huynh", "Giáo viên"], horizontal=True)
+            edu_append = f".\nLƯU Ý: Tôi đang sử dụng bộ sách '{sach}'. Vai trò của tôi là: {role}. Hãy trả lời phù hợp với lứa tuổi và vai trò này."
 
-        # Chat History
+        # --- CHAT HISTORY ---
         if "history" not in st.session_state: st.session_state.history = {}
         if menu not in st.session_state.history:
             st.session_state.history[menu] = []
-            st.session_state.history[menu].append({"role": "assistant", "content": "Xin chào! Tôi là chuyên gia lĩnh vực này. Tôi có thể giúp gì cho bạn?"})
+            # Lời chào thông minh
+            greeting = "Xin chào! Tôi là chuyên gia lĩnh vực này. "
+            if file_content: greeting += "Tôi đã nhận được file bạn gửi. "
+            else: greeting += "Nếu cần xử lý tài liệu (Excel, Word...), hãy tải lên ở thanh bên trái nhé."
+            st.session_state.history[menu].append({"role": "assistant", "content": greeting})
 
-        # Hiện lịch sử (Text clean)
         for msg in st.session_state.history[menu]:
              if msg["role"] == "user":
                  with st.chat_message("user"): st.markdown(msg["content"])
@@ -252,18 +285,17 @@ else:
                  if clean_show.strip():
                      with st.chat_message("assistant"): st.markdown(clean_show)
 
-        # Input mới
-        if prompt := st.chat_input("Nhập câu hỏi..."):
+        if prompt := st.chat_input("Nhập yêu cầu..."):
             with st.chat_message("user"):
                 st.markdown(prompt)
-                if file_content: st.caption("📎 [Có file]")
+                if file_content: st.caption(f"📎 Đính kèm: {uploaded_file.name}")
             st.session_state.history[menu].append({"role": "user", "content": prompt})
 
             with st.chat_message("assistant"):
-                with st.spinner("Chuyên gia đang trả lời..."):
+                with st.spinner("Đang xử lý..."):
                     try:
                         full_p = [prompt + edu_append]
-                        if file_content: full_p.append(f"FILE:\n{file_content}")
+                        if file_content: full_p.append(f"DỮ LIỆU TỪ FILE:\n{file_content}")
                         
                         model = genai.GenerativeModel(best_model, system_instruction=expert_instruction)
                         response = model.generate_content(full_p)
