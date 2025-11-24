@@ -1,7 +1,11 @@
-streamlit
+streamlit>=1.32.0
 google-generativeai>=0.8.3
-gTTS
-PyPDF2
-pandas
-openpyxl
-Pillow
+gTTS>=2.3.2
+PyPDF2>=3.0.0
+pandas>=2.1.0
+openpyxl>=3.1.0
+Pillow>=10.0.0
+python-docx>=1.1.0
+python-dotenv>=1.0.0
+protobuf>=4.25.0
+google-api-core>=2.19.0
