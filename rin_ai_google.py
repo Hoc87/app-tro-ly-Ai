@@ -219,8 +219,11 @@ with st.sidebar:
     st.divider()
 
     # --- MENU CÔNG CỤ THAM KHẢO ---
-    st.subheader("🔥 Công Cụ Mở Rộng")
-    st.link_button("🤖 Mở App ChatGPT", "https://chatgpt.com/")
+     st.subheader("🔥 Công Cụ Mở Rộng")
+    st.link_button(
+        "🤖 Trợ Lý AI ChatGPT",
+        "https://chatgpt.com/g/g-69004bb8428481918ecf4ade89a9216c-rin-ai-center-trung-tam-tro-ly-ai"
+    )
     with st.expander("🌐 Google AI Tools (Full)"):
         st.link_button("💎 Gemini Chat", "https://gemini.google.com/")
         st.link_button("📚 NotebookLM", "https://notebooklm.google.com/")
@@ -452,6 +455,20 @@ else:
         )
         role = c2.radio("Vai trò:", ["Học sinh", "Giáo viên", "Phụ huynh"], horizontal=True)
         system_append = f"\n(Bộ sách: {sach}, Đối tượng: {role})."
+        
+# --- ĐÍNH KÈM FILE NGAY TRONG KHU CHAT ---
+    st.markdown("**📎 Đính kèm tài liệu cho câu hỏi này (tùy chọn):**")
+    chat_uploaded_file = st.file_uploader(
+        "Chọn file cho câu hỏi (ảnh/PDF/Word/Excel...):",
+        type=["png", "jpg", "jpeg", "pdf", "txt", "csv", "xlsx", "docx"],
+        label_visibility="collapsed",
+        key=f"chat_uploader_{menu}"
+    )
+
+    chat_file_content = None
+    if chat_uploaded_file is not None:
+        chat_file_content = process_uploaded_file(chat_uploaded_file)
+
 
     # Khởi tạo lịch sử chat
     if "history" not in st.session_state:
@@ -481,15 +498,23 @@ else:
                 with st.chat_message("assistant"):
                     st.markdown(clean_show)
 
-    # Ô nhập chat
+        # Ô nhập chat
     user_prompt = st.chat_input("Gửi yêu cầu...")
 
     if user_prompt:
-        # Hiển thị user chat
+        # ƯU TIÊN file đính kèm ngay trong khu chat; nếu không có thì dùng file ở sidebar
+        used_file_content = chat_file_content if chat_file_content is not None else file_content
+        used_file_name = None
+        if chat_uploaded_file is not None:
+            used_file_name = chat_uploaded_file.name
+        elif uploaded_file is not None and file_content is not None:
+            used_file_name = uploaded_file.name
+
+        # Hiển thị tin nhắn của user
         with st.chat_message("user"):
             st.markdown(user_prompt)
-            if file_content is not None and uploaded_file is not None:
-                st.caption(f"📎 Đính kèm: {uploaded_file.name}")
+            if used_file_name:
+                st.caption(f"📎 Đính kèm: {used_file_name}")
 
         st.session_state.history[menu].append(
             {"role": "user", "content": user_prompt}
@@ -500,16 +525,17 @@ else:
             with st.spinner(f"Chuyên gia ({current_model_name}) đang phân tích..."):
                 try:
                     final_prompt = user_prompt + system_append
-                    message_payload = []
 
-                    if file_content is not None:
-                        # Nếu là ảnh -> gửi multimodal
-                        if isinstance(file_content, Image.Image):
-                            message_payload = [final_prompt, file_content]
+                    # Chuẩn bị payload gửi cho model
+                    if used_file_content is not None:
+                        if isinstance(used_file_content, Image.Image):
+                            # Multimodal: text + image
+                            message_payload = [final_prompt, used_file_content]
                         else:
+                            # Text + nội dung file dạng text
                             final_prompt += (
                                 "\n\n=== FILE DATA ===\n"
-                                f"{file_content}\n"
+                                f"{used_file_content}\n"
                                 "================="
                             )
                             message_payload = [final_prompt]
@@ -524,7 +550,7 @@ else:
                     response = chat.send_message(message_payload)
                     full_txt = response.text
 
-                    # Lấy prompt 2D/3D nếu có
+                    # Bóc prompt 2D/3D (nếu có)
                     p2d = re.search(
                         r"###PROMPT_2D###(.*?)###END_PROMPT###",
                         full_txt,
@@ -544,7 +570,7 @@ else:
 
                     st.markdown(txt_show.strip())
 
-                    # Nếu có prompt vẽ, hiển thị thêm ảnh
+                    # Nếu có prompt vẽ, hiển thị thêm ảnh minh hoạ
                     if p2d or p3d:
                         st.divider()
                         col_a, col_b = st.columns(2)
@@ -569,14 +595,13 @@ else:
                         {"role": "assistant", "content": full_txt}
                     )
 
-                    # Giới hạn lịch sử cho nhẹ RAM
+                    # Giới hạn lịch sử để nhẹ RAM
                     if len(st.session_state.history[menu]) > 40:
-                        st.session_state.history[menu] = st.session_state.history[
-                            menu
-                        ][:40]
+                        st.session_state.history[menu] = st.session_state.history[menu][-40:]
 
                 except Exception as e:
                     st.error(f"Lỗi: {e}")
                     st.warning(
                         "⚠️ Nếu gặp lỗi, hãy thử đổi sang model 'gemini-1.5-flash' ở thanh bên trái."
                     )
+
