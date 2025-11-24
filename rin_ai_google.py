@@ -119,18 +119,39 @@ def get_available_models(api_key: str):
             for m in models
             if "generateContent" in getattr(m, "supported_generation_methods", [])
         ]
+        # Lọc model an toàn: loại tts / speech / embed
         candidates = [
             n
             for n in names
-            if "gemini" in n
+            if "gemini" in n.lower()
             and (
                 "1.5" in n
                 or "2.0" in n
                 or "2.5" in n
-                or "pro" in n
-                or "flash" in n
+                or "pro" in n.lower()
+                or "flash" in n.lower()
             )
+            and "tts" not in n.lower()
+            and "speech" not in n.lower()
+            and "embed" not in n.lower()
         ]
+        if not candidates:
+            candidates = names or ["gemini-1.5-flash"]
+
+        def sort_key(x: str):
+            return (
+                "flash" not in x.lower(),
+                "pro" not in x.lower(),
+                "2.5" not in x,
+                "2.0" not in x,
+                "1.5" not in x,
+            )
+
+        candidates.sort(key=sort_key)
+        return candidates
+    except Exception:
+        return ["gemini-1.5-flash"]
+
         if not candidates:
             candidates = names or ["gemini-1.5-flash"]
 
@@ -189,15 +210,26 @@ with st.sidebar:
         if final_key:
             st.success("✅ Đã nhận Key cá nhân")
 
-    if final_key:
+        if final_key:
         available_models = get_available_models(final_key)
-        selected_model_display = st.selectbox(
-            "🧠 Chọn bộ não AI:",
-            available_models,
-            index=0,
+        recommended_model = available_models[0]
+
+        advanced_model_choice = st.checkbox(
+            "⚙️ Bật chế độ chọn model nâng cao",
+            value=False,
         )
-        current_model_name = selected_model_display
-        st.caption(f"Đang dùng model: `{current_model_name}`")
+
+        if advanced_model_choice:
+            selected_model_display = st.selectbox(
+                "🧠 Chọn bộ não AI:",
+                available_models,
+                index=0,
+            )
+            current_model_name = selected_model_display
+            st.caption(f"Đang dùng model: `{current_model_name}` (tùy chỉnh)")
+        else:
+            current_model_name = recommended_model
+            st.caption(f"Đang dùng model khuyến nghị: `{current_model_name}`")
 
     st.divider()
 
@@ -527,12 +559,12 @@ else:
                     else:
                         message_payload = [final_prompt]
 
-                    model = get_model(current_model_name)
-                    chat = model.start_chat(
+                    # SỬ DỤNG system_instruction ĐÚNG CÁCH VỚI generate_content
+                    model = genai.GenerativeModel(
+                        current_model_name,
                         system_instruction=expert_instruction,
-                        history=[],
                     )
-                    response = chat.send_message(message_payload)
+                    response = model.generate_content(message_payload)
                     full_txt = response.text
 
                     p2d = re.search(
@@ -586,4 +618,6 @@ else:
                     st.error(f"Lỗi: {e}")
                     st.warning(
                         "⚠️ Nếu gặp lỗi, hãy thử đổi sang model 'gemini-1.5-flash' ở thanh bên trái."
+                    )
+
                     )
