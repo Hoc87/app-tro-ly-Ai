@@ -187,6 +187,7 @@ with st.sidebar:
     st.caption("Developed by Mr. Học")
     st.divider()
 
+    # ---- TÀI KHOẢN & CẤU HÌNH ----
     st.subheader("🔑 Tài khoản & Cấu hình")
     key_option = st.radio(
         "Chế độ:",
@@ -210,7 +211,8 @@ with st.sidebar:
         if final_key:
             st.success("✅ Đã nhận Key cá nhân")
 
-        if final_key:
+    # ---- CHỌN MODEL (TỰ ĐỘNG + NÂNG CAO) ----
+    if final_key:
         available_models = get_available_models(final_key)
         recommended_model = available_models[0]
 
@@ -233,6 +235,7 @@ with st.sidebar:
 
     st.divider()
 
+    # ---- CÔNG CỤ MỞ RỘNG ----
     st.subheader("🔥 Công Cụ Mở Rộng")
     st.link_button(
         "🤖 Trợ Lý AI ChatGPT",
@@ -261,6 +264,7 @@ with st.sidebar:
 
     st.divider()
 
+    # ---- UPLOAD FILE TOÀN PHIÊN ----
     st.subheader("📎 Đính Kèm Tài Liệu (Toàn phiên)")
     uploaded_file = st.file_uploader(
         "Chọn file:",
@@ -275,6 +279,7 @@ with st.sidebar:
 
     st.divider()
 
+    # ---- MENU CHUYÊN GIA ----
     st.subheader("📂 Chọn Chuyên Gia")
     menu = st.selectbox(
         "Lĩnh vực hỗ trợ:",
@@ -305,6 +310,7 @@ with st.sidebar:
             "🏠 Bất Động Sản & Xe Sang",
         ],
     )
+
 
 # -------------------------------------------------------------
 # MAIN
