@@ -108,7 +108,7 @@ with st.sidebar:
 
     # --- BỘ CÔNG CỤ GOOGLE & CHATGPT ---
     st.subheader("🔥 Công Cụ Mở Rộng")
-    st.link_button("🤖 Mở App ChatGPT (Riêng)", "https://chatgpt.com/") 
+    st.link_button("🤖 Trợ lý Ai ChatGPT ", "https://chatgpt.com/g/g-69004bb8428481918ecf4ade89a9216c-rin-ai-center-trung-tam-tro-ly-ai") 
     
     with st.expander("🌐 Google AI Tools"):
         st.link_button("💎 Gemini Chat", "https://gemini.google.com/")
