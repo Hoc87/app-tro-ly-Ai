@@ -7,12 +7,17 @@ import requests
 from PIL import Image
 import PyPDF2
 import pandas as pd
+from datetime import datetime
 
-# IMPORT FILE PROMPTS
-from prompts import get_expert_prompt
+# --- IMPORT FILE PROMPTS (BẮT BUỘC PHẢI CÓ FILE prompts.py CÙNG THƯ MỤC) ---
+try:
+    from prompts import get_expert_prompt
+except ImportError:
+    st.error("⚠️ Lỗi: Không tìm thấy file 'prompts.py'. Hãy tạo file này và dán nội dung các vai trò chuyên gia vào.")
+    st.stop()
 
 # =============================================================================
-# CẤU HÌNH & HÀM HỖ TRỢ
+# 1. CẤU HÌNH & HÀM HỖ TRỢ
 # =============================================================================
 
 st.set_page_config(page_title="Rin.Ai - Siêu Trợ Lý AI", page_icon="💎", layout="wide")
@@ -31,25 +36,30 @@ def process_uploaded_file(uploaded_file):
             if "csv" in uploaded_file.type: df = pd.read_csv(uploaded_file)
             else: df = pd.read_excel(uploaded_file)
             return df.to_string()
+        elif "word" in uploaded_file.type or "docx" in uploaded_file.type:
+             return "File Word đã nhận. Hãy yêu cầu xử lý."
         else: return uploaded_file.getvalue().decode("utf-8")
     except Exception as e: return f"Lỗi đọc file: {e}"
 
 def clean_text_for_tts(text):
+    """Làm sạch văn bản để bộ đọc không đọc các ký tự lạ/code"""
     if not text: return ""
     clean = re.sub(r'###PROMPT_[23]D###.*?###END_PROMPT###', '', text, flags=re.DOTALL)
     clean = re.sub(r'\([^)]*\)', '', clean)
     clean = re.sub(r'\[[^]]*\]', '', clean)
-    clean = clean.replace('*', '').replace('#', '').replace('`', '')
+    clean = clean.replace('*', '').replace('#', '').replace('`', '').replace('-', '')
     return clean.strip()
 
 def play_text_to_speech(text_content, speed_slow=False):
     try:
         text_to_read = clean_text_for_tts(text_content)
-        if len(text_to_read) < 5: return
+        if len(text_to_read) < 5: return 
+        
         tts = gTTS(text=text_to_read, lang='vi', slow=speed_slow)
         audio_bytes = io.BytesIO()
         tts.write_to_fp(audio_bytes)
         st.audio(audio_bytes, format='audio/mp3')
+        
         status = "🐢 Đang đọc chậm..." if speed_slow else "🐇 Đang đọc tốc độ thường..."
         st.caption(f"🔊 {status}")
     except: pass
@@ -71,7 +81,7 @@ def get_best_model(api_key):
     except: return None
 
 # =============================================================================
-# GIAO DIỆN SIDEBAR (THANH BÊN TRÁI)
+# 2. SIDEBAR (THANH CÔNG CỤ TRÁI)
 # =============================================================================
 
 with st.sidebar:
@@ -80,7 +90,7 @@ with st.sidebar:
     st.caption("Developed by Mr. Học")
     st.divider()
     
-    # 1. KEY
+    # --- NHẬP KEY ---
     st.subheader("🔑 Tài khoản")
     key_option = st.radio("Chế độ:", ["🚀 Dùng Miễn Phí", "💎 Nhập Key Của Bạn"], label_visibility="collapsed")
     final_key = None
@@ -96,57 +106,49 @@ with st.sidebar:
     
     st.divider()
 
-    # 2. LIÊN KẾT MẠNH MẼ (ĐÃ CẬP NHẬT THEO ẢNH BẠN GỬI)
-    st.subheader("🔥 Bộ Công Cụ Google AI")
+    # --- BỘ CÔNG CỤ GOOGLE & CHATGPT ---
+    st.subheader("🔥 Công Cụ Mở Rộng")
+    st.link_button("🤖 Mở App ChatGPT (Riêng)", "https://chatgpt.com/") 
     
-    # Sử dụng Expander để nhóm lại cho gọn, hoặc để lộ thiên tùy bạn.
-    # Ở đây tôi để lộ thiên các tool quan trọng nhất để dễ bấm.
+    with st.expander("🌐 Google AI Tools"):
+        st.link_button("💎 Gemini Chat", "https://gemini.google.com/")
+        st.link_button("📚 NotebookLM (Học tập)", "https://notebooklm.google.com/")
+        st.link_button("🛠️ AI Studio (Dev)", "https://aistudio.google.com/")
+        st.link_button("🎨 ImageFX (Tạo ảnh)", "https://aitestkitchen.withgoogle.com/tools/image-fx")
+        st.link_button("🎥 VideoFX (Tạo Video)", "https://aitestkitchen.withgoogle.com/tools/video-fx")
+        st.link_button("🎵 MusicFX (Tạo Nhạc)", "https://aitestkitchen.withgoogle.com/tools/music-fx")
     
-    st.link_button("💎 Gemini (Chat & Code)", "https://gemini.google.com/")
-    st.link_button("📚 NotebookLM (Học tập)", "https://notebooklm.google.com/")
-    st.link_button("🛠️ AI Studio (Dev)", "https://aistudio.google.com/")
-    
-    with st.expander("🎨 Sáng tạo (Ảnh/Video/Nhạc)"):
-        st.link_button("🖼️ ImageFX (Imagen 3)", "https://aitestkitchen.withgoogle.com/tools/image-fx")
-        st.link_button("🎥 VideoFX (Veo)", "https://aitestkitchen.withgoogle.com/tools/video-fx")
-        st.link_button("🎵 MusicFX (Lyria)", "https://aitestkitchen.withgoogle.com/tools/music-fx")
-    
-    with st.expander("📝 Văn phòng (Workspace AI)"):
+    with st.expander("📝 Văn phòng (Workspace)"):
         st.link_button("Google Docs AI", "https://docs.google.com/")
         st.link_button("Google Sheets AI", "https://sheets.google.com/")
-        st.link_button("Google Slides AI", "https://slides.google.com/")
-
-    st.divider()
-    st.link_button("👉 Danh sách Trợ lý Ai ChatGPT", "https://chatgpt.com/g/g-69004bb8428481918ecf4ade89a9216c-rin-ai-center-trung-tam-tro-ly-ai") 
+    
     st.divider()
     
-    # 3. UPLOAD FILE
+    # --- UPLOAD FILE ---
     st.subheader("📎 Đính Kèm Tài Liệu")
-    st.caption("👇 Tải File Word, Excel, PDF, Ảnh tại đây:")
-    uploaded_file = st.file_uploader("Chọn file...", type=['png', 'jpg', 'pdf', 'txt', 'csv', 'xlsx', 'docx'], label_visibility="collapsed")
+    st.caption("Hỗ trợ: Ảnh, PDF, Excel, Word, Text")
+    uploaded_file = st.file_uploader("Chọn file:", type=['png', 'jpg', 'pdf', 'txt', 'csv', 'xlsx', 'docx'], label_visibility="collapsed")
     
     file_content = None
     if uploaded_file:
         file_content = process_uploaded_file(uploaded_file)
-        st.success(f"✅ Đã đọc: {uploaded_file.name}")
+        st.success(f"✅ Đã nhận: {uploaded_file.name}")
     
     st.divider()
 
-    # 4. MENU CHỨC NĂNG (ĐÃ ĐỔI SANG SELECTBOX - SỔ XUỐNG)
+    # --- MENU CHỨC NĂNG (SELECTBOX) ---
     st.subheader("📂 Chọn Chuyên Gia")
-    
-    # --- THAY ĐỔI Ở ĐÂY: st.radio -> st.selectbox ---
     menu = st.selectbox(
-        "Hãy chọn lĩnh vực bạn cần hỗ trợ:",
+        "Lĩnh vực hỗ trợ:",
         [
             "🏠 Trang Chủ & Giới Thiệu", 
             "✨ Trợ Lý Đa Lĩnh Vực (Chung)",
-            "🖥️ Chuyên Gia Tin Học Văn Phòng (Office)",
-            "🏛️ Trợ Lý Cán bộ Ủy ban (Xã/Phường/TP)",
-            "🏛️ Dịch Vụ Hành Chính Công",
-            "🏗️ Kiến Trúc - Nội Thất - Xây Dựng",
             "📰 Đọc Báo & Tóm Tắt Sách", 
             "🎨 Thiết Kế & Media (Ảnh/Video/Voice)", 
+            "🖥️ Chuyên Gia Tin Học Văn Phòng (Office)",
+            "🏗️ Kiến Trúc - Nội Thất - Xây Dựng",
+            "🏛️ Trợ Lý Cán bộ Ủy ban (Xã/Phường/TP)",
+            "🏛️ Dịch Vụ Hành Chính Công",
             "🎓 Giáo Dục & Đào Tạo", 
             "🎥 Chuyên Gia Video Google Veo",
             "👔 Nhân Sự - Tuyển Dụng - CV",
@@ -167,16 +169,15 @@ with st.sidebar:
     )
 
 # =============================================================================
-# LOGIC CHÍNH
+# 3. LOGIC CHÍNH (MAIN APP)
 # =============================================================================
 
+# --- TRANG CHỦ ---
 if menu == "🏠 Trang Chủ & Giới Thiệu":
     st.title("💎 Hệ Sinh Thái AI Thực Chiến - Rin.Ai")
     st.markdown("---")
     
-    # Chia cột: Bên trái là chữ, bên phải là ảnh
     col1, col2 = st.columns([2, 1])
-    
     with col1:
         st.markdown("""
         ### 👋 Chào mừng đến với Rin.Ai PRO
@@ -186,7 +187,8 @@ if menu == "🏠 Trang Chủ & Giới Thiệu":
         
         * 🤖 **Đội ngũ Chuyên gia:** Hơn 20 trợ lý ảo (Luật, Xây dựng, Hành chính...) có quy trình chuẩn.
         * 🎨 **Studio Sáng tạo:** Vẽ bản vẽ 2D/3D, Tạo Prompt Video, Giọng đọc AI cảm xúc.
-        * 💼 **Văn phòng:** Soạn thảo văn bản Nghị định 30, xử lý Excel/Word.
+        * 📰 **Tin tức Real-time:** Cập nhật tin nóng, giá vàng, thời tiết trong ngày (kèm link nguồn).
+        * 💼 **Văn phòng:** Soạn thảo văn bản chuẩn Nghị định 30, xử lý Excel/Word.
         
         ---
         ### 🚀 DỊCH VỤ THIẾT KẾ AI RIÊNG BIỆT (CUSTOM AI)
@@ -198,27 +200,27 @@ if menu == "🏠 Trang Chủ & Giới Thiệu":
         ## 📞 Liên hệ Chuyên gia: **Mr. Học**
         #### ☎️ Hotline/Zalo: **0901 108 788**
         """)
-        
         st.link_button("👉 Chat Zalo Ngay Với Mr. Học", "https://zalo.me/0901108788")
 
     with col2:
         st.image("https://cdn.dribbble.com/users/527451/screenshots/14972580/media/7f4288f6c3eb988a2879a953e5b12854.jpg", caption="Power of AI - Developed by Mr. Học")
 
+# --- KIỂM TRA KEY ---
 elif not final_key:
     st.warning("👋 Vui lòng nhập Key bên tay trái để bắt đầu.")
     st.stop()
 
+# --- BẮT ĐẦU VÀO CÁC CHỨC NĂNG CHÍNH ---
 else:
     best_model = get_best_model(final_key)
     genai.configure(api_key=final_key)
 
-  # -------------------------------------------------------------------------
-    # MODULE 1: TIN TỨC & SÁCH (BẢN FIX LỖI KẾT NỐI SEARCH)
+    # -------------------------------------------------------------------------
+    # MODULE 1: TIN TỨC & SÁCH (ĐÃ THẲNG HÀNG)
     # -------------------------------------------------------------------------
     if menu == "📰 Đọc Báo & Tóm Tắt Sách":
         st.header("📰 Chuyên Gia Tri Thức & Tin Tức")
         
-        from datetime import datetime
         today_str = datetime.now().strftime("%d/%m/%Y")
         st.caption(f"📅 Cập nhật tin tức ngày: {today_str}")
 
@@ -232,18 +234,18 @@ else:
                 if topic:
                     with st.spinner(f"Đang quét tin tức ngày {today_str}..."):
                         try:
-                            # --- CẤU HÌNH TÌM KIẾM (Dùng từ khóa chuẩn của thư viện) ---
-                            # Lưu ý: Dùng google_search_retrieval cho tương thích thư viện hiện tại
-                            tools_config = {'google_search_retrieval': {
-                                'dynamic_retrieval_config': {
-                                    'mode': 'dynamic',
-                                    'dynamic_threshold': 0.3,
-                                }
-                            }}
+                            # CẤU HÌNH TÌM KIẾM (Code chuẩn tương thích mọi phiên bản)
+                            tools_config = {'google_search': {}} 
                             
-                            # Ép dùng model PRO để tìm kiếm ổn định hơn
-                            search_model = genai.GenerativeModel('gemini-1.5-pro', tools=[tools_config])
-                            
+                            # Tự động dùng model tốt nhất (Flash hoặc Pro)
+                            # Thêm try-except để tránh lỗi nếu thư viện cũ không hiểu 'google_search'
+                            try:
+                                search_model = genai.GenerativeModel(best_model, tools=[tools_config])
+                            except:
+                                # Fallback cho thư viện cũ
+                                old_tool = {'google_search_retrieval': {'dynamic_retrieval_config': {'mode': 'dynamic', 'dynamic_threshold': 0.3}}}
+                                search_model = genai.GenerativeModel(best_model, tools=[old_tool])
+
                             search_prompt = f"""
                             Hãy đóng vai Biên tập viên Thời sự. Tìm kiếm và báo cáo về: "{topic}".
                             THỜI GIAN: Chỉ lấy tin tức diễn ra trong ngày hôm nay ({today_str}) hoặc 24h qua.
@@ -265,33 +267,26 @@ else:
                             play_text_to_speech(res_text)
                             
                         except Exception as e:
-                            # CƠ CHẾ FALLBACK (CHỐNG SẬP)
-                            st.warning(f"⚠️ Google Search đang quá tải hoặc gặp lỗi phiên bản. AI sẽ trả lời bằng kiến thức nội bộ.")
-                            st.caption(f"Chi tiết lỗi: {e}")
-                            
-                            # Gọi model thường không có tools để trả lời thay thế
-                            fallback_model = genai.GenerativeModel('gemini-1.5-pro')
-                            res = fallback_model.generate_content(f"Bạn hãy cho tôi biết những thông tin mới nhất mà bạn biết về: {topic}. Lưu ý: Nếu không có tin realtime, hãy phân tích dựa trên bối cảnh gần nhất.").text
+                            st.warning(f"⚠️ Google Search gặp sự cố. Đang trả lời bằng kiến thức có sẵn.")
+                            fallback_model = genai.GenerativeModel(best_model) 
+                            res = fallback_model.generate_content(f"Bạn hãy cho tôi biết thông tin về: {topic}.").text
                             st.markdown(res)
-                            play_text_to_speech(res)
-
                 else:
                     st.warning("Vui lòng nhập chủ đề tin tức!")
 
         else:
-            # Phần tóm tắt sách (Giữ nguyên)
             st.info("Tải file PDF lên hoặc dán văn bản vào dưới.")
             txt = st.text_area("Văn bản (Nếu không có file):")
             inp = file_content if file_content else txt
             if st.button("📚 Tóm tắt") and inp:
                 with st.spinner("Đang đọc hiểu..."):
                     model = genai.GenerativeModel(best_model)
-                    res = model.generate_content(f"Tóm tắt nội dung sau, rút ra 5 bài học cốt lõi: {inp}").text
+                    res = model.generate_content(f"Tóm tắt nội dung sau: {inp}").text
                     st.markdown(res)
                     play_text_to_speech(res)
 
     # -------------------------------------------------------------------------
-    # MODULE 2: MEDIA
+    # MODULE 2: MEDIA (ĐÃ THẲNG HÀNG)
     # -------------------------------------------------------------------------
     elif menu == "🎨 Thiết Kế & Media (Ảnh/Video/Voice)":
         st.header("🎨 Studio Đa Phương Tiện")
@@ -314,9 +309,9 @@ else:
 
         elif mode == "🎙️ Voice AI (Kịch bản & Đọc)":
             st.subheader("🎙️ Tạo giọng đọc AI")
-            c_conf1, c_conf2 = st.columns(2)
-            is_slow = c_conf1.checkbox("🐢 Đọc chậm rãi", value=False)
-            tone = c_conf2.selectbox("Cảm xúc:", ["Truyền cảm", "Vui tươi", "Nghiêm túc", "Hào hứng", "Buồn"])
+            c1, c2 = st.columns(2)
+            is_slow = c1.checkbox("🐢 Đọc chậm rãi", value=False)
+            tone = c2.selectbox("Cảm xúc:", ["Truyền cảm", "Vui tươi", "Nghiêm túc", "Hào hứng", "Buồn"])
             
             v_type = st.radio("Loại kịch bản:", ["🗣️ Độc thoại (Lời bình)", "👥 Hội thoại (2 người)"], horizontal=True)
 
@@ -337,9 +332,8 @@ else:
                         st.markdown(res)
                         play_text_to_speech(res, is_slow)
 
-
     # -------------------------------------------------------------------------
-    # MODULE 3: CHUYÊN GIA (CORE)
+    # MODULE 3: CHUYÊN GIA (CORE) - (ĐÃ THẲNG HÀNG)
     # -------------------------------------------------------------------------
     else:
         st.header(menu)
