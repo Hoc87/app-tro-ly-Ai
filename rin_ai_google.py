@@ -70,12 +70,13 @@ def generate_image_url(prompt):
 def get_best_model(api_key):
     genai.configure(api_key=api_key)
     try:
+        # Ưu tiên model mới nhất hỗ trợ Search
         models = [m.name for m in genai.list_models() if 'generateContent' in m.supported_generation_methods]
         priority = ["gemini-1.5-pro", "gemini-1.5-flash", "gemini-pro"]
         for p in priority:
             for m in models:
                 if p in m: return m
-        return "gemini-pro"
+        return "gemini-1.5-flash"
     except: return None
 
 # =============================================================================
@@ -88,7 +89,7 @@ with st.sidebar:
     st.caption("Developed by Mr. Học")
     st.divider()
     
-    # --- NHẬP KEY ---
+    # --- NHẬP KEY (ĐÃ THÊM HƯỚNG DẪN) ---
     st.subheader("🔑 Tài khoản")
     key_option = st.radio("Chế độ:", ["🚀 Dùng Miễn Phí", "💎 Nhập Key Của Bạn"], label_visibility="collapsed")
     final_key = None
@@ -99,17 +100,28 @@ with st.sidebar:
         except: st.error("❌ Chưa cấu hình Key chung")
     else: 
         st.info("Nhập Google API Key:")
+        # --- LINK HƯỚNG DẪN LẤY KEY ---
+        st.markdown("[👉 Bấm vào đây để lấy Key miễn phí](https://aistudio.google.com/app/apikey)")
         final_key = st.text_input("Dán Key vào đây:", type="password")
         if final_key: st.success("✅ Đã nhận Key")
     
     st.divider()
 
-    # --- MENU CÔNG CỤ ---
+    # --- MENU CÔNG CỤ (ĐÃ BỔ SUNG FULL HỆ SINH THÁI) ---
     st.subheader("🔥 Công Cụ Mở Rộng")
     st.link_button("🤖 Mở App ChatGPT", "https://chatgpt.com/") 
-    with st.expander("🌐 Google AI Tools"):
+    
+    with st.expander("🌐 Google AI Tools (Full)"):
         st.link_button("💎 Gemini Chat", "https://gemini.google.com/")
-        st.link_button("🎨 ImageFX", "https://aitestkitchen.withgoogle.com/tools/image-fx")
+        st.link_button("📚 NotebookLM (Học tập)", "https://notebooklm.google.com/")
+        st.link_button("🛠️ AI Studio (Cho Dev)", "https://aistudio.google.com/")
+        st.link_button("🎨 ImageFX (Tạo ảnh)", "https://aitestkitchen.withgoogle.com/tools/image-fx")
+        st.link_button("🎥 VideoFX (Tạo Video)", "https://aitestkitchen.withgoogle.com/tools/video-fx")
+        st.link_button("🎵 MusicFX (Tạo Nhạc)", "https://aitestkitchen.withgoogle.com/tools/music-fx")
+    
+    with st.expander("📝 Văn phòng (Workspace)"):
+        st.link_button("Google Docs AI", "https://docs.google.com/")
+        st.link_button("Google Sheets AI", "https://sheets.google.com/")
     
     st.divider()
     
@@ -184,7 +196,7 @@ if menu == "🏠 Trang Chủ & Giới Thiệu":
     with col2:
         st.image("https://cdn.dribbble.com/users/527451/screenshots/14972580/media/7f4288f6c3eb988a2879a953e5b12854.jpg")
 
-# --- MODULE 1: TIN TỨC & SÁCH (TÁCH BIỆT) ---
+# --- MODULE 1: TIN TỨC & SÁCH (ĐÃ SỬA LỖI SEARCH) ---
 elif menu == "📰 Đọc Báo & Tóm Tắt Sách":
     st.header("📰 Chuyên Gia Tri Thức & Tin Tức")
     today_str = datetime.now().strftime("%d/%m/%Y")
@@ -193,30 +205,52 @@ elif menu == "📰 Đọc Báo & Tóm Tắt Sách":
     task = st.radio("Chế độ:", ["🔎 Tin Tức Thời Sự", "📚 Tóm tắt Sách/Tài liệu"], horizontal=True)
     
     if task == "🔎 Tin Tức Thời Sự":
-        topic = st.text_input("Nhập chủ đề (VD: Thời tiết hôm nay, Giá vàng...):")
+        topic = st.text_input("Nhập chủ đề (VD: Tình hình bão lũ, Giá vàng hôm nay...):")
         if st.button("🔎 Tìm kiếm"):
             if topic:
-                with st.spinner("Đang quét tin tức..."):
+                with st.spinner(f"Đang quét tin tức mới nhất về {topic}..."):
                     try:
-                        tools_config = {'google_search': {}}
-                        search_model = genai.GenerativeModel(best_model, tools=[tools_config])
-                        res = search_model.generate_content(f"Tìm tin tức mới nhất về: {topic} ngày {today_str}. Tóm tắt và kèm link nguồn.").text
-                        st.success("✅ Kết quả:")
+                        # --- [SỬA LỖI QUAN TRỌNG] Cập nhật cú pháp Tools mới nhất ---
+                        # Thư viện mới dùng 'google_search_retrieval' thay vì 'google_search'
+                        tool_config = {'google_search_retrieval': {}}
+                        
+                        search_model = genai.GenerativeModel(best_model, tools=[tool_config])
+                        
+                        search_prompt = f"""
+                        Hãy tìm kiếm và báo cáo chi tiết về: "{topic}".
+                        Thời gian: Cập nhật mới nhất ngày hôm nay ({today_str}).
+                        Yêu cầu:
+                        1. Tóm tắt các sự kiện chính.
+                        2. Cung cấp số liệu cụ thể (nếu có).
+                        3. Đính kèm Link nguồn báo uy tín.
+                        """
+                        
+                        res = search_model.generate_content(search_prompt).text
+                        
+                        st.success("✅ Kết quả tìm kiếm:")
                         st.markdown(res)
+                        st.divider()
                         play_text_to_speech(res)
-                    except Exception as e: st.error(f"Lỗi: {e}")
+                        
+                    except Exception as e: 
+                        st.error(f"Lỗi kết nối Google Search: {e}")
+                        st.info("💡 Mẹo: Hãy thử đổi sang model 'gemini-1.5-pro' hoặc kiểm tra lại API Key.")
+            else:
+                st.warning("Vui lòng nhập chủ đề cần tìm!")
+
     else:
+        # Phần Tóm tắt sách giữ nguyên vì đã ổn
         txt_input = st.text_area("Dán văn bản (hoặc upload file bên trái):")
         user_content = file_content if file_content else txt_input
         if st.button("📚 Tóm tắt") and user_content:
-             with st.spinner("Đang đọc..."):
+             with st.spinner("Đang đọc và tóm tắt..."):
                 model = genai.GenerativeModel(best_model)
                 req = [f"Tóm tắt nội dung sau:", user_content] if isinstance(user_content, Image.Image) else [f"Tóm tắt nội dung sau: {user_content}"]
                 res = model.generate_content(req).text
                 st.markdown(res)
                 play_text_to_speech(res)
 
-# --- MODULE 2: MEDIA (TÁCH BIỆT) ---
+# --- MODULE 2: MEDIA ---
 elif menu == "🎨 Thiết Kế & Media (Ảnh/Video/Voice)":
     st.header("🎨 Studio Đa Phương Tiện")
     mode = st.radio("Công cụ:", ["🖼️ Tạo Ảnh", "🎬 Tạo Prompt Video", "🎙️ Voice AI"], horizontal=True)
@@ -233,7 +267,7 @@ elif menu == "🎨 Thiết Kế & Media (Ảnh/Video/Voice)":
         idea = st.text_area("Ý tưởng video:")
         if st.button("🎥 Tạo Prompt") and idea:
             model = genai.GenerativeModel(best_model)
-            st.code(model.generate_content(f"Create English Video Prompt for Sora: {idea}").text)
+            st.code(model.generate_content(f"Create English Video Prompt for Sora/Runway: {idea}").text)
 
     elif mode == "🎙️ Voice AI":
         c1, c2 = st.columns(2)
@@ -243,7 +277,7 @@ elif menu == "🎨 Thiết Kế & Media (Ảnh/Video/Voice)":
         if st.button("🎙️ Đọc") and txt:
             play_text_to_speech(txt, is_slow)
 
-# --- MODULE 3: CHUYÊN GIA (TÁCH BIỆT) ---
+# --- MODULE 3: CHUYÊN GIA ---
 else:
     st.header(menu)
     expert_instruction = get_expert_prompt(menu)
@@ -255,7 +289,6 @@ else:
         role = c2.radio("Vai trò:", ["Học sinh", "Giáo viên"], horizontal=True)
         system_append = f"\n(Bộ sách: {sach}, Đối tượng: {role})."
 
-    # History riêng biệt cho từng menu
     if "history" not in st.session_state: st.session_state.history = {}
     if menu not in st.session_state.history:
         st.session_state.history[menu] = [{"role": "assistant", "content": f"Xin chào! Tôi là chuyên gia {menu}. Tôi có thể giúp gì cho bạn?"}]
@@ -287,7 +320,6 @@ else:
                     model = genai.GenerativeModel(best_model, system_instruction=expert_instruction)
                     full_txt = model.generate_content(msg_content).text
                     
-                    # Tách prompt vẽ
                     p2d = re.search(r'###PROMPT_2D###(.*?)###END_PROMPT###', full_txt, re.DOTALL)
                     p3d = re.search(r'###PROMPT_3D###(.*?)###END_PROMPT###', full_txt, re.DOTALL)
                     txt_show = re.sub(r'###PROMPT_[23]D###.*?###END_PROMPT###', '', full_txt, flags=re.DOTALL)
