@@ -559,7 +559,7 @@ else:
                     else:
                         message_payload = [final_prompt]
 
-                    # SỬ DỤNG system_instruction ĐÚNG CÁCH VỚI generate_content
+                    # DÙNG system_instruction ĐÚNG CÁCH
                     model = genai.GenerativeModel(
                         current_model_name,
                         system_instruction=expert_instruction,
@@ -616,8 +616,5 @@ else:
 
                 except Exception as e:
                     st.error(f"Lỗi: {e}")
-                    st.warning(
-                        "⚠️ Nếu gặp lỗi, hãy thử đổi sang model 'gemini-1.5-flash' ở thanh bên trái."
-                    )
+                    st.warning("⚠️ Nếu gặp lỗi, hãy thử đổi sang model 'gemini-1.5-flash' ở thanh bên trái.")
 
-                    )
