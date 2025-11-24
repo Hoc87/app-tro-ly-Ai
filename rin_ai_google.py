@@ -10,9 +10,6 @@ from gtts import gTTS
 from PIL import Image
 import docx  # từ python-docx
 
-# --- CẤU HÌNH MẶC ĐỊNH ---
-current_model_name = "gemini-1.5-flash"
-
 # --- IMPORT FILE PROMPTS ---
 try:
     from prompts import get_expert_prompt
