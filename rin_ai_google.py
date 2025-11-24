@@ -2,24 +2,19 @@ import io
 import re
 from datetime import datetime
 
+import docx
 import google.generativeai as genai
 import pandas as pd
 import PyPDF2
 import streamlit as st
 from gtts import gTTS
 from PIL import Image
-import docx  # từ python-docx
 
-# --- IMPORT FILE PROMPTS ---
-try:
-    from prompts import get_expert_prompt
-except ImportError:
-    st.error("⚠️ Lỗi: Không tìm thấy file 'prompts.py'. Hãy tạo file này cùng thư mục.")
-    st.stop()
+from prompts import get_expert_prompt
 
-# =============================================================================
-# 1. CẤU HÌNH & HÀM HỖ TRỢ
-# =============================================================================
+# -------------------------------------------------------------------
+# CẤU HÌNH CHUNG
+# -------------------------------------------------------------------
 
 st.set_page_config(
     page_title="Rin.Ai - Siêu Trợ Lý AI",
@@ -27,12 +22,16 @@ st.set_page_config(
     layout="wide",
 )
 
+current_model_name = "gemini-1.5-flash"
+
+
+# -------------------------------------------------------------------
+# HÀM HỖ TRỢ
+# -------------------------------------------------------------------
 
 def process_uploaded_file(uploaded_file):
-    """Đọc nội dung file upload (ảnh, PDF, Excel, CSV, DOCX, TXT...)."""
     if uploaded_file is None:
         return None
-
     try:
         file_type = uploaded_file.type or ""
         file_name = uploaded_file.name.lower()
@@ -62,13 +61,13 @@ def process_uploaded_file(uploaded_file):
                 df = pd.read_excel(uploaded_file)
             return df.to_string(index=False)
 
-        # Word (DOCX)
+        # Word
         if file_name.endswith(".docx"):
-            doc = docx.Document(uploaded_file)
-            text = "\n".join(p.text for p in doc.paragraphs)
+            d = docx.Document(uploaded_file)
+            text = "\n".join(p.text for p in d.paragraphs)
             return text
 
-        # Text thường
+        # Text thuần
         raw = uploaded_file.getvalue()
         try:
             return raw.decode("utf-8")
@@ -80,10 +79,8 @@ def process_uploaded_file(uploaded_file):
 
 
 def clean_text_for_tts(text: str) -> str:
-    """Làm sạch text để đọc TTS (loại bớt Markdown, prompt kỹ thuật)."""
     if not text:
         return ""
-
     clean = re.sub(
         r"###PROMPT_[23]D###.*?###END_PROMPT###",
         "",
@@ -97,56 +94,51 @@ def clean_text_for_tts(text: str) -> str:
 
 
 def play_text_to_speech(text_content: str, speed_slow: bool = False):
-    """Đọc text bằng gTTS, phát trực tiếp trên Streamlit."""
     try:
         text_to_read = clean_text_for_tts(text_content)
         if len(text_to_read) < 5:
             return
-
         tts = gTTS(text=text_to_read, lang="vi", slow=speed_slow)
         audio_bytes = io.BytesIO()
         tts.write_to_fp(audio_bytes)
         audio_bytes.seek(0)
-
         st.audio(audio_bytes, format="audio/mp3")
         status = "🐢 Đang đọc chậm..." if speed_slow else "🐇 Đang đọc tốc độ thường..."
         st.caption(f"🔊 {status}")
     except Exception:
-        # Không chặn app nếu TTS lỗi
         pass
 
 
 def generate_image_url(prompt: str) -> str:
-    """Tạo URL ảnh từ Pollinations dựa trên prompt tiếng Anh."""
     clean_prompt = prompt.replace(" ", "%20")
     return f"https://image.pollinations.ai/prompt/{clean_prompt}?nologo=true&model=turbo"
 
 
 @st.cache_resource(show_spinner=False)
 def get_available_models(api_key: str):
-    """Lấy danh sách model khả dụng, ưu tiên Flash/Pro."""
     try:
         genai.configure(api_key=api_key)
         models = list(genai.list_models())
-
         names = [
             m.name
             for m in models
             if "generateContent" in getattr(m, "supported_generation_methods", [])
         ]
-
-        # Ưu tiên: 1.5 / 2.0 Flash & Pro
         candidates = [
             n
             for n in names
             if "gemini" in n
-            and ("1.5" in n or "2.0" in n or "2.5" in n or "pro" in n or "flash" in n)
+            and (
+                "1.5" in n
+                or "2.0" in n
+                or "2.5" in n
+                or "pro" in n
+                or "flash" in n
+            )
         ]
-
         if not candidates:
             candidates = names or ["gemini-1.5-flash"]
 
-        # Sắp xếp: Flash trước, Pro sau, 2.5 > 2.0 > 1.5
         def sort_key(x: str):
             return (
                 "flash" not in x.lower(),
@@ -163,13 +155,12 @@ def get_available_models(api_key: str):
 
 
 def get_model(model_name: str):
-    """Tạo GenerativeModel đã cấu hình sẵn API key (genai.configure gọi trước)."""
     return genai.GenerativeModel(model_name)
 
 
-# =============================================================================
-# 2. SIDEBAR (THANH BÊN TRÁI)
-# =============================================================================
+# -------------------------------------------------------------------
+# SIDEBAR
+# -------------------------------------------------------------------
 
 with st.sidebar:
     st.image(
@@ -180,15 +171,15 @@ with st.sidebar:
     st.caption("Developed by Mr. Học")
     st.divider()
 
-    # --- NHẬP KEY ---
+    # KEY
     st.subheader("🔑 Tài khoản & Cấu hình")
     key_option = st.radio(
         "Chế độ:",
         ["🚀 Dùng Miễn Phí", "💎 Nhập Key Của Bạn"],
         label_visibility="collapsed",
     )
-    final_key = None
 
+    final_key = None
     if key_option == "🚀 Dùng Miễn Phí":
         try:
             final_key = st.secrets["GOOGLE_API_KEY"]
@@ -204,8 +195,6 @@ with st.sidebar:
         if final_key:
             st.success("✅ Đã nhận Key cá nhân")
 
-    # --- CHỌN MODEL ---
-    global current_model_name  # dùng biến toàn cục
     if final_key:
         available_models = get_available_models(final_key)
         selected_model_display = st.selectbox(
@@ -218,11 +207,11 @@ with st.sidebar:
 
     st.divider()
 
-    # --- MENU CÔNG CỤ THAM KHẢO ---
-     st.subheader("🔥 Công Cụ Mở Rộng")
+    # CÔNG CỤ MỞ RỘNG
+    st.subheader("🔥 Công Cụ Mở Rộng")
     st.link_button(
         "🤖 Trợ Lý AI ChatGPT",
-        "https://chatgpt.com/g/g-69004bb8428481918ecf4ade89a9216c-rin-ai-center-trung-tam-tro-ly-ai"
+        "https://chatgpt.com/g/g-69004bb8428481918ecf4ade89a9216c-rin-ai-center-trung-tam-tro-ly-ai",
     )
     with st.expander("🌐 Google AI Tools (Full)"):
         st.link_button("💎 Gemini Chat", "https://gemini.google.com/")
@@ -247,12 +236,13 @@ with st.sidebar:
 
     st.divider()
 
-    # --- UPLOAD FILE ---
-    st.subheader("📎 Đính Kèm Tài Liệu")
+    # FILE UPLOAD TOÀN PHIÊN
+    st.subheader("📎 Đính Kèm Tài Liệu (Toàn phiên)")
     uploaded_file = st.file_uploader(
         "Chọn file:",
         type=["png", "jpg", "jpeg", "pdf", "txt", "csv", "xlsx", "docx"],
         label_visibility="collapsed",
+        key="sidebar_uploader",
     )
     file_content = None
     if uploaded_file:
@@ -261,7 +251,7 @@ with st.sidebar:
 
     st.divider()
 
-    # --- MENU CHÍNH ---
+    # MENU CHUYÊN GIA
     st.subheader("📂 Chọn Chuyên Gia")
     menu = st.selectbox(
         "Lĩnh vực hỗ trợ:",
@@ -293,20 +283,18 @@ with st.sidebar:
         ],
     )
 
-# =============================================================================
-# 3. LOGIC CHÍNH (MAIN APP)
-# =============================================================================
+# -------------------------------------------------------------------
+# MAIN
+# -------------------------------------------------------------------
 
-# Nếu chưa có key và không phải trang giới thiệu => yêu cầu nhập
 if not final_key and menu != "🏠 Trang Chủ & Giới Thiệu":
     st.warning("👋 Vui lòng nhập Google API Key bên tay trái để bắt đầu.")
     st.stop()
 
-# Cấu hình Gemini (1 lần)
 if final_key:
     genai.configure(api_key=final_key)
 
-# --- TRANG CHỦ ---
+# TRANG CHỦ
 if menu == "🏠 Trang Chủ & Giới Thiệu":
     st.title("💎 Hệ Sinh Thái AI Thực Chiến - Rin.Ai")
     st.markdown("---")
@@ -332,7 +320,7 @@ if menu == "🏠 Trang Chủ & Giới Thiệu":
             "https://cdn.dribbble.com/users/527451/screenshots/14972580/media/7f4288f6c3eb988a2879a953e5b12854.jpg"
         )
 
-# --- MODULE: ĐỌC TIN & TÓM TẮT SÁCH ---
+# ĐỌC BÁO & TÓM TẮT SÁCH
 elif menu == "📰 Đọc Báo & Tóm Tắt Sách":
     st.header("📰 Chuyên Gia Tri Thức & Tin Tức")
     today_str = datetime.now().strftime("%d/%m/%Y")
@@ -350,11 +338,20 @@ elif menu == "📰 Đọc Báo & Tóm Tắt Sách":
                 with st.spinner(f"Đang phân tích bằng model {current_model_name}..."):
                     try:
                         model = get_model(current_model_name)
-                        prompt = (
-                            f"Hãy tóm tắt các tin tức mới nhất (nếu có thể) về chủ đề: {topic} "
-                            f"tính đến ngày {today_str}. "
-                            "Trình bày ngắn gọn, có bullet, và nếu có thể hãy gợi ý các từ khoá để người dùng tự tra cứu thêm."
-                        )
+                        prompt = f"""
+Bạn là một trợ lý tin tức thân thiện, nói tiếng Việt, giao tiếp như một người thật.
+
+NHIỆM VỤ:
+- Giải thích, tóm tắt thông tin liên quan đến chủ đề: "{topic}".
+- Nếu không có dữ liệu thời gian thực, hãy nói rõ hạn chế và phân tích theo bối cảnh chung.
+
+YÊU CẦU:
+- Trình bày bằng Markdown, có tiêu đề phụ và bullet.
+- Không bịa tin tức cụ thể hoặc số liệu nếu không chắc chắn.
+- Cuối cùng, nêu 3–5 ý chính mà người đọc cần nắm.
+
+Ngày tham chiếu: {today_str}.
+"""
                         res = model.generate_content(prompt)
                         text = res.text
                         st.success("✅ Kết quả tổng hợp:")
@@ -390,7 +387,7 @@ elif menu == "📰 Đọc Báo & Tóm Tắt Sách":
                 except Exception as e:
                     st.error(f"Lỗi: {e}")
 
-# --- MODULE: MEDIA (ẢNH / VIDEO PROMPT / VOICE) ---
+# MEDIA
 elif menu == "🎨 Thiết Kế & Media (Ảnh/Video/Voice)":
     st.header("🎨 Studio Đa Phương Tiện – Rin.Ai")
     mode = st.radio(
@@ -399,7 +396,6 @@ elif menu == "🎨 Thiết Kế & Media (Ảnh/Video/Voice)":
         horizontal=True,
     )
 
-    # ẢNH
     if mode == "🖼️ Tạo Ảnh":
         desc = st.text_area("Nhập mô tả HÌNH ẢNH (tiếng Việt):")
         if st.button("🎨 Vẽ Ngay") and desc:
@@ -414,7 +410,6 @@ elif menu == "🎨 Thiết Kế & Media (Ảnh/Video/Voice)":
                 except Exception as e:
                     st.error(f"Lỗi tạo ảnh: {e}")
 
-    # VIDEO PROMPT
     elif mode == "🎬 Tạo Prompt Video":
         idea = st.text_area("Ý tưởng video (tiếng Việt):")
         if st.button("🎥 Viết Prompt") and idea:
@@ -429,23 +424,20 @@ elif menu == "🎨 Thiết Kế & Media (Ảnh/Video/Voice)":
                 except Exception as e:
                     st.error(f"Lỗi: {e}")
 
-    # VOICE
     elif mode == "🎙️ Voice AI":
         c1, c2 = st.columns(2)
         is_slow = c1.checkbox("🐢 Đọc chậm", value=False)
         tone = c2.selectbox("Giọng đọc:", ["Truyền cảm", "Vui vẻ", "Nghiêm túc"])
         txt = st.text_area("Nhập nội dung muốn đọc:")
-
         if st.button("🎙️ Đọc") and txt:
             st.info(f"Giọng: {tone}")
             play_text_to_speech(txt, is_slow)
 
-# --- MODULE: CÁC CHUYÊN GIA THEO NGÀNH ---
+# CÁC CHUYÊN GIA THEO NGÀNH
 else:
     st.header(menu)
     expert_instruction = get_expert_prompt(menu)
 
-    # Bổ sung cấu hình riêng cho Giáo dục
     system_append = ""
     if menu == "🎓 Giáo Dục & Đào Tạo":
         c1, c2 = st.columns(2)
@@ -453,24 +445,26 @@ else:
             "Bộ sách:",
             ["Cánh Diều", "Kết Nối Tri Thức", "Chân Trời Sáng Tạo"],
         )
-        role = c2.radio("Vai trò:", ["Học sinh", "Giáo viên", "Phụ huynh"], horizontal=True)
+        role = c2.radio(
+            "Vai trò:",
+            ["Học sinh", "Giáo viên", "Phụ huynh"],
+            horizontal=True,
+        )
         system_append = f"\n(Bộ sách: {sach}, Đối tượng: {role})."
-        
-# --- ĐÍNH KÈM FILE NGAY TRONG KHU CHAT ---
+
+    # Uploader trong khu chat
     st.markdown("**📎 Đính kèm tài liệu cho câu hỏi này (tùy chọn):**")
     chat_uploaded_file = st.file_uploader(
         "Chọn file cho câu hỏi (ảnh/PDF/Word/Excel...):",
         type=["png", "jpg", "jpeg", "pdf", "txt", "csv", "xlsx", "docx"],
         label_visibility="collapsed",
-        key=f"chat_uploader_{menu}"
+        key=f"chat_uploader_{menu}",
     )
-
     chat_file_content = None
     if chat_uploaded_file is not None:
         chat_file_content = process_uploaded_file(chat_uploaded_file)
 
-
-    # Khởi tạo lịch sử chat
+    # Lịch sử chat
     if "history" not in st.session_state:
         st.session_state.history = {}
 
@@ -482,7 +476,6 @@ else:
             }
         ]
 
-    # Hiển thị lịch sử
     for msg in st.session_state.history[menu]:
         if msg["role"] == "user":
             with st.chat_message("user"):
@@ -498,19 +491,19 @@ else:
                 with st.chat_message("assistant"):
                     st.markdown(clean_show)
 
-        # Ô nhập chat
+    # Ô nhập chat
     user_prompt = st.chat_input("Gửi yêu cầu...")
 
     if user_prompt:
-        # ƯU TIÊN file đính kèm ngay trong khu chat; nếu không có thì dùng file ở sidebar
-        used_file_content = chat_file_content if chat_file_content is not None else file_content
+        used_file_content = (
+            chat_file_content if chat_file_content is not None else file_content
+        )
         used_file_name = None
         if chat_uploaded_file is not None:
             used_file_name = chat_uploaded_file.name
         elif uploaded_file is not None and file_content is not None:
             used_file_name = uploaded_file.name
 
-        # Hiển thị tin nhắn của user
         with st.chat_message("user"):
             st.markdown(user_prompt)
             if used_file_name:
@@ -520,19 +513,15 @@ else:
             {"role": "user", "content": user_prompt}
         )
 
-        # Gọi Gemini
         with st.chat_message("assistant"):
             with st.spinner(f"Chuyên gia ({current_model_name}) đang phân tích..."):
                 try:
                     final_prompt = user_prompt + system_append
 
-                    # Chuẩn bị payload gửi cho model
                     if used_file_content is not None:
                         if isinstance(used_file_content, Image.Image):
-                            # Multimodal: text + image
                             message_payload = [final_prompt, used_file_content]
                         else:
-                            # Text + nội dung file dạng text
                             final_prompt += (
                                 "\n\n=== FILE DATA ===\n"
                                 f"{used_file_content}\n"
@@ -550,7 +539,6 @@ else:
                     response = chat.send_message(message_payload)
                     full_txt = response.text
 
-                    # Bóc prompt 2D/3D (nếu có)
                     p2d = re.search(
                         r"###PROMPT_2D###(.*?)###END_PROMPT###",
                         full_txt,
@@ -570,7 +558,6 @@ else:
 
                     st.markdown(txt_show.strip())
 
-                    # Nếu có prompt vẽ, hiển thị thêm ảnh minh hoạ
                     if p2d or p3d:
                         st.divider()
                         col_a, col_b = st.columns(2)
@@ -594,14 +581,13 @@ else:
                     st.session_state.history[menu].append(
                         {"role": "assistant", "content": full_txt}
                     )
-
-                    # Giới hạn lịch sử để nhẹ RAM
                     if len(st.session_state.history[menu]) > 40:
-                        st.session_state.history[menu] = st.session_state.history[menu][-40:]
+                        st.session_state.history[menu] = st.session_state.history[
+                            menu
+                        ][-40:]
 
                 except Exception as e:
                     st.error(f"Lỗi: {e}")
                     st.warning(
                         "⚠️ Nếu gặp lỗi, hãy thử đổi sang model 'gemini-1.5-flash' ở thanh bên trái."
                     )
-
