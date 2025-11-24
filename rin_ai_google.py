@@ -12,9 +12,9 @@ from PIL import Image
 
 from prompts import get_expert_prompt
 
-# -------------------------------------------------------------------
+# -------------------------------------------------------------
 # CẤU HÌNH CHUNG
-# -------------------------------------------------------------------
+# -------------------------------------------------------------
 
 st.set_page_config(
     page_title="Rin.Ai - Siêu Trợ Lý AI",
@@ -25,9 +25,9 @@ st.set_page_config(
 current_model_name = "gemini-1.5-flash"
 
 
-# -------------------------------------------------------------------
+# -------------------------------------------------------------
 # HÀM HỖ TRỢ
-# -------------------------------------------------------------------
+# -------------------------------------------------------------
 
 def process_uploaded_file(uploaded_file):
     if uploaded_file is None:
@@ -36,11 +36,9 @@ def process_uploaded_file(uploaded_file):
         file_type = uploaded_file.type or ""
         file_name = uploaded_file.name.lower()
 
-        # Ảnh
         if file_type.startswith("image"):
             return Image.open(uploaded_file)
 
-        # PDF
         if file_type == "application/pdf" or file_name.endswith(".pdf"):
             pdf_reader = PyPDF2.PdfReader(uploaded_file)
             text = ""
@@ -48,7 +46,6 @@ def process_uploaded_file(uploaded_file):
                 text += page.extract_text() or ""
             return text
 
-        # CSV / Excel
         if (
             "excel" in file_type
             or "spreadsheet" in file_type
@@ -61,13 +58,11 @@ def process_uploaded_file(uploaded_file):
                 df = pd.read_excel(uploaded_file)
             return df.to_string(index=False)
 
-        # Word
         if file_name.endswith(".docx"):
             d = docx.Document(uploaded_file)
             text = "\n".join(p.text for p in d.paragraphs)
             return text
 
-        # Text thuần
         raw = uploaded_file.getvalue()
         try:
             return raw.decode("utf-8")
@@ -158,9 +153,9 @@ def get_model(model_name: str):
     return genai.GenerativeModel(model_name)
 
 
-# -------------------------------------------------------------------
+# -------------------------------------------------------------
 # SIDEBAR
-# -------------------------------------------------------------------
+# -------------------------------------------------------------
 
 with st.sidebar:
     st.image(
@@ -171,7 +166,6 @@ with st.sidebar:
     st.caption("Developed by Mr. Học")
     st.divider()
 
-    # KEY
     st.subheader("🔑 Tài khoản & Cấu hình")
     key_option = st.radio(
         "Chế độ:",
@@ -207,7 +201,6 @@ with st.sidebar:
 
     st.divider()
 
-    # CÔNG CỤ MỞ RỘNG
     st.subheader("🔥 Công Cụ Mở Rộng")
     st.link_button(
         "🤖 Trợ Lý AI ChatGPT",
@@ -236,7 +229,6 @@ with st.sidebar:
 
     st.divider()
 
-    # FILE UPLOAD TOÀN PHIÊN
     st.subheader("📎 Đính Kèm Tài Liệu (Toàn phiên)")
     uploaded_file = st.file_uploader(
         "Chọn file:",
@@ -251,7 +243,6 @@ with st.sidebar:
 
     st.divider()
 
-    # MENU CHUYÊN GIA
     st.subheader("📂 Chọn Chuyên Gia")
     menu = st.selectbox(
         "Lĩnh vực hỗ trợ:",
@@ -277,3 +268,322 @@ with st.sidebar:
             "🧠 Tâm Lý - Cảm Xúc - Tinh Thần",
             "🍽️ Nhà Hàng - F&B - Ẩm Thực",
             "📦 Logistic - Vận Hành - Kho Bãi",
+            "📊 Kế Toán - Báo Cáo - Số Liệu",
+            "🎤 Sự Kiện - MC - Hội Nghị",
+            "🏠 Bất Động Sản & Xe Sang",
+        ],
+    )
+
+# -------------------------------------------------------------
+# MAIN
+# -------------------------------------------------------------
+
+if not final_key and menu != "🏠 Trang Chủ & Giới Thiệu":
+    st.warning("👋 Vui lòng nhập Google API Key bên tay trái để bắt đầu.")
+    st.stop()
+
+if final_key:
+    genai.configure(api_key=final_key)
+
+# TRANG CHỦ
+if menu == "🏠 Trang Chủ & Giới Thiệu":
+    st.title("💎 Hệ Sinh Thái AI Thực Chiến - Rin.Ai")
+    st.markdown("---")
+    col1, col2 = st.columns([2, 1])
+    with col1:
+        st.markdown(
+            """
+        ### 👋 Chào mừng đến với Rin.Ai PRO
+        **Sản phẩm tâm huyết được phát triển bởi: _Mr. Học_**
+
+        Rin.Ai là "Super App" tích hợp sức mạnh Google AI để:
+        - Hỗ trợ công việc văn phòng, kinh doanh, marketing
+        - Giúp học tập, nghiên cứu, luyện thi
+        - Tự động hoá trên nền tảng Google (Docs, Sheets, Slides...)
+        """
+        )
+        st.link_button(
+            "👉 Chat Zalo với Mr. Học",
+            "https://zalo.me/0901108788",
+        )
+    with col2:
+        st.image(
+            "https://cdn.dribbble.com/users/527451/screenshots/14972580/media/7f4288f6c3eb988a2879a953e5b12854.jpg"
+        )
+
+# ĐỌC BÁO & TÓM TẮT SÁCH
+elif menu == "📰 Đọc Báo & Tóm Tắt Sách":
+    st.header("📰 Chuyên Gia Tri Thức & Tin Tức")
+    today_str = datetime.now().strftime("%d/%m/%Y")
+    expert_instruction = get_expert_prompt(menu)
+
+    task = st.radio(
+        "Chế độ:",
+        ["🔎 Tin Tức Thời Sự", "📚 Tóm tắt Sách/Tài liệu"],
+        horizontal=True,
+    )
+
+    if task == "🔎 Tin Tức Thời Sự":
+        topic = st.text_input(f"Nhập chủ đề tin tức ({today_str}):")
+        if st.button("🔎 Phân tích tin tức"):
+            if topic:
+                with st.spinner(f"Đang phân tích bằng model {current_model_name}..."):
+                    try:
+                        model = genai.GenerativeModel(
+                            current_model_name,
+                            system_instruction=expert_instruction,
+                        )
+                        prompt = f"""
+Người dùng muốn xem tin tức liên quan đến chủ đề: "{topic}" (ngày {today_str} tại Việt Nam nếu không nói quốc gia).
+
+NHIỆM VỤ:
+- Tóm tắt bức tranh chung về chủ đề trên.
+- Nếu không có truy cập thời gian thực, hãy nói rõ hạn chế và phân tích theo bối cảnh thường gặp.
+- Trình bày 3–5 ý chính, dễ hiểu cho người Việt.
+"""
+                        res = model.generate_content(prompt)
+                        text = res.text
+                        st.success("✅ Kết quả tổng hợp:")
+                        st.markdown(text)
+                        play_text_to_speech(text)
+                    except Exception as e:
+                        st.error(f"Lỗi Model {current_model_name}: {e}")
+                        st.info(
+                            "💡 Hãy thử đổi sang model 'gemini-1.5-flash' ở thanh bên trái."
+                        )
+    else:
+        st.subheader("📚 Tóm tắt tài liệu / sách")
+        txt_input = st.text_area("Dán nội dung, hoặc chỉ cần upload file ở thanh bên trái:")
+        content = file_content if file_content is not None else txt_input
+
+        if st.button("📚 Tóm tắt") and content:
+            with st.spinner(f"Đang tóm tắt bằng model {current_model_name}..."):
+                try:
+                    model = genai.GenerativeModel(
+                        current_model_name,
+                        system_instruction=expert_instruction,
+                    )
+                    if isinstance(content, Image.Image):
+                        req = [
+                            "Tóm tắt nội dung chính trong hình sau (nếu là trang sách/tài liệu):",
+                            content,
+                        ]
+                    else:
+                        req = [
+                            f"Hãy tóm tắt nội dung sau thành 5–7 ý chính, dễ hiểu cho người Việt:\n\n{content}"
+                        ]
+                    res = model.generate_content(req)
+                    text = res.text
+                    st.markdown(text)
+                    play_text_to_speech(text)
+                except Exception as e:
+                    st.error(f"Lỗi: {e}")
+
+# MEDIA
+elif menu == "🎨 Thiết Kế & Media (Ảnh/Video/Voice)":
+    st.header("🎨 Studio Đa Phương Tiện – Rin.Ai")
+    expert_instruction = get_expert_prompt(menu)
+    mode = st.radio(
+        "Công cụ:",
+        ["🖼️ Tạo Ảnh", "🎬 Tạo Prompt Video", "🎙️ Voice AI"],
+        horizontal=True,
+    )
+
+    if mode == "🖼️ Tạo Ảnh":
+        desc = st.text_area("Nhập mô tả HÌNH ẢNH (tiếng Việt):")
+        if st.button("🎨 Vẽ Ngay") and desc:
+            with st.spinner("Đang chuyển prompt sang tiếng Anh & tạo ảnh..."):
+                try:
+                    model = genai.GenerativeModel(
+                        current_model_name,
+                        system_instruction=expert_instruction,
+                    )
+                    p_en = model.generate_content(
+                        f"Translate this image prompt to natural English, concise but detailed, suitable for text-to-image models: {desc}"
+                    ).text
+                    img_url = generate_image_url(p_en)
+                    st.image(img_url, caption="Ảnh AI tạo bởi Rin.Ai (Pollinations)")
+                except Exception as e:
+                    st.error(f"Lỗi tạo ảnh: {e}")
+
+    elif mode == "🎬 Tạo Prompt Video":
+        idea = st.text_area("Ý tưởng video (tiếng Việt):")
+        if st.button("🎥 Viết Prompt") and idea:
+            with st.spinner("Đang viết Video Prompt tiếng Anh..."):
+                try:
+                    model = genai.GenerativeModel(
+                        current_model_name,
+                        system_instruction=expert_instruction,
+                    )
+                    prompt_en = model.generate_content(
+                        f"Create a professional English video prompt for Veo/Sora/Runway based on this Vietnamese idea: {idea} "
+                        "Focus on camera movement, scene, lighting, mood, and style. Output only the final English prompt."
+                    ).text
+                    st.code(prompt_en, language="markdown")
+                except Exception as e:
+                    st.error(f"Lỗi: {e}")
+
+    elif mode == "🎙️ Voice AI":
+        c1, c2 = st.columns(2)
+        is_slow = c1.checkbox("🐢 Đọc chậm", value=False)
+        tone = c2.selectbox("Giọng đọc:", ["Truyền cảm", "Vui vẻ", "Nghiêm túc"])
+        txt = st.text_area("Nhập nội dung muốn đọc:")
+        if st.button("🎙️ Đọc") and txt:
+            st.info(f"Giọng: {tone}")
+            play_text_to_speech(txt, is_slow)
+
+# CÁC CHUYÊN GIA THEO NGÀNH
+else:
+    st.header(menu)
+    expert_instruction = get_expert_prompt(menu)
+
+    system_append = ""
+    if menu == "🎓 Giáo Dục & Đào Tạo":
+        c1, c2 = st.columns(2)
+        sach = c1.selectbox(
+            "Bộ sách:",
+            ["Cánh Diều", "Kết Nối Tri Thức", "Chân Trời Sáng Tạo"],
+        )
+        role = c2.radio(
+            "Vai trò:",
+            ["Học sinh", "Giáo viên", "Phụ huynh"],
+            horizontal=True,
+        )
+        system_append = f"\n(Bộ sách: {sach}, Đối tượng: {role})."
+
+    st.markdown("**📎 Đính kèm tài liệu cho câu hỏi này (tùy chọn):**")
+    chat_uploaded_file = st.file_uploader(
+        "Chọn file cho câu hỏi (ảnh/PDF/Word/Excel...):",
+        type=["png", "jpg", "jpeg", "pdf", "txt", "csv", "xlsx", "docx"],
+        label_visibility="collapsed",
+        key=f"chat_uploader_{menu}",
+    )
+    chat_file_content = None
+    if chat_uploaded_file is not None:
+        chat_file_content = process_uploaded_file(chat_uploaded_file)
+
+    if "history" not in st.session_state:
+        st.session_state.history = {}
+
+    if menu not in st.session_state.history:
+        st.session_state.history[menu] = [
+            {
+                "role": "assistant",
+                "content": f"Xin chào! Tôi là chuyên gia trong lĩnh vực **{menu}**. Bạn cần hỗ trợ điều gì?",
+            }
+        ]
+
+    for msg in st.session_state.history[menu]:
+        if msg["role"] == "user":
+            with st.chat_message("user"):
+                st.markdown(msg["content"])
+        else:
+            clean_show = re.sub(
+                r"###PROMPT_[23]D###.*?###END_PROMPT###",
+                "",
+                msg["content"],
+                flags=re.DOTALL,
+            )
+            if clean_show.strip():
+                with st.chat_message("assistant"):
+                    st.markdown(clean_show)
+
+    user_prompt = st.chat_input("Gửi yêu cầu...")
+
+    if user_prompt:
+        used_file_content = (
+            chat_file_content if chat_file_content is not None else file_content
+        )
+        used_file_name = None
+        if chat_uploaded_file is not None:
+            used_file_name = chat_uploaded_file.name
+        elif uploaded_file is not None and file_content is not None:
+            used_file_name = uploaded_file.name
+
+        with st.chat_message("user"):
+            st.markdown(user_prompt)
+            if used_file_name:
+                st.caption(f"📎 Đính kèm: {used_file_name}")
+
+        st.session_state.history[menu].append(
+            {"role": "user", "content": user_prompt}
+        )
+
+        with st.chat_message("assistant"):
+            with st.spinner(f"Chuyên gia ({current_model_name}) đang phân tích..."):
+                try:
+                    final_prompt = user_prompt + system_append
+
+                    if used_file_content is not None:
+                        if isinstance(used_file_content, Image.Image):
+                            message_payload = [final_prompt, used_file_content]
+                        else:
+                            final_prompt += (
+                                "\n\n=== FILE DATA ===\n"
+                                f"{used_file_content}\n"
+                                "================="
+                            )
+                            message_payload = [final_prompt]
+                    else:
+                        message_payload = [final_prompt]
+
+                    model = get_model(current_model_name)
+                    chat = model.start_chat(
+                        system_instruction=expert_instruction,
+                        history=[],
+                    )
+                    response = chat.send_message(message_payload)
+                    full_txt = response.text
+
+                    p2d = re.search(
+                        r"###PROMPT_2D###(.*?)###END_PROMPT###",
+                        full_txt,
+                        re.DOTALL,
+                    )
+                    p3d = re.search(
+                        r"###PROMPT_3D###(.*?)###END_PROMPT###",
+                        full_txt,
+                        re.DOTALL,
+                    )
+                    txt_show = re.sub(
+                        r"###PROMPT_[23]D###.*?###END_PROMPT###",
+                        "",
+                        full_txt,
+                        flags=re.DOTALL,
+                    )
+
+                    st.markdown(txt_show.strip())
+
+                    if p2d or p3d:
+                        st.divider()
+                        col_a, col_b = st.columns(2)
+                        if p2d:
+                            with col_a:
+                                st.image(
+                                    generate_image_url(
+                                        "Blueprint floor plan. " + p2d.group(1)
+                                    ),
+                                    caption="Bản vẽ 2D (demo AI)",
+                                )
+                        if p3d:
+                            with col_b:
+                                st.image(
+                                    generate_image_url(
+                                        "Architecture render 8k. " + p3d.group(1)
+                                    ),
+                                    caption="Phối cảnh 3D (demo AI)",
+                                )
+
+                    st.session_state.history[menu].append(
+                        {"role": "assistant", "content": full_txt}
+                    )
+                    if len(st.session_state.history[menu]) > 40:
+                        st.session_state.history[menu] = st.session_state.history[
+                            menu
+                        ][-40:]
+
+                except Exception as e:
+                    st.error(f"Lỗi: {e}")
+                    st.warning(
+                        "⚠️ Nếu gặp lỗi, hãy thử đổi sang model 'gemini-1.5-flash' ở thanh bên trái."
+                    )
