@@ -377,7 +377,7 @@ Nếu bạn là **cá nhân, doanh nghiệp, trung tâm đào tạo hoặc tổ 
 
 - 👤 **Mr. Học – Founder Rin.Ai**
 - 📱 **Điện thoại/Zalo:** **0901108788**
-- 📧 **Email:** _nhap_email_cua_ban_tai_day_
+- 📧 **Email:** nguyenhoc1010@gmail.com
 
 ✨ Rin.Ai mong muốn đồng hành cùng bạn trong hành trình **ứng dụng AI thực chiến**, làm việc **nhanh hơn – thông minh hơn – hiệu quả hơn** mỗi ngày.
 
