@@ -21,9 +21,17 @@ st.set_page_config(
     page_icon="💎",
     layout="wide",
 )
-
+# --- ẨN THANH MENU VÀ ICON GITHUB (BẢO MẬT) ---
+hide_streamlit_style = """
+            <style>
+            #MainMenu {visibility: hidden;}
+            footer {visibility: hidden;}
+            header {visibility: hidden;}
+            .stDeployButton {display:none;}
+            </style>
+            """
+st.markdown(hide_streamlit_style, unsafe_allow_html=True)
 current_model_name = "gemini-1.5-flash"
-
 
 # -------------------------------------------------------------
 # HÀM HỖ TRỢ
