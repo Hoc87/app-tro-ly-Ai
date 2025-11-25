@@ -425,26 +425,35 @@ elif menu == "📰 Đọc Báo & Tóm Tắt Sách":
                 st.warning("❗ Vui lòng nhập chủ đề trước khi phân tích.")
             else:
                 with st.spinner(
-                    f"Đang phân tích chủ đề “{topic}” với {current_model_name}..."
+                    f"Đang dùng {current_model_name} + Google Search để phân tích chủ đề “{topic}”..."
                 ):
                     try:
+                        # Bật công cụ google_search cho model (SDK google-generativeai 0.8.x)
+                        tools = [{"google_search": {}}]
+
                         model = genai.GenerativeModel(
                             current_model_name,
                             system_instruction=expert_instruction,
+                            tools=tools,
                         )
 
                         prompt_text = (
                             "Chế độ: TIN TỨC THỜI SỰ.\n"
                             f"Chủ đề: {topic}\n"
-                            f"Ngày tham chiếu: {today_str}.\n"
-                            "Hãy áp dụng đúng vai trò, nhiệm vụ, quy trình và nguyên tắc mà bạn đã được cấu hình "
-                            "trong system_instruction: tổng hợp bức tranh chính, phân tích tác động và đưa phần nguồn tham khảo (nếu có)."
+                            f"Ngày tham chiếu (hiện tại): {today_str}.\n"
+                            "Hãy sử dụng công cụ google_search nếu có thể để lấy **tin tức MỚI NHẤT**, "
+                            "từ ÍT NHẤT 3–5 trang báo/nguồn uy tín.\n"
+                            "Trình bày đúng quy trình bạn đã được cấu hình trong system_instruction: "
+                            "PHẦN 1 – Tóm tắt nhanh (có ghi Nguồn + URL), "
+                            "PHẦN 2 – Phân tích & đánh giá, "
+                            "PHẦN 3 – Danh sách nguồn tham khảo (Tên báo – tiêu đề rút gọn – URL).\n"
+                            "Nếu vì bất kỳ lý do gì không dùng được google_search, phải nói rõ và KHÔNG bịa link."
                         )
 
                         response = model.generate_content(prompt_text)
                         res_text = response.text
 
-                        st.success("✅ Kết quả tổng hợp & phân tích:")
+                        st.success("✅ Kết quả tổng hợp & phân tích (kèm link nếu có):")
                         st.markdown(res_text)
                         play_text_to_speech(res_text)
 
@@ -494,211 +503,4 @@ elif menu == "📰 Đọc Báo & Tóm Tắt Sách":
                 except Exception as e:
                     st.error(f"❌ Lỗi khi tóm tắt tài liệu: {e}")
 
-
-# MEDIA
-elif menu == "🎨 Thiết Kế & Media (Ảnh/Video/Voice)":
-    st.header("🎨 Studio Đa Phương Tiện – Rin.Ai")
-    expert_instruction = get_expert_prompt(menu)
-    mode = st.radio(
-        "Công cụ:",
-        ["🖼️ Tạo Ảnh", "🎬 Tạo Prompt Video", "🎙️ Voice AI"],
-        horizontal=True,
-    )
-
-    if mode == "🖼️ Tạo Ảnh":
-        desc = st.text_area("Nhập mô tả HÌNH ẢNH (tiếng Việt):")
-        if st.button("🎨 Vẽ Ngay") and desc:
-            with st.spinner("Đang chuyển prompt sang tiếng Anh & tạo ảnh..."):
-                try:
-                    model = genai.GenerativeModel(
-                        current_model_name,
-                        system_instruction=expert_instruction,
-                    )
-                    p_en = model.generate_content(
-                        f"Translate this image prompt to natural English, concise but detailed, suitable for text-to-image models: {desc}"
-                    ).text
-                    img_url = generate_image_url(p_en)
-                    st.image(img_url, caption="Ảnh AI tạo bởi Rin.Ai (Pollinations)")
-                except Exception as e:
-                    st.error(f"Lỗi tạo ảnh: {e}")
-
-    elif mode == "🎬 Tạo Prompt Video":
-        idea = st.text_area("Ý tưởng video (tiếng Việt):")
-        if st.button("🎥 Viết Prompt") and idea:
-            with st.spinner("Đang viết Video Prompt tiếng Anh..."):
-                try:
-                    model = genai.GenerativeModel(
-                        current_model_name,
-                        system_instruction=expert_instruction,
-                    )
-                    prompt_en = model.generate_content(
-                        f"Create a professional English video prompt for Veo/Sora/Runway based on this Vietnamese idea: {idea} "
-                        "Focus on camera movement, scene, lighting, mood, and style. Output only the final English prompt."
-                    ).text
-                    st.code(prompt_en, language="markdown")
-                except Exception as e:
-                    st.error(f"Lỗi: {e}")
-
-    elif mode == "🎙️ Voice AI":
-        c1, c2 = st.columns(2)
-        is_slow = c1.checkbox("🐢 Đọc chậm", value=False)
-        tone = c2.selectbox("Giọng đọc:", ["Truyền cảm", "Vui vẻ", "Nghiêm túc"])
-        txt = st.text_area("Nhập nội dung muốn đọc:")
-        if st.button("🎙️ Đọc") and txt:
-            st.info(f"Giọng: {tone}")
-            play_text_to_speech(txt, is_slow)
-
-# CÁC CHUYÊN GIA THEO NGÀNH
-else:
-    st.header(menu)
-    expert_instruction = get_expert_prompt(menu)
-
-    system_append = ""
-    if menu == "🎓 Giáo Dục & Đào Tạo":
-        c1, c2 = st.columns(2)
-        sach = c1.selectbox(
-            "Bộ sách:",
-            ["Cánh Diều", "Kết Nối Tri Thức", "Chân Trời Sáng Tạo"],
-        )
-        role = c2.radio(
-            "Vai trò:",
-            ["Học sinh", "Giáo viên", "Phụ huynh"],
-            horizontal=True,
-        )
-        system_append = f"\n(Bộ sách: {sach}, Đối tượng: {role})."
-
-    st.markdown("**📎 Đính kèm tài liệu cho câu hỏi này (tùy chọn):**")
-    chat_uploaded_file = st.file_uploader(
-        "Chọn file cho câu hỏi (ảnh/PDF/Word/Excel...):",
-        type=["png", "jpg", "jpeg", "pdf", "txt", "csv", "xlsx", "docx"],
-        label_visibility="collapsed",
-        key=f"chat_uploader_{menu}",
-    )
-    chat_file_content = None
-    if chat_uploaded_file is not None:
-        chat_file_content = process_uploaded_file(chat_uploaded_file)
-
-    if "history" not in st.session_state:
-        st.session_state.history = {}
-
-    if menu not in st.session_state.history:
-        st.session_state.history[menu] = [
-            {
-                "role": "assistant",
-                "content": f"Xin chào! Tôi là chuyên gia trong lĩnh vực **{menu}**. Bạn cần hỗ trợ điều gì?",
-            }
-        ]
-
-    for msg in st.session_state.history[menu]:
-        if msg["role"] == "user":
-            with st.chat_message("user"):
-                st.markdown(msg["content"])
-        else:
-            clean_show = re.sub(
-                r"###PROMPT_[23]D###.*?###END_PROMPT###",
-                "",
-                msg["content"],
-                flags=re.DOTALL,
-            )
-            if clean_show.strip():
-                with st.chat_message("assistant"):
-                    st.markdown(clean_show)
-
-    user_prompt = st.chat_input("Gửi yêu cầu...")
-
-    if user_prompt:
-        used_file_content = (
-            chat_file_content if chat_file_content is not None else file_content
-        )
-        used_file_name = None
-        if chat_uploaded_file is not None:
-            used_file_name = chat_uploaded_file.name
-        elif uploaded_file is not None and file_content is not None:
-            used_file_name = uploaded_file.name
-
-        with st.chat_message("user"):
-            st.markdown(user_prompt)
-            if used_file_name:
-                st.caption(f"📎 Đính kèm: {used_file_name}")
-
-        st.session_state.history[menu].append(
-            {"role": "user", "content": user_prompt}
-        )
-
-        with st.chat_message("assistant"):
-            with st.spinner(f"Chuyên gia ({current_model_name}) đang phân tích..."):
-                try:
-                    final_prompt = user_prompt + system_append
-
-                    if used_file_content is not None:
-                        if isinstance(used_file_content, Image.Image):
-                            message_payload = [final_prompt, used_file_content]
-                        else:
-                            final_prompt += (
-                                "\n\n=== FILE DATA ===\n"
-                                f"{used_file_content}\n"
-                                "================="
-                            )
-                            message_payload = [final_prompt]
-                    else:
-                        message_payload = [final_prompt]
-
-                    # DÙNG system_instruction ĐÚNG CÁCH
-                    model = genai.GenerativeModel(
-                        current_model_name,
-                        system_instruction=expert_instruction,
-                    )
-                    response = model.generate_content(message_payload)
-                    full_txt = response.text
-
-                    p2d = re.search(
-                        r"###PROMPT_2D###(.*?)###END_PROMPT###",
-                        full_txt,
-                        re.DOTALL,
-                    )
-                    p3d = re.search(
-                        r"###PROMPT_3D###(.*?)###END_PROMPT###",
-                        full_txt,
-                        re.DOTALL,
-                    )
-                    txt_show = re.sub(
-                        r"###PROMPT_[23]D###.*?###END_PROMPT###",
-                        "",
-                        full_txt,
-                        flags=re.DOTALL,
-                    )
-
-                    st.markdown(txt_show.strip())
-
-                    if p2d or p3d:
-                        st.divider()
-                        col_a, col_b = st.columns(2)
-                        if p2d:
-                            with col_a:
-                                st.image(
-                                    generate_image_url(
-                                        "Blueprint floor plan. " + p2d.group(1)
-                                    ),
-                                    caption="Bản vẽ 2D (demo AI)",
-                                )
-                        if p3d:
-                            with col_b:
-                                st.image(
-                                    generate_image_url(
-                                        "Architecture render 8k. " + p3d.group(1)
-                                    ),
-                                    caption="Phối cảnh 3D (demo AI)",
-                                )
-
-                    st.session_state.history[menu].append(
-                        {"role": "assistant", "content": full_txt}
-                    )
-                    if len(st.session_state.history[menu]) > 40:
-                        st.session_state.history[menu] = st.session_state.history[
-                            menu
-                        ][-40:]
-
-                except Exception as e:
-                    st.error(f"Lỗi: {e}")
-                    st.warning("⚠️ Nếu gặp lỗi, hãy thử đổi sang model 'gemini-1.5-flash' ở thanh bên trái.")
 
