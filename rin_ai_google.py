@@ -519,8 +519,7 @@ elif menu == "📰 Đọc Báo & Tóm Tắt Sách":
 
                         response = model.generate_content(user_query)
 
-                        )
-
+                        
                         res_text = response.text
                         st.success("✅ Kết quả tổng hợp & phân tích (kèm link nguồn):")
                         st.markdown(res_text)
