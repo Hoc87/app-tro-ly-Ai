@@ -328,26 +328,72 @@ if menu == "🏠 Trang Chủ & Giới Thiệu":
     st.title("💎 Hệ Sinh Thái AI Thực Chiến - Rin.Ai")
     st.markdown("---")
     col1, col2 = st.columns([2, 1])
-    with col1:
-        st.markdown(
-            """
-        ### 👋 Chào mừng đến với Rin.Ai PRO
-        **Sản phẩm tâm huyết được phát triển bởi: _Mr. Học_**
 
-        Rin.Ai là "Super App" tích hợp sức mạnh Google AI để:
-        - Hỗ trợ công việc văn phòng, kinh doanh, marketing
-        - Giúp học tập, nghiên cứu, luyện thi
-        - Tự động hoá trên nền tảng Google (Docs, Sheets, Slides...)
-        """
-        )
+    with col1:
+        st.markdown("""
+💎 **Rin.Ai – Hệ Sinh Thái AI Thực Chiến Cho Người Việt**
+
+👋 Chào mừng bạn đến với **Rin.Ai PRO**  
+Được nghiên cứu, xây dựng và liên tục nâng cấp bởi **Mr. Học** – người sáng lập hệ sinh thái **Rin.Ai**.
+
+Rin.Ai là một **"Super App" AI** tích hợp song song hai nền tảng:
+
+- 🤖 **Google AI Suite**: Gemini, AI Studio, NotebookLM, Imagen, Veo…
+- 🧠 **ChatGPT & hệ sinh thái OpenAI**
+
+🎯 Mục tiêu: mang sức mạnh của các mô hình AI hàng đầu thế giới vào **công việc, học tập và tự động hoá** hàng ngày của người Việt.
+
+---
+
+### 🚀 1. Cho công việc & kinh doanh
+
+- 🖥️ Hỗ trợ **văn phòng, báo cáo, Excel/Sheets, biểu mẫu, hợp đồng, slide thuyết trình**.
+- 📈 Đồng hành cùng **kinh doanh & marketing**: chân dung khách hàng, ý tưởng nội dung, kịch bản video, kịch bản bán hàng & chăm sóc khách hàng.
+- 📋 Đề xuất **checklist, quy trình, mẫu template** có thể áp dụng ngay vào thực tế.
+
+### 🎓 2. Cho học tập & phát triển bản thân
+
+- 📚 Giải thích kiến thức **từ phổ thông đến kỹ năng nghề** theo cách dễ hiểu, nhiều ví dụ.
+- 📄 Tóm tắt nhanh **sách, tài liệu, PDF, slide, ghi chú** thành các ý chính.
+- 📝 Hỗ trợ **luyện thi, ôn tập, làm bài tập**, gợi ý cách tự học thông minh hơn.
+
+### ⚙️ 3. Tự động hoá trên nền tảng Google
+
+- 🔧 Gợi ý **Apps Script, công thức, macro** cho Google Docs, Sheets, Slides, Gmail…
+- 🔁 Biến các thao tác lặp lại thành **quy trình tự động**, giảm lỗi thủ công.
+- 📊 Gợi ý cách **chuẩn hoá dữ liệu, dựng báo cáo, dashboard** phục vụ quyết định nhanh.
+
+---
+
+### 🤝 Hợp tác xây dựng Trợ lý AI riêng
+
+Nếu bạn là **cá nhân, doanh nghiệp, trung tâm đào tạo hoặc tổ chức** muốn xây dựng:
+
+- 🤖 **Trợ lý AI mang thương hiệu riêng**
+- 📂 Tích hợp **quy trình, dữ liệu, tài liệu nội bộ** của chính bạn
+- 🌐 Hoạt động trên nhiều kênh (web, mobile, chatbot, nội bộ doanh nghiệp)
+
+➡️ Hãy liên hệ trực tiếp để được tư vấn & thiết kế giải pháp:
+
+- 👤 **Mr. Học – Founder Rin.Ai**
+- 📱 **Điện thoại/Zalo:** **0901108788**
+- 📧 **Email:** _nhap_email_cua_ban_tai_day_
+
+✨ Rin.Ai mong muốn đồng hành cùng bạn trong hành trình **ứng dụng AI thực chiến**, làm việc **nhanh hơn – thông minh hơn – hiệu quả hơn** mỗi ngày.
+
+👉 **Tiếp theo:** hãy dùng **menu bên trái** để chọn **Chuyên gia AI** phù hợp với nhu cầu của bạn và bắt đầu trò chuyện ngay bây giờ.
+        """)
         st.link_button(
             "👉 Chat Zalo với Mr. Học",
             "https://zalo.me/0901108788",
         )
+
     with col2:
         st.image(
-            "https://cdn.dribbble.com/users/527451/screenshots/14972580/media/7f4288f6c3eb988a2879a953e5b12854.jpg"
+            "https://cdn.dribbble.com/users/527451/screenshots/14972580/media/7f4288f6c3eb988a2879a953e5b12854.jpg",
+            use_column_width=True,
         )
+
 
 # ĐỌC BÁO & TÓM TẮT SÁCH
 elif menu == "📰 Đọc Báo & Tóm Tắt Sách":
