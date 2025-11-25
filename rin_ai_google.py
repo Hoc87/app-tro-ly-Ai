@@ -425,35 +425,28 @@ elif menu == "📰 Đọc Báo & Tóm Tắt Sách":
                 st.warning("❗ Vui lòng nhập chủ đề trước khi phân tích.")
             else:
                 with st.spinner(
-                    f"Đang dùng {current_model_name} + Google Search để phân tích chủ đề “{topic}”..."
+                    f"Đang dùng {current_model_name} để phân tích chủ đề “{topic}”..."
                 ):
                     try:
-                        # Bật công cụ google_search cho model (SDK google-generativeai 0.8.x)
-                        tools = [{"google_search": {}}]
-
+                        # KHÔNG dùng tools google_search để tránh lỗi SDK cũ
                         model = genai.GenerativeModel(
                             current_model_name,
                             system_instruction=expert_instruction,
-                            tools=tools,
                         )
 
                         prompt_text = (
                             "Chế độ: TIN TỨC THỜI SỰ.\n"
                             f"Chủ đề: {topic}\n"
-                            f"Ngày tham chiếu (hiện tại): {today_str}.\n"
-                            "Hãy sử dụng công cụ google_search nếu có thể để lấy **tin tức MỚI NHẤT**, "
-                            "từ ÍT NHẤT 3–5 trang báo/nguồn uy tín.\n"
-                            "Trình bày đúng quy trình bạn đã được cấu hình trong system_instruction: "
-                            "PHẦN 1 – Tóm tắt nhanh (có ghi Nguồn + URL), "
-                            "PHẦN 2 – Phân tích & đánh giá, "
-                            "PHẦN 3 – Danh sách nguồn tham khảo (Tên báo – tiêu đề rút gọn – URL).\n"
-                            "Nếu vì bất kỳ lý do gì không dùng được google_search, phải nói rõ và KHÔNG bịa link."
+                            f"Ngày tham chiếu: {today_str}.\n"
+                            "Hãy áp dụng đúng vai trò, nhiệm vụ, quy trình và nguyên tắc mà bạn đã được cấu hình "
+                            "trong system_instruction: tổng hợp bức tranh chính, phân tích tác động và đưa phần nguồn tham khảo (nếu có). "
+                            "Nếu không truy cập được tin mới hoặc không chắc chắn, hãy nói rõ giới hạn và KHÔNG bịa link."
                         )
 
                         response = model.generate_content(prompt_text)
                         res_text = response.text
 
-                        st.success("✅ Kết quả tổng hợp & phân tích (kèm link nếu có):")
+                        st.success("✅ Kết quả tổng hợp & phân tích:")
                         st.markdown(res_text)
                         play_text_to_speech(res_text)
 
