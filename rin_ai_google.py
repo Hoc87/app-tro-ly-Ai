@@ -412,7 +412,7 @@ elif menu == "📰 Đọc Báo & Tóm Tắt Sách":
     # Lấy system_instruction từ prompts.py
     expert_instruction = get_expert_prompt(menu)
 
-    task = st.radio(
+    mode = st.radio(
         "Chế độ:",
         ["🔎 Tin Tức Thời Sự", "📚 Tóm tắt Sách/Tài liệu"],
         horizontal=True,
@@ -420,21 +420,40 @@ elif menu == "📰 Đọc Báo & Tóm Tắt Sách":
     )
 
     # ==============================
-    # 1) CHẾ ĐỘ: TIN TỨC THỜI SỰ
+    # 1) CHAT TIN TỨC THỜI SỰ
     # ==============================
-    if task == "🔎 Tin Tức Thời Sự":
-        topic = st.text_input(
-            f"Nhập chủ đề tin tức ({today_str}):",
-            key="news_topic_input",
-        )
+    if mode == "🔎 Tin Tức Thời Sự":
+        st.subheader("💬 Chat Tin Tức Thời Sự")
 
-        if st.button("🔎 Phân tích tin tức", key="news_analyze_btn"):
-            if not topic:
-                st.warning("❗ Vui lòng nhập chủ đề trước khi phân tích.")
-            else:
-                with st.spinner(
-                    f"Đang dùng {current_model_name} để làm rõ phạm vi tin tức cho chủ đề “{topic}”..."
-                ):
+        if "news_chat" not in st.session_state:
+            st.session_state.news_chat = [
+                {
+                    "role": "assistant",
+                    "content": (
+                        "Xin chào 👋\n\n"
+                        f"Hôm nay là **{today_str}**. Tôi là **Chuyên Gia Tri Thức & Tin Tức** của Rin.Ai.\n\n"
+                        "Bạn hãy nhập chủ đề tin tức bạn quan tâm (ví dụ: *báo kinh doanh Việt Nam hôm nay*, "
+                        "*thị trường chứng khoán*, *giá vàng thế giới*...).\n\n"
+                        "Tôi sẽ hỏi lại những thông tin cần thiết rồi cùng bạn phân tích dần qua nhiều lượt chat."
+                    ),
+                }
+            ]
+
+        # Hiển thị lịch sử chat
+        for msg in st.session_state.news_chat:
+            with st.chat_message(msg["role"]):
+                st.markdown(msg["content"])
+
+        user_msg = st.chat_input("Nhập chủ đề / câu hỏi về tin tức...")
+        if user_msg:
+            # Lưu & hiển thị tin nhắn người dùng
+            st.session_state.news_chat.append({"role": "user", "content": user_msg})
+            with st.chat_message("user"):
+                st.markdown(user_msg)
+
+            # Trả lời
+            with st.chat_message("assistant"):
+                with st.spinner(f"Đang dùng {current_model_name} để phân tích..."):
                     try:
                         model = genai.GenerativeModel(
                             current_model_name,
@@ -442,76 +461,113 @@ elif menu == "📰 Đọc Báo & Tóm Tắt Sách":
                         )
 
                         prompt_text = (
-                            "Bạn đang ở vai trò: CHUYÊN GIA TRI THỨC & TIN TỨC trong hệ sinh thái Rin.Ai.\n"
                             "Chế độ hiện tại: TIN TỨC THỜI SỰ.\n"
-                            f"Chủ đề người dùng nhập: {topic}\n"
-                            f"Ngày tham chiếu hệ thống: {today_str}.\n"
-                            "Không được nói rằng ngày tham chiếu này là 'trong tương lai'; "
-                            "nếu thiếu dữ liệu mới, chỉ cần nói bạn có kiến thức tới khoảng năm 2024 mà không phủ nhận ngày tham chiếu.\n"
+                            f"Ngày tham chiếu hệ thống (ngày hôm nay): {today_str}.\n"
+                            "Hãy trò chuyện với người dùng dưới dạng HỘI THOẠI NHIỀU LƯỢT, phong cách thân thiện, chuyên nghiệp.\n"
+                            "Tin nhắn mới nhất của người dùng là:\n"
+                            f"{user_msg}\n"
                             "\n"
-                            "Trong LƯỢT TRẢ LỜI NÀY, nhiệm vụ DUY NHẤT của bạn là HỎI LẠI người dùng để làm rõ phạm vi tin tức, "
-                            "không tóm tắt tin tức và KHÔNG hỏi gì liên quan đến sách.\n"
-                            "Hãy hỏi ngắn gọn các câu sau bằng tiếng Việt:\n"
-                            "1) Quốc gia hoặc khu vực bạn muốn theo dõi tin tức? (Ví dụ: Việt Nam, Mỹ, Toàn cầu, Châu Á...).\n"
-                            "2) Khung thời gian bạn muốn cập nhật? (Hôm nay, 24 giờ qua, 7 ngày qua hoặc một khoảng thời gian cụ thể trong quá khứ).\n"
-                            "Nếu người dùng đã cung cấp sẵn một phần các thông tin này, hãy xác nhận lại và nói rằng bạn đã sẵn sàng phân tích kỹ hơn trong lượt tiếp theo."
+                            "Hướng xử lý:\n"
+                            "- Nếu đây là câu hỏi đầu tiên về một chủ đề, hãy xác nhận lại chủ đề, quốc gia/khu vực và khoảng thời gian (hôm nay / 24h qua / 7 ngày...).\n"
+                            "- Nếu người dùng đã nêu rõ 'báo kinh doanh Việt Nam hôm nay' thì không cần hỏi lại, hãy phân tích bối cảnh chung, xu hướng và những điểm đáng chú ý.\n"
+                            "- Khi thiếu dữ liệu mới, hãy nói rõ rằng kiến thức của bạn cập nhật đến khoảng năm 2024 và KHÔNG được bịa số liệu hoặc link.\n"
                         )
 
                         response = model.generate_content(prompt_text)
-                        res_text = response.text
+                        answer = response.text or "Mình đang gặp khó khi trả lời câu này, bạn có thể hỏi lại cách khác giúp mình nhé."
+                        st.markdown(answer)
+                        play_text_to_speech(answer)
 
-                        st.success("✅ Câu hỏi làm rõ từ chuyên gia:")
-                        st.markdown(res_text)
-                        play_text_to_speech(res_text)
-
+                        st.session_state.news_chat.append(
+                            {"role": "assistant", "content": answer}
+                        )
                     except Exception as e:
-                        st.error(f"❌ Lỗi khi phân tích tin tức: {e}")
-                        st.info(
-                            "💡 Nếu lỗi tiếp diễn, hãy thử chọn model `gemini-1.5-flash` ở thanh bên trái."
+                        err_msg = f"❌ Lỗi khi trả lời tin tức: {e}"
+                        st.error(err_msg)
+                        st.session_state.news_chat.append(
+                            {"role": "assistant", "content": err_msg}
                         )
 
     # ==============================
-    # 2) CHẾ ĐỘ: TÓM TẮT SÁCH / TÀI LIỆU
+    # 2) CHAT TÓM TẮT SÁCH / TÀI LIỆU
     # ==============================
     else:
-        st.subheader("📚 Tóm tắt Sách / Tài liệu")
-        txt_input = st.text_area(
-            "Dán nội dung, hoặc chỉ cần ghi TÊN SÁCH / CHỦ ĐỀ rồi upload file ở thanh bên trái:",
-            key="news_text_area",
-        )
-        content = file_content if file_content is not None else txt_input
+        st.subheader("📚 Chat Tóm tắt Sách / Tài liệu")
 
-        if st.button("📚 Tóm tắt", key="news_summary_btn") and content:
-            with st.spinner("Đang tóm tắt nội dung..."):
-                try:
-                    model = genai.GenerativeModel(
-                        current_model_name,
-                        system_instruction=expert_instruction,
-                    )
+        if "book_chat" not in st.session_state:
+            st.session_state.book_chat = [
+                {
+                    "role": "assistant",
+                    "content": (
+                        "Xin chào 👋\n\n"
+                        "Bạn hãy nhập **tên sách**, **tác giả** hoặc **dán nội dung/tài liệu** bạn có.\n\n"
+                        "Tôi sẽ giúp bạn tóm tắt 3–7 ý chính, rút ra bài học và gợi ý cách áp dụng thực tế. "
+                        "Bạn có thể tiếp tục đặt câu hỏi follow-up trong cùng cuộc trò chuyện này."
+                    ),
+                }
+            ]
 
-                    if isinstance(content, Image.Image):
-                        request = [
-                            "Chế độ hiện tại: TÓM TẮT SÁCH/TÀI LIỆU.\n"
-                            "Hãy tóm tắt nội dung chính của hình ảnh / tài liệu sau, trình bày dạng gạch đầu dòng dễ hiểu cho người Việt.\n"
-                            "KHÔNG đặt câu hỏi về tin tức thời sự trong lượt này.",
-                            content,
-                        ]
-                    else:
-                        request = [
-                            "Chế độ hiện tại: TÓM TẮT SÁCH/TÀI LIỆU.\n"
-                            "Chỉ tập trung vào cuốn sách / tài liệu mà người dùng cung cấp, KHÔNG hỏi về tin tức hay thời sự trong lượt này.\n"
-                            "Nhiệm vụ: 1) Tóm tắt 3–7 ý chính; 2) Nêu 3–5 bài học / gợi ý ứng dụng thực tế cho người Việt; "
-                            "3) Nếu người dùng chỉ nhập TÊN SÁCH, hãy tóm tắt dựa trên hiểu biết của bạn.\n"
-                            "\n"
-                            f"Nội dung người dùng cung cấp:\n{content}"
-                        ]
+        # Hiển thị lịch sử chat sách
+        for msg in st.session_state.book_chat:
+            with st.chat_message(msg["role"]):
+                st.markdown(msg["content"])
 
-                    res_text = model.generate_content(request).text
-                    st.markdown(res_text)
-                    play_text_to_speech(res_text)
+        book_msg = st.chat_input("Nhập tên sách / nội dung cần tóm tắt...")
+        if book_msg:
+            st.session_state.book_chat.append({"role": "user", "content": book_msg})
+            with st.chat_message("user"):
+                st.markdown(book_msg)
 
-                except Exception as e:
-                    st.error(f"❌ Lỗi khi tóm tắt tài liệu: {e}")
+            with st.chat_message("assistant"):
+                with st.spinner(f"Đang dùng {current_model_name} để tóm tắt..."):
+                    try:
+                        model = genai.GenerativeModel(
+                            current_model_name,
+                            system_instruction=expert_instruction,
+                        )
+
+                        # Nếu có file đính kèm toàn phiên thì gộp thêm vào
+                        if file_content is not None:
+                            if isinstance(file_content, Image.Image):
+                                req = [
+                                    "Chế độ: TÓM TẮT SÁCH/TÀI LIỆU.\n"
+                                    "Người dùng vừa gửi câu sau (tên sách / ghi chú / câu hỏi):\n"
+                                    f"{book_msg}\n\n"
+                                    "Dưới đây là hình ảnh tài liệu họ đã đính kèm. Hãy đọc và tóm tắt cùng với nội dung người dùng đã nhập:",
+                                    file_content,
+                                ]
+                            else:
+                                req = [
+                                    "Chế độ: TÓM TẮT SÁCH/TÀI LIỆU.\n"
+                                    "Người dùng vừa gửi câu sau (tên sách / ghi chú / câu hỏi):\n"
+                                    f"{book_msg}\n\n"
+                                    "Đây là toàn bộ nội dung tài liệu text đi kèm:\n"
+                                    f"{file_content}\n\n"
+                                    "Hãy tóm tắt 3–7 ý chính, rút ra bài học & gợi ý ứng dụng cho người Việt.",
+                                ]
+                        else:
+                            req = [
+                                "Chế độ: TÓM TẮT SÁCH/TÀI LIỆU.\n"
+                                "Người dùng chỉ cung cấp nội dung sau (tên sách, mô tả hoặc đoạn trích). "
+                                "Dựa trên hiểu biết của bạn, hãy tóm tắt 3–7 ý chính và gợi ý cách áp dụng thực tế:\n"
+                                f"{book_msg}"
+                            ]
+
+                        response = model.generate_content(req)
+                        answer = response.text or "Hiện tại mình chưa tóm tắt được nội dung này, bạn thử diễn đạt lại giúp mình nhé."
+                        st.markdown(answer)
+                        play_text_to_speech(answer)
+
+                        st.session_state.book_chat.append(
+                            {"role": "assistant", "content": answer}
+                        )
+                    except Exception as e:
+                        err_msg = f"❌ Lỗi khi tóm tắt sách/tài liệu: {e}"
+                        st.error(err_msg)
+                        st.session_state.book_chat.append(
+                            {"role": "assistant", "content": err_msg}
+                        )
+
 
 # -------------------------------------------------------------
 # CÁC CHUYÊN GIA THEO NGÀNH (CHUNG CHO TẤT CẢ MENU CÒN LẠI)
