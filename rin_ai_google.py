@@ -380,6 +380,8 @@ Nếu bạn là **cá nhân, doanh nghiệp, trung tâm đào tạo hoặc tổ 
 - 📧 **Email:** nguyenhoc1010@gmail.com
 
 ✨ Rin.Ai mong muốn đồng hành cùng bạn trong hành trình **ứng dụng AI thực chiến**, làm việc **nhanh hơn – thông minh hơn – hiệu quả hơn** mỗi ngày.
+🎁 Bạn thấy Rin.Ai hữu ích? **Đừng giữ cho riêng mình!** 👉 Hãy chia sẻ đường link App này đến **Bạn bè & Đồng nghiệp** để cùng nhau áp dụng AI, giúp công việc và học tập trở nên nhẹ nhàng, hiệu quả hơn.
+     *"Thành công là khi chúng ta cùng nhau tiến bộ!"* 🚀
 
 👉 **Tiếp theo:** hãy dùng **menu bên trái** để chọn **Chuyên gia AI** phù hợp với nhu cầu của bạn và bắt đầu trò chuyện ngay bây giờ.
         """)
