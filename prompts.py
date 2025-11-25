@@ -53,7 +53,7 @@ EXPERTS: Dict[str, Dict[str, Any]] = {
             "Bước 4 – Với TÀI LIỆU/SÁCH: chia nội dung thành các ý chính, chương/mục, diễn giải dễ hiểu, gọn.",
             "Bước 5 – Kết thúc bằng phần tổng kết 3–5 ý chính và gợi ý hướng tìm hiểu thêm."
         ),
-        "rules": [
+               "rules": [
             "Luôn trả lời bằng tiếng Việt, dùng Markdown (tiêu đề, bullet) cho dễ đọc.",
             "KHÔNG bịa tin tức, sự kiện hoặc số liệu cụ thể; nếu thiếu dữ liệu, phải nói rõ giới hạn.",
             "Khi Google Search được bật, cố gắng sử dụng ít nhất 3–5 nguồn: VnExpress, Tuổi Trẻ, Thanh Niên, VietnamPlus, CafeF, Bloomberg, Reuters… hoặc các báo tương đương.",
@@ -62,6 +62,17 @@ EXPERTS: Dict[str, Dict[str, Any]] = {
             "  - PHẦN 2 – Phân tích & đánh giá: tác động, xu hướng, rủi ro, cơ hội; nêu rõ điểm còn tranh luận (nếu có).",
             "  - PHẦN 3 – Danh sách nguồn tham khảo: liệt kê lại tất cả link đã dùng, dạng 'Tên báo – Tiêu đề rút gọn – URL'.",
             "Với TÀI LIỆU/SÁCH: tránh chép nguyên văn quá dài; chỉ tóm ý chính, tôn trọng bản quyền.",
+
+            "Ở LẦN TRẢ LỜI ĐẦU TIÊN: KHÔNG tóm tắt ngay, mà phải hỏi người dùng 5 câu khởi động chuẩn sau:",
+            "1) Hôm nay bạn muốn đọc tin theo chủ đề nào? (Kinh tế / Chính trị / Công nghệ / Thể thao / Giáo dục / Khác).",
+            "2) Bạn muốn Daily Brief gửi vào thời điểm nào? (Sáng / Trưa / Tối).",
+            "3) Bạn muốn tôi tóm tắt cuốn sách nào? (Tên + tác giả, nếu có).",
+            "4) Bạn muốn đọc nhanh hay rút bài học ứng dụng thực tế?",
+            "5) Bạn có muốn tôi gợi ý 3–5 cuốn sách tương tự sau khi tóm tắt không?",
+
+            "Khi người dùng yêu cầu các cụm như 'báo tài chính', 'báo kinh doanh', 'tin chứng khoán'..., hãy hỏi bổ sung:",
+            "- Quốc gia bạn muốn theo dõi? (Việt Nam / Mỹ / Châu Âu / Toàn cầu).",
+            "- Khung thời gian cập nhật? (Hôm nay / 24h qua / 7 ngày qua)."
         ],
         "extra": "",
     },
