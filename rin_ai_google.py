@@ -495,5 +495,184 @@ elif menu == "📰 Đọc Báo & Tóm Tắt Sách":
 
                 except Exception as e:
                     st.error(f"❌ Lỗi khi tóm tắt tài liệu: {e}")
+# -------------------------------------------------------------
+# CÁC CHUYÊN GIA THEO NGÀNH (CHUNG CHO TẤT CẢ MENU CÒN LẠI)
+# Bao gồm: ✨ Trợ Lý Đa Lĩnh Vực, 🎨 Media, Office, Kiến trúc, Luật, Kinh doanh...
+# -------------------------------------------------------------
+else:
+    st.header(menu)
+
+    # Lấy cấu hình chuyên gia từ prompts.py
+    expert_instruction = get_expert_prompt(menu)
+
+    # Tuỳ chỉnh thêm cho Giáo dục (chọn bộ sách / vai trò)
+    system_append = ""
+    if menu == "🎓 Giáo Dục & Đào Tạo":
+        c1, c2 = st.columns(2)
+        sach = c1.selectbox(
+            "Bộ sách:",
+            ["Cánh Diều", "Kết Nối Tri Thức", "Chân Trời Sáng Tạo"],
+        )
+        role = c2.radio(
+            "Vai trò:",
+            ["Học sinh", "Giáo viên", "Phụ huynh"],
+            horizontal=True,
+        )
+        system_append = f"\n(Bộ sách: {sach}, Đối tượng: {role})."
+
+    # Upload file riêng cho từng câu hỏi (nằm trong khu chat, dễ nhìn)
+    st.markdown("**📎 Đính kèm tài liệu cho câu hỏi này (tùy chọn):**")
+    chat_uploaded_file = st.file_uploader(
+        "Chọn file cho câu hỏi (ảnh/PDF/Word/Excel...):",
+        type=["png", "jpg", "jpeg", "pdf", "txt", "csv", "xlsx", "docx"],
+        label_visibility="collapsed",
+        key=f"chat_uploader_{menu}",
+    )
+    chat_file_content = None
+    if chat_uploaded_file is not None:
+        chat_file_content = process_uploaded_file(chat_uploaded_file)
+
+    # Lưu lịch sử chat theo từng menu chuyên gia
+    if "history" not in st.session_state:
+        st.session_state.history = {}
+
+    if menu not in st.session_state.history:
+        st.session_state.history[menu] = [
+            {
+                "role": "assistant",
+                "content": (
+                    f"Xin chào! Tôi là **chuyên gia {menu}** trong hệ sinh thái Rin.Ai. "
+                    "Bạn hãy mô tả thật rõ yêu cầu, bối cảnh và mục tiêu, tôi sẽ hỗ trợ theo đúng vai trò & quy trình đã được cấu hình."
+                ),
+            }
+        ]
+
+    # Hiển thị lại lịch sử hội thoại
+    for msg in st.session_state.history[menu]:
+        if msg["role"] == "user":
+            with st.chat_message("user"):
+                st.markdown(msg["content"])
+        else:
+            # Ẩn phần PROMPT_2D / 3D khi hiển thị, chỉ dùng nội bộ
+            clean_show = re.sub(
+                r"###PROMPT_[23]D###.*?###END_PROMPT###",
+                "",
+                msg["content"],
+                flags=re.DOTALL,
+            )
+            if clean_show.strip():
+                with st.chat_message("assistant"):
+                    st.markdown(clean_show)
+
+    # Ô nhập chat
+    user_prompt = st.chat_input("Gửi yêu cầu cho chuyên gia...")
+
+    if user_prompt:
+        # Xác định file sẽ dùng cho câu hỏi này
+        used_file_content = (
+            chat_file_content if chat_file_content is not None else file_content
+        )
+        used_file_name = None
+        if chat_uploaded_file is not None:
+            used_file_name = chat_uploaded_file.name
+        elif uploaded_file is not None and file_content is not None:
+            used_file_name = uploaded_file.name
+
+        # Hiển thị tin nhắn người dùng
+        with st.chat_message("user"):
+            st.markdown(user_prompt)
+            if used_file_name:
+                st.caption(f"📎 Đính kèm: {used_file_name}")
+
+        st.session_state.history[menu].append(
+            {"role": "user", "content": user_prompt}
+        )
+
+        # Gọi model theo đúng chuyên gia
+        with st.chat_message("assistant"):
+            with st.spinner(f"Chuyên gia ({current_model_name}) đang phân tích..."):
+                try:
+                    final_prompt = user_prompt + system_append
+
+                    # Chuẩn bị payload cho Gemini: nếu có file thì gắn thêm
+                    if used_file_content is not None:
+                        if isinstance(used_file_content, Image.Image):
+                            message_payload = [final_prompt, used_file_content]
+                        else:
+                            final_prompt += (
+                                "\n\n=== FILE DATA (tóm tắt nội dung người dùng gửi) ===\n"
+                                f"{used_file_content}\n"
+                                "===================================================="
+                            )
+                            message_payload = [final_prompt]
+                    else:
+                        message_payload = [final_prompt]
+
+                    # Tạo model & start_chat để có memory trong từng lần hỏi
+                    model = get_model(current_model_name)
+                    chat = model.start_chat(
+                        system_instruction=expert_instruction,
+                        history=[],
+                    )
+                    response = chat.send_message(message_payload)
+                    full_txt = response.text or ""
+
+                    # Tách PROMPT_2D / 3D (nếu là chuyên gia Kiến trúc)
+                    p2d = re.search(
+                        r"###PROMPT_2D###(.*?)###END_PROMPT###",
+                        full_txt,
+                        re.DOTALL,
+                    )
+                    p3d = re.search(
+                        r"###PROMPT_3D###(.*?)###END_PROMPT###",
+                        full_txt,
+                        re.DOTALL,
+                    )
+                    txt_show = re.sub(
+                        r"###PROMPT_[23]D###.*?###END_PROMPT###",
+                        "",
+                        full_txt,
+                        flags=re.DOTALL,
+                    )
+
+                    # Hiển thị nội dung trả lời chính
+                    st.markdown(txt_show.strip())
+
+                    # Nếu có prompt vẽ 2D/3D → demo thêm ảnh minh hoạ (tuỳ chọn)
+                    if p2d or p3d:
+                        st.divider()
+                        col_a, col_b = st.columns(2)
+                        if p2d:
+                            with col_a:
+                                st.image(
+                                    generate_image_url(
+                                        "Blueprint floor plan. " + p2d.group(1)
+                                    ),
+                                    caption="Bản vẽ 2D (demo AI)",
+                                )
+                        if p3d:
+                            with col_b:
+                                st.image(
+                                    generate_image_url(
+                                        "Architecture render 8k. " + p3d.group(1)
+                                    ),
+                                    caption="Phối cảnh 3D (demo AI)",
+                                )
+
+                    # Lưu vào lịch sử
+                    st.session_state.history[menu].append(
+                        {"role": "assistant", "content": full_txt}
+                    )
+                    # Giới hạn lịch sử để tránh quá dài
+                    if len(st.session_state.history[menu]) > 40:
+                        st.session_state.history[menu] = st.session_state.history[
+                            menu
+                        ][-40:]
+
+                except Exception as e:
+                    st.error(f"❌ Lỗi khi chuyên gia trả lời: {e}")
+                    st.warning(
+                        "⚠️ Nếu gặp lỗi, hãy thử đổi sang model 'gemini-1.5-flash' ở thanh bên trái."
+                    )
 
 
