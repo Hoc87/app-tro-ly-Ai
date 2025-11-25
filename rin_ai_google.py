@@ -433,37 +433,34 @@ elif menu == "📰 Đọc Báo & Tóm Tắt Sách":
                 st.warning("❗ Vui lòng nhập chủ đề trước khi phân tích.")
             else:
                 with st.spinner(
-                    f"Đang dùng {current_model_name} để phân tích chủ đề “{topic}”..."
+                    f"Đang dùng {current_model_name} để làm rõ phạm vi tin tức cho chủ đề “{topic}”..."
                 ):
                     try:
-                        # KHÔNG dùng tools google_search để tránh lỗi SDK cũ
                         model = genai.GenerativeModel(
                             current_model_name,
                             system_instruction=expert_instruction,
                         )
 
                         prompt_text = (
-                         "Bạn đang ở vai trò: CHUYÊN GIA TRI THỨC & TIN TỨC trong hệ sinh thái Rin.Ai.\n"
-                         "Chế độ hiện tại: TIN TỨC THỜI SỰ.\n"
-                         f"Chủ đề người dùng nhập: {topic}\n"
-                         f"Ngày tham chiếu hiện tại (HÔM NAY theo hệ thống): {today_str}.\n"
-                         "QUAN TRỌNG: Không được nói rằng ngày tham chiếu này là 'trong tương lai' hay 'ngoài phạm vi dữ liệu của bạn'. "
-                         "Nếu thiếu dữ liệu mới, chỉ cần nói chung là dữ liệu của bạn cập nhật tới khoảng năm 2024, "
-                         "nhưng KHÔNG được phủ nhận ngày tham chiếu.\n"
-                         "\n"
-                         "LẦN TRẢ LỜI NÀY chỉ có 1 nhiệm vụ: đặt các câu hỏi làm rõ theo đúng workflow đã được cấu hình trong system_instruction, "
-                         "không tóm tắt tin tức và không phân tích chi tiết.\n"
-                       "Hãy:\n"
-                       "- Hỏi người dùng 5 câu khởi động (chủ đề, thời điểm Daily Brief, sách, chế độ đọc, gợi ý sách tương tự).\n"
-                       "- Nếu chủ đề liên quan tới tài chính / kinh doanh / chứng khoán, hỏi thêm về QUỐC GIA và KHUNG THỜI GIAN (Hôm nay / 24h / 7 ngày).\n"
-                      "Chỉ trả lời bằng danh sách câu hỏi cần người dùng bổ sung, không phân tích tin tức trong lượt này."
-                    )
-
+                            "Bạn đang ở vai trò: CHUYÊN GIA TRI THỨC & TIN TỨC trong hệ sinh thái Rin.Ai.\n"
+                            "Chế độ hiện tại: TIN TỨC THỜI SỰ.\n"
+                            f"Chủ đề người dùng nhập: {topic}\n"
+                            f"Ngày tham chiếu hệ thống: {today_str}.\n"
+                            "Không được nói rằng ngày tham chiếu này là 'trong tương lai'; "
+                            "nếu thiếu dữ liệu mới, chỉ cần nói bạn có kiến thức tới khoảng năm 2024 mà không phủ nhận ngày tham chiếu.\n"
+                            "\n"
+                            "Trong LƯỢT TRẢ LỜI NÀY, nhiệm vụ DUY NHẤT của bạn là HỎI LẠI người dùng để làm rõ phạm vi tin tức, "
+                            "không tóm tắt tin tức và KHÔNG hỏi gì liên quan đến sách.\n"
+                            "Hãy hỏi ngắn gọn các câu sau bằng tiếng Việt:\n"
+                            "1) Quốc gia hoặc khu vực bạn muốn theo dõi tin tức? (Ví dụ: Việt Nam, Mỹ, Toàn cầu, Châu Á...).\n"
+                            "2) Khung thời gian bạn muốn cập nhật? (Hôm nay, 24 giờ qua, 7 ngày qua hoặc một khoảng thời gian cụ thể trong quá khứ).\n"
+                            "Nếu người dùng đã cung cấp sẵn một phần các thông tin này, hãy xác nhận lại và nói rằng bạn đã sẵn sàng phân tích kỹ hơn trong lượt tiếp theo."
+                        )
 
                         response = model.generate_content(prompt_text)
                         res_text = response.text
 
-                        st.success("✅ Kết quả tổng hợp & phân tích:")
+                        st.success("✅ Câu hỏi làm rõ từ chuyên gia:")
                         st.markdown(res_text)
                         play_text_to_speech(res_text)
 
@@ -479,7 +476,7 @@ elif menu == "📰 Đọc Báo & Tóm Tắt Sách":
     else:
         st.subheader("📚 Tóm tắt Sách / Tài liệu")
         txt_input = st.text_area(
-            "Dán nội dung, hoặc chỉ cần upload file ở thanh bên trái:",
+            "Dán nội dung, hoặc chỉ cần ghi TÊN SÁCH / CHỦ ĐỀ rồi upload file ở thanh bên trái:",
             key="news_text_area",
         )
         content = file_content if file_content is not None else txt_input
@@ -494,16 +491,19 @@ elif menu == "📰 Đọc Báo & Tóm Tắt Sách":
 
                     if isinstance(content, Image.Image):
                         request = [
-                            "Chế độ: TÓM TẮT SÁCH/TÀI LIỆU.\n"
-                            "Hãy tóm tắt nội dung chính của hình ảnh/tài liệu sau, trình bày dạng gạch đầu dòng dễ hiểu cho người Việt:",
+                            "Chế độ hiện tại: TÓM TẮT SÁCH/TÀI LIỆU.\n"
+                            "Hãy tóm tắt nội dung chính của hình ảnh / tài liệu sau, trình bày dạng gạch đầu dòng dễ hiểu cho người Việt.\n"
+                            "KHÔNG đặt câu hỏi về tin tức thời sự trong lượt này.",
                             content,
                         ]
                     else:
                         request = [
-                            "Chế độ: TÓM TẮT SÁCH/TÀI LIỆU.\n"
-                            "Hãy tóm tắt nội dung sau theo đúng quy trình bạn đã được cấu hình "
-                            "(ý chính, phân tích ngắn, tổng kết 3–5 ý quan trọng):\n\n"
-                            f"{content}"
+                            "Chế độ hiện tại: TÓM TẮT SÁCH/TÀI LIỆU.\n"
+                            "Chỉ tập trung vào cuốn sách / tài liệu mà người dùng cung cấp, KHÔNG hỏi về tin tức hay thời sự trong lượt này.\n"
+                            "Nhiệm vụ: 1) Tóm tắt 3–7 ý chính; 2) Nêu 3–5 bài học / gợi ý ứng dụng thực tế cho người Việt; "
+                            "3) Nếu người dùng chỉ nhập TÊN SÁCH, hãy tóm tắt dựa trên hiểu biết của bạn.\n"
+                            "\n"
+                            f"Nội dung người dùng cung cấp:\n{content}"
                         ]
 
                     res_text = model.generate_content(request).text
@@ -512,6 +512,7 @@ elif menu == "📰 Đọc Báo & Tóm Tắt Sách":
 
                 except Exception as e:
                     st.error(f"❌ Lỗi khi tóm tắt tài liệu: {e}")
+
 # -------------------------------------------------------------
 # CÁC CHUYÊN GIA THEO NGÀNH (CHUNG CHO TẤT CẢ MENU CÒN LẠI)
 # Bao gồm: ✨ Trợ Lý Đa Lĩnh Vực, 🎨 Media, Office, Kiến trúc, Luật, Kinh doanh...
