@@ -333,15 +333,25 @@ if final_key:
 # TRANG CHỦ
 if menu == "🏠 Trang Chủ & Giới Thiệu":
     st.title("💎 Hệ Sinh Thái AI Thực Chiến - Rin.Ai")
+    
+    # --- ĐƯA CAM KẾT BẢO MẬT LÊN ĐẦU (NGAY DƯỚI TIÊU ĐỀ) ---
+    st.info("""
+    🛡️ **CAM KẾT BẢO MẬT & QUYỀN RIÊNG TƯ**
+    
+    * **An toàn dữ liệu:** Mọi tài liệu và nội dung chat được xử lý trực tiếp trên hạ tầng bảo mật tiêu chuẩn quốc tế của Google & OpenAI.
+    * **Riêng tư tuyệt đối:** Rin.Ai **KHÔNG** lưu trữ, **KHÔNG** thu thập và **KHÔNG** có quyền xem dữ liệu cá nhân của người dùng.
+    * **Minh bạch:** Bạn là người duy nhất sở hữu dữ liệu của mình.
+    """)
+    
     st.markdown("---")
+    
     col1, col2 = st.columns([2, 1])
 
     with col1:
         st.markdown("""
 💎 **Rin.Ai – Hệ Sinh Thái AI Thực Chiến Cho Người Việt**
 
-👋 Chào mừng bạn đến với **Rin.Ai PRO**  
-Được nghiên cứu, xây dựng và liên tục nâng cấp bởi **Mr. Học** – người sáng lập hệ sinh thái **Rin.Ai**.
+👋 Chào mừng bạn đến với **Rin.Ai PRO** Được nghiên cứu, xây dựng và liên tục nâng cấp bởi **Mr. Học** – người sáng lập hệ sinh thái **Rin.Ai**.
 
 Rin.Ai là một **"Super App" AI** tích hợp song song hai nền tảng:
 
@@ -402,7 +412,6 @@ Nếu bạn là **cá nhân, doanh nghiệp, trung tâm đào tạo hoặc tổ 
             "https://cdn.dribbble.com/users/527451/screenshots/14972580/media/7f4288f6c3eb988a2879a953e5b12854.jpg",
             use_column_width=True,
         )
-
 
 # ĐỌC BÁO & TÓM TẮT SÁCH
 elif menu == "📰 Đọc Báo & Tóm Tắt Sách":
