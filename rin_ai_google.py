@@ -338,8 +338,8 @@ if menu == "🏠 Trang Chủ & Giới Thiệu":
     st.info("""
     🛡️ **CAM KẾT BẢO MẬT & QUYỀN RIÊNG TƯ**
     
-    * **An toàn dữ liệu:** Mọi tài liệu và nội dung chat được xử lý trực tiếp trên hạ tầng bảo mật tiêu chuẩn quốc tế của Google & OpenAI.
-    * **Riêng tư tuyệt đối:** Rin.Ai **KHÔNG** lưu trữ, **KHÔNG** thu thập và **KHÔNG** có quyền xem dữ liệu cá nhân của người dùng.
+    * **An toàn dữ liệu:** Mọi tài liệu và nội dung chat được xử lý mã hóa trực tiếp trên hạ tầng bảo mật tiêu chuẩn quốc tế của Google & OpenAI.
+    * **Riêng tư tuyệt đối:** Rin.Ai chỉ là công cụ trợ lý Ai, **KHÔNG** lưu trữ, **KHÔNG** thu thập và **KHÔNG** xem được dữ liệu cá nhân của người dùng.
     * **Minh bạch:** Bạn là người duy nhất sở hữu dữ liệu của mình.
     """)
     
@@ -418,8 +418,19 @@ elif menu == "📰 Đọc Báo & Tóm Tắt Sách":
     st.header("📰 Chuyên Gia Tri Thức & Tin Tức")
     today_str = datetime.now().strftime("%d/%m/%Y")
 
-    # Lấy system_instruction từ prompts.py
-    expert_instruction = get_expert_prompt(menu)
+    # Lấy persona gốc từ prompts.py
+    base_instruction = get_expert_prompt(menu)
+
+    # Bổ sung ngữ cảnh riêng cho chế độ TIN TỨC
+    news_system_instruction = (
+        base_instruction
+        + f"\n\nNGỮ CẢNH RIÊNG CHO CHẾ ĐỘ TIN TỨC:\n"
+          f"- Hôm nay là {today_str} theo hệ thống ứng dụng.\n"
+          "- Bạn có thể dùng từ 'hôm nay' để nói về ngày này, nhưng phải trung thực rằng dữ liệu chi tiết "
+          "chỉ cập nhật tới khoảng năm 2024.\n"
+          "- Trong hội thoại, được phép hỏi TỐI ĐA 1–2 câu làm rõ, sau đó PHẢI chuyển sang tóm tắt & phân tích; "
+          "không hỏi đi hỏi lại cùng một nội dung.\n"
+    )
 
     mode = st.radio(
         "Chế độ:",
@@ -434,67 +445,67 @@ elif menu == "📰 Đọc Báo & Tóm Tắt Sách":
     if mode == "🔎 Tin Tức Thời Sự":
         st.subheader("💬 Chat Tin Tức Thời Sự")
 
-        if "news_chat" not in st.session_state:
-            st.session_state.news_chat = [
-                {
-                    "role": "assistant",
-                    "content": (
-                        "Xin chào 👋\n\n"
-                        f"Hôm nay là **{today_str}**. Tôi là **Chuyên Gia Tri Thức & Tin Tức** của Rin.Ai.\n\n"
-                        "Bạn hãy nhập chủ đề tin tức bạn quan tâm (ví dụ: *báo kinh doanh Việt Nam hôm nay*, "
-                        "*thị trường chứng khoán*, *giá vàng thế giới*...).\n\n"
-                        "Tôi sẽ hỏi lại những thông tin cần thiết rồi cùng bạn phân tích dần qua nhiều lượt chat."
-                    ),
-                }
-            ]
+        # Lưu lịch sử tin nhắn hiển thị
+        if "news_messages" not in st.session_state:
+            st.session_state.news_messages = []
+
+        # Khởi tạo session chat với Gemini (giữ ngữ cảnh qua nhiều lượt)
+        if "news_bot" not in st.session_state:
+            model = genai.GenerativeModel(
+                current_model_name,
+                system_instruction=news_system_instruction,
+            )
+            st.session_state.news_bot = model.start_chat(history=[])
+
+        # Tin nhắn chào đầu tiên
+        if not st.session_state.news_messages:
+            greeting = (
+                f"Xin chào 👋\n\nHôm nay là **{today_str}**.\n"
+                "Tôi là **Chuyên Gia Tri Thức & Tin Tức** của Rin.Ai.\n\n"
+                "Bạn hãy gửi chủ đề tin tức bạn quan tâm (ví dụ: *báo kinh doanh Việt Nam hôm nay*, "
+                "*chứng khoán Việt Nam*, *xu hướng bất động sản*...).\n\n"
+                "Tôi có thể hỏi lại 1–2 câu cho rõ, sau đó sẽ tóm tắt & phân tích cho bạn.\n"
+                "Lưu ý: tôi không thể truy cập mọi tin nóng 100%, nhưng sẽ dựa trên kiến thức tới khoảng năm 2024 "
+                "để đưa bức tranh tổng quan và luôn nhắc rõ giới hạn."
+            )
+            st.session_state.news_messages.append(
+                {"role": "assistant", "content": greeting}
+            )
 
         # Hiển thị lịch sử chat
-        for msg in st.session_state.news_chat:
+        for msg in st.session_state.news_messages:
             with st.chat_message(msg["role"]):
                 st.markdown(msg["content"])
 
-        user_msg = st.chat_input("Nhập chủ đề / câu hỏi về tin tức...")
-        if user_msg:
-            # Lưu & hiển thị tin nhắn người dùng
-            st.session_state.news_chat.append({"role": "user", "content": user_msg})
+        # Ô chat người dùng
+        user_text = st.chat_input("Nhập chủ đề / câu hỏi về tin tức...")
+        if user_text:
+            # Lưu & hiển thị tin nhắn user
+            st.session_state.news_messages.append(
+                {"role": "user", "content": user_text}
+            )
             with st.chat_message("user"):
-                st.markdown(user_msg)
+                st.markdown(user_text)
 
-            # Trả lời
+            # Gửi vào session chat Gemini
             with st.chat_message("assistant"):
-                with st.spinner(f"Đang dùng {current_model_name} để phân tích..."):
+                with st.spinner(f"Đang dùng {current_model_name} để phản hồi..."):
                     try:
-                        model = genai.GenerativeModel(
-                            current_model_name,
-                            system_instruction=expert_instruction,
+                        response = st.session_state.news_bot.send_message(user_text)
+                        answer = (
+                            response.text
+                            or "Hiện tôi chưa trả lời được, bạn thử diễn đạt lại ngắn gọn hơn giúp tôi nhé."
                         )
-
-                        prompt_text = (
-                            "Chế độ hiện tại: TIN TỨC THỜI SỰ.\n"
-                            f"Ngày tham chiếu hệ thống (ngày hôm nay): {today_str}.\n"
-                            "Hãy trò chuyện với người dùng dưới dạng HỘI THOẠI NHIỀU LƯỢT, phong cách thân thiện, chuyên nghiệp.\n"
-                            "Tin nhắn mới nhất của người dùng là:\n"
-                            f"{user_msg}\n"
-                            "\n"
-                            "Hướng xử lý:\n"
-                            "- Nếu đây là câu hỏi đầu tiên về một chủ đề, hãy xác nhận lại chủ đề, quốc gia/khu vực và khoảng thời gian (hôm nay / 24h qua / 7 ngày...).\n"
-                            "- Nếu người dùng đã nêu rõ 'báo kinh doanh Việt Nam hôm nay' thì không cần hỏi lại, hãy phân tích bối cảnh chung, xu hướng và những điểm đáng chú ý.\n"
-                            "- Khi thiếu dữ liệu mới, hãy nói rõ rằng kiến thức của bạn cập nhật đến khoảng năm 2024 và KHÔNG được bịa số liệu hoặc link.\n"
-                        )
-
-                        response = model.generate_content(prompt_text)
-                        answer = response.text or "Mình đang gặp khó khi trả lời câu này, bạn có thể hỏi lại cách khác giúp mình nhé."
                         st.markdown(answer)
                         play_text_to_speech(answer)
-
-                        st.session_state.news_chat.append(
+                        st.session_state.news_messages.append(
                             {"role": "assistant", "content": answer}
                         )
                     except Exception as e:
-                        err_msg = f"❌ Lỗi khi trả lời tin tức: {e}"
-                        st.error(err_msg)
-                        st.session_state.news_chat.append(
-                            {"role": "assistant", "content": err_msg}
+                        err = f"❌ Lỗi khi trò chuyện về tin tức: {e}"
+                        st.error(err)
+                        st.session_state.news_messages.append(
+                            {"role": "assistant", "content": err}
                         )
 
     # ==============================
@@ -532,7 +543,7 @@ elif menu == "📰 Đọc Báo & Tóm Tắt Sách":
                     try:
                         model = genai.GenerativeModel(
                             current_model_name,
-                            system_instruction=expert_instruction,
+                            system_instruction=base_instruction,
                         )
 
                         # Nếu có file đính kèm toàn phiên thì gộp thêm vào
@@ -542,7 +553,8 @@ elif menu == "📰 Đọc Báo & Tóm Tắt Sách":
                                     "Chế độ: TÓM TẮT SÁCH/TÀI LIỆU.\n"
                                     "Người dùng vừa gửi câu sau (tên sách / ghi chú / câu hỏi):\n"
                                     f"{book_msg}\n\n"
-                                    "Dưới đây là hình ảnh tài liệu họ đã đính kèm. Hãy đọc và tóm tắt cùng với nội dung người dùng đã nhập:",
+                                    "Dưới đây là hình ảnh tài liệu họ đã đính kèm. "
+                                    "Hãy đọc và tóm tắt cùng với nội dung người dùng đã nhập:",
                                     file_content,
                                 ]
                             else:
@@ -563,10 +575,12 @@ elif menu == "📰 Đọc Báo & Tóm Tắt Sách":
                             ]
 
                         response = model.generate_content(req)
-                        answer = response.text or "Hiện tại mình chưa tóm tắt được nội dung này, bạn thử diễn đạt lại giúp mình nhé."
+                        answer = (
+                            response.text
+                            or "Hiện tại mình chưa tóm tắt được nội dung này, bạn thử diễn đạt lại giúp mình nhé."
+                        )
                         st.markdown(answer)
                         play_text_to_speech(answer)
-
                         st.session_state.book_chat.append(
                             {"role": "assistant", "content": answer}
                         )
@@ -576,7 +590,6 @@ elif menu == "📰 Đọc Báo & Tóm Tắt Sách":
                         st.session_state.book_chat.append(
                             {"role": "assistant", "content": err_msg}
                         )
-
 
 # -------------------------------------------------------------
 # CÁC CHUYÊN GIA THEO NGÀNH (CHUNG CHO TẤT CẢ MENU CÒN LẠI)
