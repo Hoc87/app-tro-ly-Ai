@@ -401,6 +401,8 @@ Nếu bạn là **cá nhân, doanh nghiệp, trung tâm đào tạo hoặc tổ 
 elif menu == "📰 Đọc Báo & Tóm Tắt Sách":
     st.header("📰 Chuyên Gia Tri Thức & Tin Tức")
     today_str = datetime.now().strftime("%d/%m/%Y")
+
+    # Lấy system_instruction từ prompts.py
     expert_instruction = get_expert_prompt(menu)
 
     task = st.radio(
@@ -409,61 +411,84 @@ elif menu == "📰 Đọc Báo & Tóm Tắt Sách":
         horizontal=True,
     )
 
+    # ==============================
+    # 1) CHẾ ĐỘ: TIN TỨC THỜI SỰ
+    # ==============================
     if task == "🔎 Tin Tức Thời Sự":
         topic = st.text_input(f"Nhập chủ đề tin tức ({today_str}):")
+
         if st.button("🔎 Phân tích tin tức"):
-            if topic:
-                with st.spinner(f"Đang phân tích bằng model {current_model_name}..."):
+            if not topic:
+                st.warning("❗ Vui lòng nhập chủ đề trước khi phân tích.")
+            else:
+                with st.spinner(
+                    f"Đang dùng {current_model_name} + Google Search để phân tích..."
+                ):
                     try:
+                        # Model sử dụng system_instruction của chuyên gia Tin tức
                         model = genai.GenerativeModel(
                             current_model_name,
                             system_instruction=expert_instruction,
                         )
-                        prompt = f"""
-Người dùng muốn xem tin tức liên quan đến chủ đề: "{topic}" (ngày {today_str} tại Việt Nam nếu không nói quốc gia).
 
-NHIỆM VỤ:
-- Tóm tắt bức tranh chung về chủ đề trên.
-- Nếu không có truy cập thời gian thực, hãy nói rõ hạn chế và phân tích theo bối cảnh thường gặp.
-- Trình bày 3–5 ý chính, dễ hiểu cho người Việt.
-"""
-                        res = model.generate_content(prompt)
-                        text = res.text
-                        st.success("✅ Kết quả tổng hợp:")
-                        st.markdown(text)
-                        play_text_to_speech(text)
-                    except Exception as e:
-                        st.error(f"Lỗi Model {current_model_name}: {e}")
-                        st.info(
-                            "💡 Hãy thử đổi sang model 'gemini-1.5-flash' ở thanh bên trái."
+                        # Prompt rất ngắn: chỉ truyền CHỦ ĐỀ + NGÀY, còn lại để chuyên gia trong prompts.py xử lý
+                        user_query = (
+                            "Chế độ: TIN TỨC THỜI SỰ.\n"
+                            f"Chủ đề người dùng yêu cầu: {topic}\n"
+                            f"Ngày tham chiếu: {today_str}.\n"
+                            "Hãy áp dụng đúng vai trò, nhiệm vụ, quy trình và nguyên tắc mà bạn đã được cấu hình."
                         )
+
+                        response = model.generate_content(
+                            user_query,
+                            tools="google_search_retrieval",  # bật Google Search Grounding
+                        )
+
+                        res_text = response.text
+                        st.success("✅ Kết quả tổng hợp & phân tích (kèm link nguồn):")
+                        st.markdown(res_text)
+                        play_text_to_speech(res_text)
+
+                    except Exception as e:
+                        st.error(f"❌ Lỗi khi phân tích tin tức: {e}")
+                        st.info(
+                            "💡 Nếu lỗi tiếp diễn, hãy thử chọn model `gemini-1.5-flash` ở thanh bên trái."
+                        )
+
+    # ==============================
+    # 2) CHẾ ĐỘ: TÓM TẮT SÁCH / TÀI LIỆU
+    # ==============================
     else:
-        st.subheader("📚 Tóm tắt tài liệu / sách")
-        txt_input = st.text_area("Dán nội dung, hoặc chỉ cần upload file ở thanh bên trái:")
-        content = file_content if file_content is not None else txt_input
+        txt_input = st.text_area("Dán văn bản hoặc Upload file:")
+        content = file_content if file_content else txt_input
 
         if st.button("📚 Tóm tắt") and content:
-            with st.spinner(f"Đang tóm tắt bằng model {current_model_name}..."):
+            with st.spinner("Đang tóm tắt nội dung..."):
                 try:
                     model = genai.GenerativeModel(
                         current_model_name,
                         system_instruction=expert_instruction,
                     )
+
                     if isinstance(content, Image.Image):
                         req = [
-                            "Tóm tắt nội dung chính trong hình sau (nếu là trang sách/tài liệu):",
+                            "Chế độ: TÓM TẮT SÁCH/TÀI LIỆU.\n"
+                            "Hãy tóm tắt nội dung chính của hình ảnh/tài liệu sau, trình bày dễ hiểu cho người Việt:",
                             content,
                         ]
                     else:
                         req = [
-                            f"Hãy tóm tắt nội dung sau thành 5–7 ý chính, dễ hiểu cho người Việt:\n\n{content}"
+                            "Chế độ: TÓM TẮT SÁCH/TÀI LIỆU.\n"
+                            "Hãy tóm tắt nội dung sau theo đúng quy trình bạn đã được cấu hình "
+                            "(ý chính, phân tích ngắn, tổng kết 3–5 ý quan trọng):\n\n"
+                            f"{content}"
                         ]
-                    res = model.generate_content(req)
-                    text = res.text
-                    st.markdown(text)
-                    play_text_to_speech(text)
+
+                    res = model.generate_content(req).text
+                    st.markdown(res)
+                    play_text_to_speech(res)
                 except Exception as e:
-                    st.error(f"Lỗi: {e}")
+                    st.error(f"❌ Lỗi khi tóm tắt tài liệu: {e}")
 
 # MEDIA
 elif menu == "🎨 Thiết Kế & Media (Ảnh/Video/Voice)":
