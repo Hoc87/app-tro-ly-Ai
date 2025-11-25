@@ -408,15 +408,19 @@ elif menu == "📰 Đọc Báo & Tóm Tắt Sách":
         "Chế độ:",
         ["🔎 Tin Tức Thời Sự", "📚 Tóm tắt Sách/Tài liệu"],
         horizontal=True,
+        key="news_mode_radio",
     )
 
     # ==============================
     # 1) CHẾ ĐỘ: TIN TỨC THỜI SỰ
     # ==============================
     if task == "🔎 Tin Tức Thời Sự":
-        topic = st.text_input(f"Nhập chủ đề tin tức ({today_str}):")
+        topic = st.text_input(
+            f"Nhập chủ đề tin tức ({today_str}):",
+            key="news_topic_input",
+        )
 
-        if st.button("🔎 Phân tích tin tức"):
+        if st.button("🔎 Phân tích tin tức", key="news_analyze_btn"):
             if not topic:
                 st.warning("❗ Vui lòng nhập chủ đề trước khi phân tích.")
             else:
@@ -437,7 +441,6 @@ elif menu == "📰 Đọc Báo & Tóm Tắt Sách":
                             "trong system_instruction: tổng hợp bức tranh chính, phân tích tác động và đưa phần nguồn tham khảo (nếu có)."
                         )
 
-                        # KHÔNG dùng tools nữa để tránh lỗi SDK
                         response = model.generate_content(prompt_text)
                         res_text = response.text
 
@@ -456,10 +459,13 @@ elif menu == "📰 Đọc Báo & Tóm Tắt Sách":
     # ==============================
     else:
         st.subheader("📚 Tóm tắt Sách / Tài liệu")
-        txt_input = st.text_area("Dán nội dung, hoặc chỉ cần upload file ở thanh bên trái:")
+        txt_input = st.text_area(
+            "Dán nội dung, hoặc chỉ cần upload file ở thanh bên trái:",
+            key="news_text_area",
+        )
         content = file_content if file_content is not None else txt_input
 
-        if st.button("📚 Tóm tắt") and content:
+        if st.button("📚 Tóm tắt", key="news_summary_btn") and content:
             with st.spinner("Đang tóm tắt nội dung..."):
                 try:
                     model = genai.GenerativeModel(
@@ -488,83 +494,6 @@ elif menu == "📰 Đọc Báo & Tóm Tắt Sách":
                 except Exception as e:
                     st.error(f"❌ Lỗi khi tóm tắt tài liệu: {e}")
 
-
-    # ==============================
-    # 1) CHẾ ĐỘ: TIN TỨC THỜI SỰ
-    # ==============================
-    if task == "🔎 Tin Tức Thời Sự":
-        topic = st.text_input(f"Nhập chủ đề tin tức ({today_str}):")
-
-        if st.button("🔎 Phân tích tin tức"):
-            if not topic:
-                st.warning("❗ Vui lòng nhập chủ đề trước khi phân tích.")
-            else:
-                with st.spinner(
-                    f"Đang dùng {current_model_name} + Google Search để phân tích..."
-                ):
-                    try:
-                        # Model sử dụng system_instruction của chuyên gia Tin tức
-                        model = genai.GenerativeModel(
-                            current_model_name,
-                            system_instruction=expert_instruction,
-                        )
-
-                        # Prompt rất ngắn: chỉ truyền CHỦ ĐỀ + NGÀY, còn lại để chuyên gia trong prompts.py xử lý
-                        user_query = (
-                            "Chế độ: TIN TỨC THỜI SỰ.\n"
-                            f"Chủ đề người dùng yêu cầu: {topic}\n"
-                            f"Ngày tham chiếu: {today_str}.\n"
-                            "Hãy áp dụng đúng vai trò, nhiệm vụ, quy trình và nguyên tắc mà bạn đã được cấu hình."
-                        )
-
-                        response = model.generate_content(user_query)
-
-                        
-                        res_text = response.text
-                        st.success("✅ Kết quả tổng hợp & phân tích (kèm link nguồn):")
-                        st.markdown(res_text)
-                        play_text_to_speech(res_text)
-
-                    except Exception as e:
-                        st.error(f"❌ Lỗi khi phân tích tin tức: {e}")
-                        st.info(
-                            "💡 Nếu lỗi tiếp diễn, hãy thử chọn model `gemini-1.5-flash` ở thanh bên trái."
-                        )
-
-    # ==============================
-    # 2) CHẾ ĐỘ: TÓM TẮT SÁCH / TÀI LIỆU
-    # ==============================
-    else:
-        txt_input = st.text_area("Dán văn bản hoặc Upload file:")
-        content = file_content if file_content else txt_input
-
-        if st.button("📚 Tóm tắt") and content:
-            with st.spinner("Đang tóm tắt nội dung..."):
-                try:
-                    model = genai.GenerativeModel(
-                        current_model_name,
-                        system_instruction=expert_instruction,
-                    )
-
-                    if isinstance(content, Image.Image):
-                        req = [
-                            "Chế độ: TÓM TẮT SÁCH/TÀI LIỆU.\n"
-                            "Hãy tóm tắt nội dung chính của hình ảnh/tài liệu sau, trình bày dễ hiểu cho người Việt:",
-                            content,
-                        ]
-                    else:
-                        req = [
-                            "Chế độ: TÓM TẮT SÁCH/TÀI LIỆU.\n"
-                            "Hãy tóm tắt nội dung sau theo đúng quy trình bạn đã được cấu hình "
-                            "(ý chính, phân tích ngắn, tổng kết 3–5 ý quan trọng):\n\n"
-                            f"{content}"
-                        ]
-
-                    res = model.generate_content(req).text
-                    st.markdown(res)
-                    play_text_to_speech(res)
-                except Exception as e:
-                    st.error(f"❌ Lỗi khi tóm tắt tài liệu: {e}")
 
 # MEDIA
 elif menu == "🎨 Thiết Kế & Media (Ảnh/Video/Voice)":
