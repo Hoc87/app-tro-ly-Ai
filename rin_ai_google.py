@@ -438,9 +438,8 @@ elif menu == "📰 Đọc Báo & Tóm Tắt Sách":
                             "Hãy áp dụng đúng vai trò, nhiệm vụ, quy trình và nguyên tắc mà bạn đã được cấu hình."
                         )
 
-                        response = model.generate_content(
-                            user_query,
-                            tools="google_search",  # bật Google Search Grounding
+                        response = model.generate_content(user_query)
+
                         )
 
                         res_text = response.text
