@@ -441,7 +441,7 @@ elif menu == "📰 Đọc Báo & Tóm Tắt Sách":
 
                         response = model.generate_content(
                             user_query,
-                            tools="google_search_retrieval",  # bật Google Search Grounding
+                            tools="google_search",  # bật Google Search Grounding
                         )
 
                         res_text = response.text
