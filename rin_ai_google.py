@@ -238,7 +238,7 @@ with st.sidebar:
     # ---- CÔNG CỤ MỞ RỘNG ----
     st.subheader("🔥 Công Cụ Mở Rộng")
     st.link_button(
-        "🤖 Trợ Lý AI ChatGPT",
+        "🤖 Danh sách Trợ Lý AI ChatGPT",
         "https://chatgpt.com/g/g-69004bb8428481918ecf4ade89a9216c-rin-ai-center-trung-tam-tro-ly-ai",
     )
     with st.expander("🌐 Google AI Tools (Full)"):
@@ -280,7 +280,7 @@ with st.sidebar:
     st.divider()
 
     # ---- MENU CHUYÊN GIA ----
-    st.subheader("📂 Chọn Chuyên Gia")
+    st.subheader("📂 Chọn Chuyên Gia (Hệ sinh thái Ai của Google")
     menu = st.selectbox(
         "Lĩnh vực hỗ trợ:",
         [
