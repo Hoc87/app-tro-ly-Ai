@@ -311,14 +311,6 @@ with st.sidebar:
         ],
     )
 
-st.divider()
-    st.info("""
-    🔒 **CAM KẾT BẢO MẬT TUYỆT ĐỐI**
-    
-    Mọi dữ liệu và nội dung chat của bạn đều được xử lý trực tiếp trên hạ tầng bảo mật tiêu chuẩn quốc tế của **Google & OpenAI**.
-    
-    **Rin.Ai** chỉ là nền tảng công cụ tạo ra Trợ lý, chúng tôi **KHÔNG** có quyền truy cập, **KHÔNG** xem và **KHÔNG** lưu trữ dữ liệu riêng tư của người dùng.
-    """)
 # -------------------------------------------------------------
 # MAIN
 # -------------------------------------------------------------
