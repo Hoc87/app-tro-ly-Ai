@@ -443,13 +443,22 @@ elif menu == "📰 Đọc Báo & Tóm Tắt Sách":
                         )
 
                         prompt_text = (
-                            "Chế độ: TIN TỨC THỜI SỰ.\n"
-                            f"Chủ đề: {topic}\n"
-                            f"Ngày tham chiếu: {today_str}.\n"
-                            "Hãy áp dụng đúng vai trò, nhiệm vụ, quy trình và nguyên tắc mà bạn đã được cấu hình "
-                            "trong system_instruction: tổng hợp bức tranh chính, phân tích tác động và đưa phần nguồn tham khảo (nếu có). "
-                            "Nếu không truy cập được tin mới hoặc không chắc chắn, hãy nói rõ giới hạn và KHÔNG bịa link."
-                        )
+                         "Bạn đang ở vai trò: CHUYÊN GIA TRI THỨC & TIN TỨC trong hệ sinh thái Rin.Ai.\n"
+                         "Chế độ hiện tại: TIN TỨC THỜI SỰ.\n"
+                         f"Chủ đề người dùng nhập: {topic}\n"
+                         f"Ngày tham chiếu hiện tại (HÔM NAY theo hệ thống): {today_str}.\n"
+                         "QUAN TRỌNG: Không được nói rằng ngày tham chiếu này là 'trong tương lai' hay 'ngoài phạm vi dữ liệu của bạn'. "
+                         "Nếu thiếu dữ liệu mới, chỉ cần nói chung là dữ liệu của bạn cập nhật tới khoảng năm 2024, "
+                         "nhưng KHÔNG được phủ nhận ngày tham chiếu.\n"
+                         "\n"
+                         "LẦN TRẢ LỜI NÀY chỉ có 1 nhiệm vụ: đặt các câu hỏi làm rõ theo đúng workflow đã được cấu hình trong system_instruction, "
+                         "không tóm tắt tin tức và không phân tích chi tiết.\n"
+                       "Hãy:\n"
+                       "- Hỏi người dùng 5 câu khởi động (chủ đề, thời điểm Daily Brief, sách, chế độ đọc, gợi ý sách tương tự).\n"
+                       "- Nếu chủ đề liên quan tới tài chính / kinh doanh / chứng khoán, hỏi thêm về QUỐC GIA và KHUNG THỜI GIAN (Hôm nay / 24h / 7 ngày).\n"
+                      "Chỉ trả lời bằng danh sách câu hỏi cần người dùng bổ sung, không phân tích tin tức trong lượt này."
+                    )
+
 
                         response = model.generate_content(prompt_text)
                         res_text = response.text
