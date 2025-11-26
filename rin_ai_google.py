@@ -25,58 +25,76 @@ st.set_page_config(
 # --- CẤU HÌNH GIAO DIỆN: SẠCH SẼ TUYỆT ĐỐI & GIỮ NÚT MENU ---
 st.markdown("""
     <style>
-    /* ========================================= */
-    /* 1. LÀM "TÀNG HÌNH" THANH HEADER           */
-    /* ========================================= */
-    header[data-testid="stHeader"] {
-        visibility: hidden !important; /* Chỉ ẩn đi, không xóa bỏ */
-        background: transparent !important;
-    }
-
-    /* ========================================= */
-    /* 2. XÓA BỎ CÁC THÀNH PHẦN KHÔNG CẦN THIẾT  */
-    /* ========================================= */
-    .stDeployButton {display: none !important;}
-    [data-testid="stDecoration"] {display: none !important;}
-    footer {visibility: hidden !important;}
-    div[data-testid="stStatusWidget"] {display: none !important;}
+    /* ================================================================= */
+    /* LAYER 1: TIÊU DIỆT CÁC THÀNH PHẦN RÁC (Display None)              */
+    /* ================================================================= */
     
-    /* Ẩn thanh Viewer Badge (chứa chữ Fork, GitHub) */
+    /* 1. Ẩn thanh công cụ bên phải (Nơi chứa Github, Edit, 3 chấm) */
+    [data-testid="stToolbar"] {
+        display: none !important;
+    }
+    
+    /* 2. Ẩn các nút Header Action (Deploy, Share...) */
+    [data-testid="stHeaderActionElements"] {
+        display: none !important;
+    }
+    
+    /* 3. Ẩn dải màu trang trí trên cùng */
+    [data-testid="stDecoration"] {
+        display: none !important;
+    }
+    
+    /* 4. Ẩn Footer và các nút quản lý dưới đáy */
+    footer {display: none !important;}
+    div[data-testid="stStatusWidget"] {display: none !important;}
+    .stDeployButton {display: none !important;}
     div[class^='viewerBadge'] {display: none !important;}
 
-    /* ========================================= */
-    /* 3. "HỒI SINH" NÚT MỞ MENU (QUAN TRỌNG)    */
-    /* ========================================= */
+    /* ================================================================= */
+    /* LAYER 2: XỬ LÝ HEADER (Làm tàng hình để không che nội dung)       */
+    /* ================================================================= */
+    
+    header[data-testid="stHeader"] {
+        background: transparent !important; /* Trong suốt */
+        pointer-events: none;               /* Chuột bấm xuyên qua được */
+        /* KHÔNG DÙNG display:none VÌ SẼ LÀM MẤT NÚT MŨI TÊN */
+    }
+
+    /* ================================================================= */
+    /* LAYER 3: TÁCH NÚT MŨI TÊN RA RIÊNG (Quan trọng nhất)              */
+    /* ================================================================= */
+    
     [data-testid="stSidebarCollapsedControl"] {
-        /* Bắt buộc hiện ra dù cha nó bị ẩn */
-        visibility: visible !important; 
+        /* 1. Hiển thị và cho phép bấm */
         display: flex !important;
+        visibility: visible !important;
+        pointer-events: auto !important; 
         
-        /* Định vị cố định góc màn hình (Bóc nó ra khỏi thanh Header) */
-        position: fixed !important;
-        top: 20px;
-        left: 20px;
-        z-index: 1000001; /* Nổi lên trên cùng */
+        /* 2. TÁCH RA KHỎI HEADER (Tạo layer mới nằm trên cùng) */
+        position: fixed !important; 
+        top: 15px !important;
+        left: 15px !important;
+        z-index: 1000005 !important; /* Layer cao nhất, cao hơn cả Header */
         
-        /* Trang trí nút màu xanh cho dễ thấy */
+        /* 3. Trang trí nút cho dễ nhìn (Xanh dương) */
         background-color: #0078FF !important;
         color: white !important;
         border-radius: 50%;
-        width: 40px;
-        height: 40px;
+        width: 42px;
+        height: 42px;
         border: 2px solid white;
-        box-shadow: 0px 4px 10px rgba(0,0,0,0.2);
+        box-shadow: 0px 2px 10px rgba(0,0,0,0.2);
         align-items: center;
         justify-content: center;
     }
 
-    /* Hiệu ứng khi di chuột vào */
+    /* Hiệu ứng khi di chuột vào nút */
     [data-testid="stSidebarCollapsedControl"]:hover {
         background-color: #0056b3 !important;
         transform: scale(1.1);
     }
     
-    /* Đẩy nội dung xuống để không bị che */
+    /* Đẩy nội dung chính xuống để không bị đè */
     .block-container {
         padding-top: 60px !important;
     }
