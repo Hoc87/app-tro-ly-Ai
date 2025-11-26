@@ -318,7 +318,9 @@ with st.sidebar:
             "🏠 Bất Động Sản & Xe Sang",
         ],
     )
-st.divider()
+# ... (Các phần menu bên trên giữ nguyên) ...
+
+    st.divider()
     
     # --- KHU VỰC QUẢN TRỊ VIÊN (ADMIN) ---
     # Dùng Expander để giấu gọn lại
@@ -344,6 +346,10 @@ st.divider()
             st.info("Lưu ý: Sau khi sửa trên GitHub và Commit, hãy quay lại đây F5 để thấy thay đổi.")
         elif admin_pass:
             st.error("Sai mật khẩu!")
+
+# =============================================================================
+# 3. LOGIC CHÍNH (MAIN APP)
+# =============================================================================
 # -------------------------------------------------------------
 # MAIN
 # -------------------------------------------------------------
