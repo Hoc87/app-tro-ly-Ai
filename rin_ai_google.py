@@ -22,54 +22,65 @@ st.set_page_config(
     layout="wide",
 )
 
-# Ẩn bớt nút của Streamlit nhưng KHÔNG đụng vào header / toolbar / sidebar
+# --- CẤU HÌNH GIAO DIỆN: SẠCH SẼ TUYỆT ĐỐI & GIỮ NÚT MENU ---
 st.markdown("""
     <style>
-    /* 1. Ẩn các nút không cần thiết (Deploy, GitHub, Edit, Menu 3 chấm) */
-    .stDeployButton {display:none;}
-    [data-testid="StyledFullScreenButton"] {display:none;}
-    [data-testid="baseLinkButton-secondary"] {display:none;}
-    [data-testid="stHeaderActionElements"] {display:none;}
-    footer {visibility: hidden;}
-    #MainMenu {visibility: hidden;}
+    /* ================================================================= */
+    /* 1. ẨN CÁC THÀNH PHẦN "RÁC" (Góc phải trên & Góc phải dưới)        */
+    /* ================================================================= */
     
-    /* 2. Làm header trong suốt để không che nội dung, nhưng vẫn tồn tại */
-    header[data-testid="stHeader"] {
-        background-color: transparent;
-        z-index: 1; /* Thấp hơn nút menu */
+    /* Ẩn thanh công cụ góc phải trên (GitHub, Fork, Menu 3 chấm) */
+    [data-testid="stHeaderActionElements"] {
+        display: none !important;
+    }
+    
+    /* Ẩn nút "Deploy", "Manage App" và Logo Streamlit ở góc phải dưới */
+    .stDeployButton {display:none !important;}
+    footer {visibility: hidden !important;}
+    div[data-testid="stStatusWidget"] {visibility: hidden !important;}
+    
+    /* QUAN TRỌNG: Ẩn thanh "Viewer Badge" (Chứa chữ Fork & GitHub) */
+    div[class*="viewerBadge"] {
+        display: none !important;
     }
 
-    /* 3. CẤU HÌNH NÚT MỞ MENU (QUAN TRỌNG NHẤT) */
-    /* Dùng position: fixed để ghim chặt nút vào góc màn hình */
+    /* Làm trong suốt thanh Header (để không che nội dung) */
+    header[data-testid="stHeader"] {
+        background-color: transparent;
+        z-index: 1;
+    }
+
+    /* ================================================================= */
+    /* 2. GIỮ NÚT MENU TRÁI (NÚT NỔI - FLOATING BUTTON)                  */
+    /* ================================================================= */
     [data-testid="stSidebarCollapsedControl"] {
         display: flex !important;
         visibility: visible !important;
         align-items: center;
         justify-content: center;
         
-        /* Giao diện nút xanh nổi bật */
+        /* Giao diện nút: Xanh nổi bật */
         background-color: #0078FF !important;
         color: white !important;
         border-radius: 50%;
-        width: 40px;
-        height: 40px;
+        width: 45px;
+        height: 45px;
         border: 2px solid white;
-        box-shadow: 2px 2px 5px rgba(0,0,0,0.2);
+        box-shadow: 2px 2px 10px rgba(0,0,0,0.2);
         
-        /* VỊ TRÍ CỐ ĐỊNH: Luôn nằm ở góc trái trên cùng */
+        /* VỊ TRÍ CỐ ĐỊNH: Góc trái trên cùng */
         position: fixed;
         top: 15px;
         left: 15px;
-        z-index: 999999; /* Luôn nổi lên trên cùng */
+        z-index: 999999;
     }
 
-    /* Hiệu ứng khi di chuột vào nút */
     [data-testid="stSidebarCollapsedControl"]:hover {
         background-color: #0056b3 !important;
         transform: scale(1.1);
     }
 
-    /* 4. Đẩy nội dung xuống một chút để không bị nút che */
+    /* Đẩy nội dung xuống để nút không che chữ */
     .block-container {
         padding-top: 60px !important;
     }
