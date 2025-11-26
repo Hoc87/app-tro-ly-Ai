@@ -24,21 +24,15 @@ st.markdown("""
     footer {visibility: hidden;}             /* Footer */
     [data-testid="stDecoration"] {display:none;}  /* Logo Streamlit góc trên trái */
     
-    /* 2. ẨN THANH TOOLBAR (Nơi chứa nút Cây bút và Con mèo) */
-    [data-testid="stToolbar"] {
-        visibility: hidden !important; 
-        height: 0px; /* Thu nhỏ chiều cao để không chiếm chỗ */
-    }
-    
-    /* Ẩn thêm Header Action Elements để chắc chắn mất hẳn */
-    [data-testid="stHeaderActionElements"] {
+    /* Ẩn 2 nút (cây bút & GitHub) trên thanh toolbar góc phải */
+    [data-testid="stToolbar"] button,
+    [data-testid="stToolbar"] a {
         display: none !important;
     }
-
     /* KHÔNG ẩn stToolbar để không làm mất nút toggle sidebar */
     /* [data-testid="stToolbar"] {visibility: hidden !important;}  <-- KHÔNG DÙNG */
 
-    /* 3. STYLE CHUNG CHO NÚT MỞ SIDEBAR KHI BỊ THU GỌN */
+    /* 2. STYLE CHUNG CHO NÚT MỞ SIDEBAR KHI BỊ THU GỌN */
     [data-testid="stSidebarCollapsedControl"] {
         display: flex !important;
         visibility: visible !important;
@@ -56,7 +50,7 @@ st.markdown("""
         cursor: pointer;
     }
 
-    /* 3.1. Vị trí & kích thước trên MÁY TÍNH */
+    /* 2.1. Vị trí & kích thước trên MÁY TÍNH */
     @media (min-width: 769px) {
         [data-testid="stSidebarCollapsedControl"] {
             top: 15px;
@@ -66,7 +60,7 @@ st.markdown("""
         }
     }
 
-    /* 3.2. Vị trí & kích thước trên ĐIỆN THOẠI / MÀN HÌNH NHỎ */
+    /* 2.2. Vị trí & kích thước trên ĐIỆN THOẠI / MÀN HÌNH NHỎ */
     @media (max-width: 768px) {
         [data-testid="stSidebarCollapsedControl"] {
             top: 10px;
@@ -82,7 +76,7 @@ st.markdown("""
         transform: scale(1.1);
     }
 
-    /* 4. Đẩy nội dung xuống một chút để nút không che mất chữ đầu trang */
+    /* 3. Đẩy nội dung xuống một chút để nút không che mất chữ đầu trang */
     .block-container {
         padding-top: 60px !important;
     }
