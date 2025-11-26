@@ -24,79 +24,30 @@ st.set_page_config(
 
 # --- CẤU HÌNH GIAO DIỆN: SẠCH SẼ TUYỆT ĐỐI & GIỮ NÚT MENU ---
 st.markdown("""
-    <style>
-    /* ========================================================= */
-    /* LAYER 1: ẨN CÁC NÚT BÊN PHẢI (TOOLBAR)                    */
-    /* ========================================================= */
-    
-    /* Ẩn thanh công cụ chứa GitHub, Edit, Menu 3 chấm */
-    [data-testid="stToolbar"] {
-        visibility: hidden !important; /* Chỉ ẩn hình ảnh, không xóa code */
-        height: 0px !important;        /* Thu nhỏ lại */
-        padding: 0px !important;
-    }
+<style>
+/* 1. Ẩn nút Deploy (nếu có) */
+.stDeployButton {display: none;}
 
-    /* Ẩn các nút Header Action (Deploy...) */
-    [data-testid="stHeaderActionElements"] {
-        display: none !important;
-    }
+/* 2. Ẩn menu 3 chấm chuẩn của Streamlit */
+#MainMenu {visibility: hidden;}
+footer {visibility: hidden;}
 
-    /* Ẩn thanh trang trí màu sắc */
-    [data-testid="stDecoration"] {
-        display: none !important;
-    }
+/* 3. Ẩn link Fork + icon GitHub ở toolbar trên cùng */
+[data-testid="stToolbar"] a[href*="fork"],        /* chữ Fork */
+[data-testid="stToolbar"] a[href*="github.com"] { /* logo GitHub */
+    display: none !important;
+}
 
-    /* Ẩn Footer */
-    footer {display: none !important;}
+/* 4. Ẩn badge / widget ở góc dưới phải (Was this app helpful?, etc.) */
+[data-testid="stStatusWidget"],
+div[class*="viewerBadge_container"],
+div[class*="stAppStatusWidget"] {
+    display: none !important;
+}
 
-    /* ========================================================= */
-    /* LAYER 2: XỬ LÝ THANH HEADER (LÀM TRONG SUỐT)              */
-    /* ========================================================= */
-    
-    header[data-testid="stHeader"] {
-        background: transparent !important;
-        height: 0px !important; /* Thu nhỏ header lại */
-    }
-
-    /* ========================================================= */
-    /* LAYER 3: NÚT MENU (ĐƯỢC TÁCH RA VÀ LÀM NỔI)               */
-    /* ========================================================= */
-    
-    /* Nhắm mục tiêu chính xác vào nút đóng/mở Sidebar */
-    [data-testid="stSidebarCollapsedControl"] {
-        /* BẮT BUỘC HIỆN RA */
-        visibility: visible !important; 
-        display: flex !important;
-        
-        /* TÁCH LỚP: Đưa nút này lên tầng cao nhất */
-        position: fixed !important;
-        top: 20px;
-        left: 20px;
-        z-index: 1000005; /* Cao hơn mọi thứ khác */
-        
-        /* GIAO DIỆN: Làm đẹp nút */
-        background-color: #0078FF !important;
-        color: white !important;
-        border-radius: 50%;
-        width: 45px;
-        height: 45px;
-        border: 2px solid white;
-        box-shadow: 0px 4px 12px rgba(0,0,0,0.3);
-        align-items: center;
-        justify-content: center;
-    }
-
-    /* Hiệu ứng hover */
-    [data-testid="stSidebarCollapsedControl"]:hover {
-        background-color: #0056b3 !important;
-        transform: scale(1.1);
-    }
-
-    /* Đẩy nội dung xuống */
-    .block-container {
-        padding-top: 70px !important;
-    }
-    </style>
+/* KHÔNG ẩn header, KHÔNG ẩn stToolbar, KHÔNG đụng sidebar toggle:
+   để mũi tên / icon menu trên mobile vẫn hoạt động bình thường */
+</style>
 """, unsafe_allow_html=True)
 # -------------------------------------------------------------
 # HÀM HỖ TRỢ
