@@ -15,58 +15,58 @@ from prompts import get_expert_prompt
 # -------------------------------------------------------------
 # CẤU HÌNH CHUNG
 # -------------------------------------------------------------
-
-# --- CẤU HÌNH GIAO DIỆN: ẨN TOOLBAR & TỐI ƯU MOBILE ---
+# --- CẤU HÌNH GIAO DIỆN: ẨN TOOLBAR & ÉP HIỆN NÚT MENU ---
 st.markdown("""
     <style>
-    /* 1. ẨN CÁC NÚT THỪA Ở GÓC PHẢI (Github, Edit, Menu 3 chấm, Deploy) */
+    /* 1. Ẩn các thành phần không mong muốn ở góc phải (Deploy, Menu 3 chấm, GitHub icon) */
     .stDeployButton {display:none;}
-    [data-testid="stToolbar"] {visibility: hidden !important;} /* <-- Dòng này ẩn cây bút và con mèo */
-    [data-testid="stDecoration"] {display:none;} /* Ẩn dải màu trang trí trên cùng */
+    [data-testid="stToolbar"] {visibility: hidden !important;}
+    [data-testid="stDecoration"] {display:none;}
     footer {visibility: hidden;}
-    #MainMenu {visibility: hidden;}
     
-    /* 2. QUAN TRỌNG: Header làm trong suốt nhưng KHÔNG ĐƯỢC ẨN (để giữ nút Menu) */
-    header {
-        background-color: transparent !important;
+    /* 2. TẠO NÚT MỞ MENU "NỔI" (FLOATING BUTTON) 
+       Đây là phần quan trọng nhất để nút luôn hiện ra khi thu menu vào */
+    section[data-testid="stSidebar"] > div {
+        height: 100%;
+        width: 100%;
     }
-
-    /* 3. TẠO NÚT MỞ MENU NỔI (Floating Button) - HIỆN RÕ TRÊN ĐIỆN THOẠI */
+    
+    /* Nhắm vào nút mũi tên > khi sidebar đóng */
     [data-testid="stSidebarCollapsedControl"] {
         display: flex !important;
-        visibility: visible !important; /* Ép hiện lại nút menu dù header bị ẩn */
+        visibility: visible !important; /* Ép buộc hiện hình */
         align-items: center;
         justify-content: center;
         
-        background-color: #0078FF !important; /* Màu xanh nổi bật */
-        color: white !important;
-        border-radius: 50%;
-        width: 45px;
-        height: 45px;
+        /* Thiết kế giao diện nút cho đẹp và dễ thấy */
+        background-color: #0078FF !important; /* Nền Xanh */
+        color: white !important;              /* Mũi tên Trắng */
+        border-radius: 10px;                  /* Bo góc */
+        width: 40px;
+        height: 40px;
         border: 2px solid white;
-        box-shadow: 0px 4px 10px rgba(0,0,0,0.2);
+        box-shadow: 2px 2px 10px rgba(0,0,0,0.3); /* Đổ bóng */
         
-        /* Cố định vị trí góc trái - Rất quan trọng cho Mobile */
-        position: fixed;
-        top: 15px;
-        left: 15px;
-        z-index: 1000001;
+        /* CỐ ĐỊNH VỊ TRÍ (FIXED) - Để nó không chạy theo Header */
+        position: fixed; 
+        top: 15px;      /* Cách mép trên 15px */
+        left: 15px;     /* Cách mép trái 15px */
+        z-index: 1000001; /* Lớp cao nhất, đè lên mọi thứ */
     }
 
-    /* Hiệu ứng khi di chuột */
+    /* Hiệu ứng khi di chuột vào nút (trên máy tính) */
     [data-testid="stSidebarCollapsedControl"]:hover {
         background-color: #0056b3 !important;
         transform: scale(1.1);
-        transition: all 0.2s;
+        cursor: pointer;
     }
     
-    /* Đẩy nội dung xuống để không bị nút Menu che mất chữ trên điện thoại */
+    /* 3. Đẩy nội dung chính xuống một chút để không bị nút che mất chữ */
     .block-container {
-        padding-top: 70px !important;
+        padding-top: 60px !important;
     }
     </style>
 """, unsafe_allow_html=True)
-
 
 # -------------------------------------------------------------
 # HÀM HỖ TRỢ
