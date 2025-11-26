@@ -25,62 +25,93 @@ st.set_page_config(
 # --- CẤU HÌNH GIAO DIỆN: SẠCH SẼ TUYỆT ĐỐI & GIỮ NÚT MENU ---
 st.markdown("""
     <style>
-    /* ================================================================= */
-    /* 1. ẨN CÁC THÀNH PHẦN "RÁC" (Góc phải trên & Góc phải dưới)        */
-    /* ================================================================= */
+    /* ========================================= */
+    /* 1. DIỆT CÁC NÚT GÓC PHẢI TRÊN (FORK, GITHUB) */
+    /* ========================================= */
     
-    /* Ẩn thanh công cụ góc phải trên (GitHub, Fork, Menu 3 chấm) */
+    /* Ẩn thanh công cụ chính */
+    [data-testid="stToolbar"] {
+        display: none !important;
+    }
+    
+    /* Ẩn các thành phần Header Action (Nơi chứa nút 3 chấm, Deploy) */
     [data-testid="stHeaderActionElements"] {
         display: none !important;
     }
     
-    /* Ẩn nút "Deploy", "Manage App" và Logo Streamlit ở góc phải dưới */
-    .stDeployButton {display:none !important;}
-    footer {visibility: hidden !important;}
-    div[data-testid="stStatusWidget"] {visibility: hidden !important;}
-    
-    /* QUAN TRỌNG: Ẩn thanh "Viewer Badge" (Chứa chữ Fork & GitHub) */
-    div[class*="viewerBadge"] {
+    /* Ẩn thanh trang trí (Cầu vồng) */
+    [data-testid="stDecoration"] {
         display: none !important;
     }
 
-    /* Làm trong suốt thanh Header (để không che nội dung) */
-    header[data-testid="stHeader"] {
-        background-color: transparent;
-        z-index: 1;
+    /* ẨN CÁI THANH "VIEWER BADGE" (Chứa chữ Fork & GitHub icon khó chịu nhất) */
+    /* Dùng kỹ thuật chọn theo thuộc tính class bắt đầu bằng... */
+    div[class^='viewerBadge_container'], div[class*='viewerBadge'] {
+        display: none !important;
+        visibility: hidden !important;
+        opacity: 0 !important;
+        height: 0 !important;
+        width: 0 !important;
+        pointer-events: none !important;
     }
 
-    /* ================================================================= */
-    /* 2. GIỮ NÚT MENU TRÁI (NÚT NỔI - FLOATING BUTTON)                  */
-    /* ================================================================= */
+    /* ========================================= */
+    /* 2. DIỆT NÚT GÓC PHẢI DƯỚI (MANAGE APP)    */
+    /* ========================================= */
+    
+    /* Ẩn Footer mặc định */
+    footer {visibility: hidden !important;}
+    
+    /* Ẩn nút Manage App và Logo Streamlit nhảy múa */
+    div[data-testid="stStatusWidget"] {
+        display: none !important;
+        visibility: hidden !important;
+    }
+    
+    /* Ẩn nút Deploy Button nếu còn sót */
+    .stDeployButton {display:none !important;}
+
+    /* ========================================= */
+    /* 3. BẢO VỆ & LÀM NỔI NÚT MENU TRÁI         */
+    /* ========================================= */
+    
+    /* Làm Header trong suốt để không che nội dung */
+    header[data-testid="stHeader"] {
+        background: transparent !important;
+        pointer-events: none; /* Để chuột bấm xuyên qua được */
+    }
+
+    /* Cấu hình nút Menu (Mũi tên) */
     [data-testid="stSidebarCollapsedControl"] {
         display: flex !important;
         visibility: visible !important;
+        pointer-events: auto !important; /* Bật lại khả năng bấm chuột */
         align-items: center;
         justify-content: center;
         
-        /* Giao diện nút: Xanh nổi bật */
+        /* Giao diện nút Xanh */
         background-color: #0078FF !important;
         color: white !important;
         border-radius: 50%;
         width: 45px;
         height: 45px;
         border: 2px solid white;
-        box-shadow: 2px 2px 10px rgba(0,0,0,0.2);
+        box-shadow: 2px 2px 10px rgba(0,0,0,0.3);
         
-        /* VỊ TRÍ CỐ ĐỊNH: Góc trái trên cùng */
+        /* Vị trí cố định */
         position: fixed;
         top: 15px;
         left: 15px;
-        z-index: 999999;
+        z-index: 9999999;
     }
 
+    /* Hiệu ứng khi di chuột */
     [data-testid="stSidebarCollapsedControl"]:hover {
         background-color: #0056b3 !important;
         transform: scale(1.1);
     }
-
-    /* Đẩy nội dung xuống để nút không che chữ */
+    
+    /* Đẩy nội dung xuống */
     .block-container {
         padding-top: 60px !important;
     }
