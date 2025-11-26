@@ -22,15 +22,19 @@ st.markdown("""
     .stDeployButton {display:none;}          /* Nút Deploy */
     #MainMenu {visibility: hidden;}          /* Menu 3 chấm */
     footer {visibility: hidden;}             /* Footer */
-    [data-testid="stDecoration"] {display:none;}  /* Logo Streamlit góc trên trái */
-    
-    /* Ẩn 2 nút (cây bút & GitHub) trên thanh toolbar góc phải */
+
+    /* CHỈ ẨN LOGO TRONG stDecoration, KHÔNG ẨN CẢ KHUNG
+       → vẫn giữ được nút mũi tên / menu sidebar */
+    [data-testid="stDecoration"] svg,
+    [data-testid="stDecoration"] img {
+        display: none !important;
+    }
+
+    /* Ẩn 2 nút bút & GitHub trên toolbar */
     [data-testid="stToolbar"] button,
     [data-testid="stToolbar"] a {
         display: none !important;
     }
-    /* KHÔNG ẩn stToolbar để không làm mất nút toggle sidebar */
-    /* [data-testid="stToolbar"] {visibility: hidden !important;}  <-- KHÔNG DÙNG */
 
     /* 2. STYLE CHUNG CHO NÚT MỞ SIDEBAR KHI BỊ THU GỌN */
     [data-testid="stSidebarCollapsedControl"] {
@@ -70,18 +74,13 @@ st.markdown("""
         }
     }
 
-    /* Hiệu ứng hover (chỉ thấy trên desktop) */
-    [data-testid="stSidebarCollapsedControl"]:hover {
-        background-color: #0056b3 !important;
-        transform: scale(1.1);
-    }
-
     /* 3. Đẩy nội dung xuống một chút để nút không che mất chữ đầu trang */
     .block-container {
         padding-top: 60px !important;
     }
     </style>
 """, unsafe_allow_html=True)
+
 
 # -------------------------------------------------------------
 # HÀM HỖ TRỢ
