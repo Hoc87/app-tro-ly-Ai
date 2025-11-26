@@ -15,53 +15,63 @@ from prompts import get_expert_prompt
 # -------------------------------------------------------------
 # CẤU HÌNH CHUNG
 # -------------------------------------------------------------
-# --- CẤU HÌNH GIAO DIỆN: ẨN TOOLBAR & ÉP HIỆN NÚT MENU ---
+# --- CẤU HÌNH GIAO DIỆN: ẨN BỚT NÚT, GIỮ NÚT MỞ MENU CHO CẢ MOBILE & DESKTOP ---
 st.markdown("""
     <style>
-    /* 1. Ẩn các thành phần không mong muốn ở góc phải (Deploy, Menu 3 chấm, GitHub icon) */
-    .stDeployButton {display:none;}
-    [data-testid="stToolbar"] {visibility: hidden !important;}
-    [data-testid="stDecoration"] {display:none;}
-    footer {visibility: hidden;}
-    
-    /* 2. TẠO NÚT MỞ MENU "NỔI" (FLOATING BUTTON) 
-       Đây là phần quan trọng nhất để nút luôn hiện ra khi thu menu vào */
-    section[data-testid="stSidebar"] > div {
-        height: 100%;
-        width: 100%;
-    }
-    
-    /* Nhắm vào nút mũi tên > khi sidebar đóng */
+    /* 1. Ẩn bớt các thành phần mặc định của Streamlit (không liên quan sidebar) */
+    .stDeployButton {display:none;}          /* Nút Deploy */
+    #MainMenu {visibility: hidden;}          /* Menu 3 chấm */
+    footer {visibility: hidden;}             /* Footer */
+    [data-testid="stDecoration"] {display:none;}  /* Logo Streamlit góc trên trái */
+
+    /* KHÔNG ẩn stToolbar để không làm mất nút toggle sidebar */
+    /* [data-testid="stToolbar"] {visibility: hidden !important;}  <-- KHÔNG DÙNG */
+
+    /* 2. STYLE CHUNG CHO NÚT MỞ SIDEBAR KHI BỊ THU GỌN */
     [data-testid="stSidebarCollapsedControl"] {
         display: flex !important;
-        visibility: visible !important; /* Ép buộc hiện hình */
+        visibility: visible !important;
         align-items: center;
         justify-content: center;
-        
-        /* Thiết kế giao diện nút cho đẹp và dễ thấy */
-        background-color: #0078FF !important; /* Nền Xanh */
-        color: white !important;              /* Mũi tên Trắng */
-        border-radius: 10px;                  /* Bo góc */
-        width: 40px;
-        height: 40px;
+
+        background-color: #0078FF !important;
+        color: white !important;
+        border-radius: 999px;
         border: 2px solid white;
-        box-shadow: 2px 2px 10px rgba(0,0,0,0.3); /* Đổ bóng */
-        
-        /* CỐ ĐỊNH VỊ TRÍ (FIXED) - Để nó không chạy theo Header */
-        position: fixed; 
-        top: 15px;      /* Cách mép trên 15px */
-        left: 15px;     /* Cách mép trái 15px */
-        z-index: 1000001; /* Lớp cao nhất, đè lên mọi thứ */
+        box-shadow: 2px 2px 10px rgba(0,0,0,0.3);
+
+        position: fixed;
+        z-index: 1000001;
+        cursor: pointer;
     }
 
-    /* Hiệu ứng khi di chuột vào nút (trên máy tính) */
+    /* 2.1. Vị trí & kích thước trên MÁY TÍNH */
+    @media (min-width: 769px) {
+        [data-testid="stSidebarCollapsedControl"] {
+            top: 15px;
+            left: 15px;
+            width: 40px;
+            height: 40px;
+        }
+    }
+
+    /* 2.2. Vị trí & kích thước trên ĐIỆN THOẠI / MÀN HÌNH NHỎ */
+    @media (max-width: 768px) {
+        [data-testid="stSidebarCollapsedControl"] {
+            top: 10px;
+            left: 10px;
+            width: 36px;
+            height: 36px;
+        }
+    }
+
+    /* Hiệu ứng hover (chỉ thấy trên desktop) */
     [data-testid="stSidebarCollapsedControl"]:hover {
         background-color: #0056b3 !important;
         transform: scale(1.1);
-        cursor: pointer;
     }
-    
-    /* 3. Đẩy nội dung chính xuống một chút để không bị nút che mất chữ */
+
+    /* 3. Đẩy nội dung xuống một chút để nút không che mất chữ đầu trang */
     .block-container {
         padding-top: 60px !important;
     }
