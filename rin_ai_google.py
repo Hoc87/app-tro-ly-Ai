@@ -15,26 +15,37 @@ from prompts import get_expert_prompt
 # -------------------------------------------------------------
 # CẤU HÌNH CHUNG
 # -------------------------------------------------------------
-# --- CẤU HÌNH GIAO DIỆN: ẨN BỚT NÚT, GIỮ NGUYÊN MŨI TÊN SIDEBAR ---
-st.markdown("""
-    <style>
-    /* Ẩn nút Deploy */
-    .stDeployButton {display:none;}
 
-    /* Ẩn menu 3 chấm & footer */
+st.set_page_config(
+    page_title="Rin.Ai - Siêu Trợ Lý AI",
+    page_icon="💎",
+    layout="wide",
+)
+
+# Ẩn bớt nút của Streamlit nhưng KHÔNG đụng vào header / toolbar / sidebar
+st.markdown(
+    """
+    <style>
+    /* 1. Ẩn nút Deploy + 2 icon (edit, GitHub) ở góc phải */
+    .stDeployButton {display:none;}
+    [data-testid="StyledFullScreenButton"] {display:none;}   /* icon cây bút */
+    [data-testid="baseLinkButton-secondary"] {display:none;} /* icon GitHub */
+
+    /* 2. Ẩn menu mặc định & footer, nhưng KHÔNG ẩn header */
     #MainMenu {visibility: hidden;}
     footer {visibility: hidden;}
 
-    /* Ẩn 2 nút (bút & GitHub) trên thanh toolbar */
-    [data-testid="stToolbar"] button,
-    [data-testid="stToolbar"] a {
-        display: none !important;
+    /* 3. Đảm bảo header, toolbar, nút mũi tên sidebar LUÔN HIỆN */
+    header {visibility: visible !important;}
+    [data-testid="stToolbar"] {visibility: visible !important;}
+    [data-testid="stSidebarCollapsedControl"] {
+        visibility: visible !important;
+        display: flex !important;
     }
-
-    /* KHÔNG ĐỤNG TỚI: stSidebar, stSidebarCollapsedControl, stDecoration
-       → để Streamlit tự hiện mũi tên / icon menu */
     </style>
-""", unsafe_allow_html=True)
+    """,
+    unsafe_allow_html=True,
+)
 
 # -------------------------------------------------------------
 # HÀM HỖ TRỢ
