@@ -34,8 +34,19 @@ st.markdown(
     /* 2. Ẩn menu mặc định & footer, nhưng KHÔNG ẩn header */
     #MainMenu {visibility: hidden;}
     footer {visibility: hidden;}
+    
+    /* 3. ẨN THANH TOOLBAR (Nơi chứa nút Cây bút và Con mèo) */
+    [data-testid="stToolbar"] {
+        visibility: hidden !important; 
+        height: 0px; /* Thu nhỏ chiều cao để không chiếm chỗ */
+    }
+    
+    /* Ẩn thêm Header Action Elements để chắc chắn mất hẳn */
+    [data-testid="stHeaderActionElements"] {
+        display: none !important;
+    }
 
-    /* 3. Đảm bảo header, toolbar, nút mũi tên sidebar LUÔN HIỆN */
+    /* 4. Đảm bảo header, toolbar, nút mũi tên sidebar LUÔN HIỆN */
     header {visibility: visible !important;}
     [data-testid="stToolbar"] {visibility: visible !important;}
     [data-testid="stSidebarCollapsedControl"] {
