@@ -318,7 +318,32 @@ with st.sidebar:
             "🏠 Bất Động Sản & Xe Sang",
         ],
     )
-
+st.divider()
+    
+    # --- KHU VỰC QUẢN TRỊ VIÊN (ADMIN) ---
+    # Dùng Expander để giấu gọn lại
+    with st.expander("⚙️ Admin Control (Chủ sở hữu)"):
+        admin_pass = st.text_input("Nhập mật khẩu Admin:", type="password", key="admin_pass")
+        
+        # Đặt mật khẩu của riêng bạn ở đây (Ví dụ: Hoc87)
+        if admin_pass == "Hoc87": 
+            st.success("🔓 Chào Mr. Học! Đã mở khóa quyền Admin.")
+            
+            st.markdown("---")
+            st.write("👇 **Bấm vào để sửa code ngay:**")
+            
+            # Link đến file chính
+            st.link_button("📝 Sửa file rin_ai_google.py", "https://github.com/Hoc87/app-tro-ly-Ai/edit/main/rin_ai_google.py")
+            
+            # Link đến file Prompt
+            st.link_button("🧠 Sửa file prompts.py", "https://github.com/Hoc87/app-tro-ly-Ai/edit/main/prompts.py")
+            
+            # Link đến file thư viện
+            st.link_button("📦 Sửa requirements.txt", "https://github.com/Hoc87/app-tro-ly-Ai/edit/main/requirements.txt")
+            
+            st.info("Lưu ý: Sau khi sửa trên GitHub và Commit, hãy quay lại đây F5 để thấy thay đổi.")
+        elif admin_pass:
+            st.error("Sai mật khẩu!")
 # -------------------------------------------------------------
 # MAIN
 # -------------------------------------------------------------
