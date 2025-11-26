@@ -668,25 +668,165 @@ else:
         system_append = f"\n(Bộ sách: {sach}, Đối tượng: {role})."
         
     # Tuỳ chỉnh thêm cho Thiết Kế & Media: cho chọn loại nội dung
+        # Tuỳ chỉnh thêm cho Thiết Kế & Media: Ảnh / Video / Voice
     if menu == "🎨 Thiết Kế & Media (Ảnh/Video/Voice)":
-        col_m1, col_m2 = st.columns(2)
-        media_type = col_m1.radio(
+        st.markdown("### 🎯 Cài đặt nội dung Media")
+
+        col_top1, col_top2 = st.columns(2)
+
+        media_type = col_top1.radio(
             "Bạn muốn tập trung vào:",
             ["Ảnh (image)", "Video (video)", "Giọng nói / Voice"],
             horizontal=False,
         )
-        media_goal = col_m2.selectbox(
+
+        media_goal = col_top2.selectbox(
             "Mục đích chính:",
             [
                 "Quảng cáo / bán hàng",
                 "Xây kênh TikTok / Reels",
                 "Thuyết trình / đào tạo",
                 "Nội dung cá nhân / thương hiệu",
+                "Giới thiệu sản phẩm/dịch vụ",
                 "Khác",
             ],
         )
-        system_append += f"\n(Loại media trọng tâm: {media_type}. Mục đích chính: {media_goal}.)"
 
+        # --------- GIAO DIỆN CHO ẢNH ----------
+        if media_type == "Ảnh (image)":
+            st.markdown("##### 🖼 Thiết lập cho Prompt Ảnh")
+
+            c1, c2 = st.columns(2)
+            img_ratio = c1.selectbox(
+                "Tỉ lệ khung hình",
+                ["1:1", "3:4", "4:5", "9:16 (dọc)", "16:9 (ngang)"],
+            )
+            img_style = c2.selectbox(
+                "Phong cách hình ảnh",
+                [
+                    "Realistic / Photorealistic",
+                    "3D render",
+                    "Anime / Manga",
+                    "Flat illustration",
+                    "Minimal / Clean",
+                    "Vintage / Film",
+                    "Cyberpunk / Futuristic",
+                ],
+            )
+
+            mood = st.selectbox(
+                "Không khí cảm xúc chính của ảnh",
+                [
+                    "Tươi sáng, tích cực",
+                    "Sang trọng, cao cấp",
+                    "Đời thường, gần gũi",
+                    "Huyền bí, ấn tượng",
+                    "Hài hước, vui nhộn",
+                ],
+            )
+
+            system_append += (
+                f"\n(Đây là prompt cho ẢNH. Tỉ lệ khung hình ưu tiên: {img_ratio}. "
+                f"Phong cách thị giác chính: {img_style}. Không khí cảm xúc: {mood}. "
+                f"Mục đích sử dụng: {media_goal}.)"
+            )
+
+        # --------- GIAO DIỆN CHO VIDEO ----------
+        elif media_type == "Video (video)":
+            st.markdown("##### 🎬 Thiết lập cho Prompt VIDEO")
+
+            v1, v2, v3 = st.columns(3)
+            video_engine = v1.selectbox(
+                "Công cụ / Model video",
+                [
+                    "Google Veo 3",
+                    "Kling",
+                    "Pika Labs",
+                    "Runway",
+                    "InVideo",
+                    "Khác / generic",
+                ],
+            )
+            video_ratio = v2.selectbox(
+                "Tỉ lệ khung hình",
+                ["9:16 dọc", "16:9 ngang", "1:1 vuông"],
+            )
+            video_duration = v3.selectbox(
+                "Độ dài video mong muốn",
+                ["5–7 giây", "10–15 giây", "20–30 giây", "30–60 giây"],
+            )
+
+            video_style = st.selectbox(
+                "Phong cách video",
+                [
+                    "Realistic quay máy thật",
+                    "Cinematic / điện ảnh",
+                    "Anime / hoạt hình",
+                    "Motion graphic / text animation",
+                    "Vlog đời thường",
+                    "Product promo (quảng cáo sản phẩm)",
+                ],
+            )
+
+            camera_move = st.selectbox(
+                "Chuyển động camera",
+                [
+                    "Tĩnh, ít chuyển động",
+                    "Pan / tracking nhẹ",
+                    "Zoom in / zoom out",
+                    "Nhiều chuyển động, năng lượng cao",
+                ],
+            )
+
+            system_append += (
+                f"\n(Đây là prompt cho VIDEO. Công cụ nhắm tới: {video_engine}. "
+                f"Tỉ lệ khung hình: {video_ratio}. Độ dài: {video_duration}. "
+                f"Phong cách video: {video_style}. Chuyển động camera: {camera_move}. "
+                f"Mục đích sử dụng: {media_goal}.)"
+            )
+
+        # --------- GIAO DIỆN CHO VOICE ----------
+        else:  # "Giọng nói / Voice"
+            st.markdown("##### 🎙 Thiết lập cho Prompt GIỌNG NÓI / VOICE")
+
+            c1, c2, c3 = st.columns(3)
+            region = c1.selectbox(
+                "Vùng miền giọng đọc",
+                ["Miền Bắc", "Miền Trung", "Miền Nam", "Trung tính / dễ nghe"],
+            )
+            speakers = c2.selectbox(
+                "Số người thoại",
+                ["Độc thoại (1 người)", "Đối thoại (2 người)", "Nhiều người / hội thoại"],
+            )
+            gender = c3.selectbox(
+                "Giọng chính",
+                ["Nam", "Nữ", "Kết hợp Nam & Nữ"],
+            )
+
+            voice_style = st.selectbox(
+                "Phong cách giọng đọc",
+                [
+                    "Quảng cáo sôi động, thúc đẩy mua hàng",
+                    "Kể chuyện ấm áp, gần gũi",
+                    "Đọc thơ chậm rãi, trữ tình",
+                    "Giọng MC sự kiện / trang trọng",
+                    "Bản tin thời sự, nghiêm túc",
+                    "Giọng TikTok / mạng xã hội, trẻ trung",
+                ],
+            )
+
+            speed = st.selectbox(
+                "Tốc độ đọc",
+                ["Chậm", "Vừa phải", "Nhanh"],
+            )
+
+            system_append += (
+                f"\n(Đây là prompt cho VOICE. Vùng miền: {region}. "
+                f"Bố cục thoại: {speakers}. Giọng chính: {gender}. "
+                f"Phong cách thể hiện: {voice_style}. Tốc độ đọc: {speed}. "
+                f"Mục đích sử dụng: {media_goal}.)"
+            )
+    
     # Upload file riêng cho từng câu hỏi (nằm trong khu chat, dễ nhìn)
     st.markdown("**📎 Đính kèm tài liệu cho câu hỏi này (tùy chọn):**")
     chat_uploaded_file = st.file_uploader(
