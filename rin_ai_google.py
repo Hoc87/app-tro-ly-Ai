@@ -23,52 +23,58 @@ st.set_page_config(
 )
 
 # Ẩn bớt nút của Streamlit nhưng KHÔNG đụng vào header / toolbar / sidebar
-st.markdown(
-    """
+st.markdown("""
     <style>
-    /* 1. Ẩn nút Deploy + 2 icon (edit, GitHub) ở góc phải */
+    /* 1. Ẩn các nút không cần thiết (Deploy, GitHub, Edit, Menu 3 chấm) */
     .stDeployButton {display:none;}
-    [data-testid="StyledFullScreenButton"] {display:none;}   /* icon cây bút */
-    [data-testid="baseLinkButton-secondary"] {display:none;} /* icon GitHub */
-    
-    /* Ẩn thanh header có chữ Fork + icon GitHub */
-    header[data-testid="stHeader"] {
-        display: none !important;
-    }
-
-    /* Ẩn các badge / icon nổi dưới đáy app (2 icon ở mobile) */
-    a[class^="viewerBadge_link__"],
-    div[class^="viewerBadge_container__"],
-    div[data-testid="stStatusWidget"] {
-        display: none !important;
-    }
-
-    /* 2. Ẩn menu mặc định & footer, nhưng KHÔNG ẩn header */
-    #MainMenu {visibility: hidden;}
+    [data-testid="StyledFullScreenButton"] {display:none;}
+    [data-testid="baseLinkButton-secondary"] {display:none;}
+    [data-testid="stHeaderActionElements"] {display:none;}
     footer {visibility: hidden;}
+    #MainMenu {visibility: hidden;}
     
-    /* 3. ẨN THANH TOOLBAR (Nơi chứa nút Cây bút và Con mèo) */
-    [data-testid="stToolbar"] {
-        visibility: hidden !important; 
-        height: 0px; /* Thu nhỏ chiều cao để không chiếm chỗ */
-    }
-    
-    /* Ẩn thêm Header Action Elements để chắc chắn mất hẳn */
-    [data-testid="stHeaderActionElements"] {
-        display: none !important;
+    /* 2. Làm header trong suốt để không che nội dung, nhưng vẫn tồn tại */
+    header[data-testid="stHeader"] {
+        background-color: transparent;
+        z-index: 1; /* Thấp hơn nút menu */
     }
 
-    /* 4. Đảm bảo header, toolbar, nút mũi tên sidebar LUÔN HIỆN */
-    header {visibility: visible !important;}
-    [data-testid="stToolbar"] {visibility: visible !important;}
+    /* 3. CẤU HÌNH NÚT MỞ MENU (QUAN TRỌNG NHẤT) */
+    /* Dùng position: fixed để ghim chặt nút vào góc màn hình */
     [data-testid="stSidebarCollapsedControl"] {
-        visibility: visible !important;
         display: flex !important;
+        visibility: visible !important;
+        align-items: center;
+        justify-content: center;
+        
+        /* Giao diện nút xanh nổi bật */
+        background-color: #0078FF !important;
+        color: white !important;
+        border-radius: 50%;
+        width: 40px;
+        height: 40px;
+        border: 2px solid white;
+        box-shadow: 2px 2px 5px rgba(0,0,0,0.2);
+        
+        /* VỊ TRÍ CỐ ĐỊNH: Luôn nằm ở góc trái trên cùng */
+        position: fixed;
+        top: 15px;
+        left: 15px;
+        z-index: 999999; /* Luôn nổi lên trên cùng */
+    }
+
+    /* Hiệu ứng khi di chuột vào nút */
+    [data-testid="stSidebarCollapsedControl"]:hover {
+        background-color: #0056b3 !important;
+        transform: scale(1.1);
+    }
+
+    /* 4. Đẩy nội dung xuống một chút để không bị nút che */
+    .block-container {
+        padding-top: 60px !important;
     }
     </style>
-    """,
-    unsafe_allow_html=True,
-)
+""", unsafe_allow_html=True)
 
 # -------------------------------------------------------------
 # HÀM HỖ TRỢ
