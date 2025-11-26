@@ -16,22 +16,51 @@ from prompts import get_expert_prompt
 # CẤU HÌNH CHUNG
 # -------------------------------------------------------------
 
-st.set_page_config(
-    page_title="Rin.Ai - Siêu Trợ Lý AI",
-    page_icon="💎",
-    layout="wide",
-)
-# --- ẨN THANH MENU VÀ ICON GITHUB (BẢO MẬT) ---
-hide_streamlit_style = """
-            <style>
-            #MainMenu {visibility: hidden;}
-            footer {visibility: hidden;}
-            header {visibility: hidden;}
-            .stDeployButton {display:none;}
-            </style>
-            """
-st.markdown(hide_streamlit_style, unsafe_allow_html=True)
-current_model_name = "gemini-1.5-flash"
+# --- CẤU HÌNH GIAO DIỆN: KHÔI PHỤC NÚT MỞ MENU ---
+st.markdown("""
+    <style>
+    /* 1. Ẩn các thành phần không cần thiết (Deploy, Footer, Menu 3 chấm) */
+    .stDeployButton {display:none;}
+    footer {visibility: hidden;}
+    #MainMenu {visibility: hidden;}
+    
+    /* 2. QUAN TRỌNG: Tạo nút mở Menu nổi bật (Floating Button) */
+    /* Selector này nhắm vào nút mũi tên > khi sidebar đóng */
+    [data-testid="stSidebarCollapsedControl"] {
+        display: flex !important;
+        visibility: visible !important;
+        align-items: center;
+        justify-content: center;
+        
+        /* Thiết kế nút cho đẹp và dễ thấy */
+        background-color: #0078FF !important; /* Màu xanh thương hiệu */
+        color: white !important;              /* Mũi tên màu trắng */
+        border-radius: 50%;                   /* Hình tròn */
+        width: 45px;
+        height: 45px;
+        border: 2px solid white;
+        box-shadow: 0px 4px 10px rgba(0,0,0,0.2); /* Đổ bóng */
+        
+        /* CỐ ĐỊNH VỊ TRÍ: Luôn nằm góc trái trên cùng */
+        position: fixed;
+        top: 20px;
+        left: 20px;
+        z-index: 1000001; /* Luôn nằm trên các thành phần khác */
+    }
+
+    /* Hiệu ứng khi di chuột vào */
+    [data-testid="stSidebarCollapsedControl"]:hover {
+        background-color: #0056b3 !important;
+        transform: scale(1.1);
+        transition: all 0.2s;
+    }
+    
+    /* 3. Đẩy nội dung chính xuống một chút để không bị nút che mất (trên Mobile) */
+    .block-container {
+        padding-top: 60px !important; 
+    }
+    </style>
+""", unsafe_allow_html=True)
 
 # -------------------------------------------------------------
 # HÀM HỖ TRỢ
