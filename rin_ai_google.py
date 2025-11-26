@@ -384,7 +384,7 @@ with st.sidebar:
         admin_pass = st.text_input("Nhập mật khẩu Admin:", type="password", key="admin_pass")
         
         # Đặt mật khẩu của riêng bạn ở đây (Ví dụ: Hoc87)
-        if admin_pass == "Hoc87": 
+        if admin_pass == "Orin": 
             st.success("🔓 Chào Mr. Học! Đã mở khóa quyền Admin.")
             
             st.markdown("---")
