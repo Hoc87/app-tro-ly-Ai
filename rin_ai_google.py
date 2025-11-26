@@ -194,9 +194,13 @@ def get_available_models(api_key: str):
         return ["gemini-1.5-flash"]
 
 
-def get_model(model_name: str):
+def get_model(model_name: str, system_instruction: str | None = None):
+    if system_instruction:
+        return genai.GenerativeModel(
+            model_name,
+            system_instruction=system_instruction,
+        )
     return genai.GenerativeModel(model_name)
-
 
 # -------------------------------------------------------------
 # SIDEBAR
@@ -662,6 +666,26 @@ else:
             horizontal=True,
         )
         system_append = f"\n(Bộ sách: {sach}, Đối tượng: {role})."
+        
+    # Tuỳ chỉnh thêm cho Thiết Kế & Media: cho chọn loại nội dung
+    if menu == "🎨 Thiết Kế & Media (Ảnh/Video/Voice)":
+        col_m1, col_m2 = st.columns(2)
+        media_type = col_m1.radio(
+            "Bạn muốn tập trung vào:",
+            ["Ảnh (image)", "Video (video)", "Giọng nói / Voice"],
+            horizontal=False,
+        )
+        media_goal = col_m2.selectbox(
+            "Mục đích chính:",
+            [
+                "Quảng cáo / bán hàng",
+                "Xây kênh TikTok / Reels",
+                "Thuyết trình / đào tạo",
+                "Nội dung cá nhân / thương hiệu",
+                "Khác",
+            ],
+        )
+        system_append += f"\n(Loại media trọng tâm: {media_type}. Mục đích chính: {media_goal}.)"
 
     # Upload file riêng cho từng câu hỏi (nằm trong khu chat, dễ nhìn)
     st.markdown("**📎 Đính kèm tài liệu cho câu hỏi này (tùy chọn):**")
@@ -752,11 +776,9 @@ else:
                         message_payload = [final_prompt]
 
                     # Tạo model & start_chat để có memory trong từng lần hỏi
-                    model = get_model(current_model_name)
-                    chat = model.start_chat(
-                        system_instruction=expert_instruction,
-                        history=[],
-                    )
+                    model = get_model(current_model_name, expert_instruction)
+                    chat = model.start_chat(history=[])
+
                     response = chat.send_message(message_payload)
                     full_txt = response.text or ""
 
