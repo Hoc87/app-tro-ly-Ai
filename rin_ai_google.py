@@ -30,6 +30,18 @@ st.markdown(
     .stDeployButton {display:none;}
     [data-testid="StyledFullScreenButton"] {display:none;}   /* icon cây bút */
     [data-testid="baseLinkButton-secondary"] {display:none;} /* icon GitHub */
+    
+    /* Ẩn thanh header có chữ Fork + icon GitHub */
+    header[data-testid="stHeader"] {
+        display: none !important;
+    }
+
+    /* Ẩn các badge / icon nổi dưới đáy app (2 icon ở mobile) */
+    a[class^="viewerBadge_link__"],
+    div[class^="viewerBadge_container__"],
+    div[data-testid="stStatusWidget"] {
+        display: none !important;
+    }
 
     /* 2. Ẩn menu mặc định & footer, nhưng KHÔNG ẩn header */
     #MainMenu {visibility: hidden;}
