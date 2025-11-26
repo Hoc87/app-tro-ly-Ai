@@ -16,51 +16,57 @@ from prompts import get_expert_prompt
 # CẤU HÌNH CHUNG
 # -------------------------------------------------------------
 
-# --- CẤU HÌNH GIAO DIỆN: KHÔI PHỤC NÚT MỞ MENU ---
+# --- CẤU HÌNH GIAO DIỆN: ẨN TOOLBAR & TỐI ƯU MOBILE ---
 st.markdown("""
     <style>
-    /* 1. Ẩn các thành phần không cần thiết (Deploy, Footer, Menu 3 chấm) */
+    /* 1. ẨN CÁC NÚT THỪA Ở GÓC PHẢI (Github, Edit, Menu 3 chấm, Deploy) */
     .stDeployButton {display:none;}
+    [data-testid="stToolbar"] {visibility: hidden !important;} /* <-- Dòng này ẩn cây bút và con mèo */
+    [data-testid="stDecoration"] {display:none;} /* Ẩn dải màu trang trí trên cùng */
     footer {visibility: hidden;}
     #MainMenu {visibility: hidden;}
     
-    /* 2. QUAN TRỌNG: Tạo nút mở Menu nổi bật (Floating Button) */
-    /* Selector này nhắm vào nút mũi tên > khi sidebar đóng */
+    /* 2. QUAN TRỌNG: Header làm trong suốt nhưng KHÔNG ĐƯỢC ẨN (để giữ nút Menu) */
+    header {
+        background-color: transparent !important;
+    }
+
+    /* 3. TẠO NÚT MỞ MENU NỔI (Floating Button) - HIỆN RÕ TRÊN ĐIỆN THOẠI */
     [data-testid="stSidebarCollapsedControl"] {
         display: flex !important;
-        visibility: visible !important;
+        visibility: visible !important; /* Ép hiện lại nút menu dù header bị ẩn */
         align-items: center;
         justify-content: center;
         
-        /* Thiết kế nút cho đẹp và dễ thấy */
-        background-color: #0078FF !important; /* Màu xanh thương hiệu */
-        color: white !important;              /* Mũi tên màu trắng */
-        border-radius: 50%;                   /* Hình tròn */
+        background-color: #0078FF !important; /* Màu xanh nổi bật */
+        color: white !important;
+        border-radius: 50%;
         width: 45px;
         height: 45px;
         border: 2px solid white;
-        box-shadow: 0px 4px 10px rgba(0,0,0,0.2); /* Đổ bóng */
+        box-shadow: 0px 4px 10px rgba(0,0,0,0.2);
         
-        /* CỐ ĐỊNH VỊ TRÍ: Luôn nằm góc trái trên cùng */
+        /* Cố định vị trí góc trái - Rất quan trọng cho Mobile */
         position: fixed;
-        top: 20px;
-        left: 20px;
-        z-index: 1000001; /* Luôn nằm trên các thành phần khác */
+        top: 15px;
+        left: 15px;
+        z-index: 1000001;
     }
 
-    /* Hiệu ứng khi di chuột vào */
+    /* Hiệu ứng khi di chuột */
     [data-testid="stSidebarCollapsedControl"]:hover {
         background-color: #0056b3 !important;
         transform: scale(1.1);
         transition: all 0.2s;
     }
     
-    /* 3. Đẩy nội dung chính xuống một chút để không bị nút che mất (trên Mobile) */
+    /* Đẩy nội dung xuống để không bị nút Menu che mất chữ trên điện thoại */
     .block-container {
-        padding-top: 60px !important; 
+        padding-top: 70px !important;
     }
     </style>
 """, unsafe_allow_html=True)
+
 
 # -------------------------------------------------------------
 # HÀM HỖ TRỢ
