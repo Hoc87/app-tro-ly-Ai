@@ -15,72 +15,26 @@ from prompts import get_expert_prompt
 # -------------------------------------------------------------
 # CẤU HÌNH CHUNG
 # -------------------------------------------------------------
-# --- CẤU HÌNH GIAO DIỆN: ẨN BỚT NÚT, GIỮ NÚT MỞ MENU CHO CẢ MOBILE & DESKTOP ---
+# --- CẤU HÌNH GIAO DIỆN: ẨN BỚT NÚT, GIỮ NGUYÊN MŨI TÊN SIDEBAR ---
 st.markdown("""
     <style>
-    /* 1. Ẩn bớt các thành phần mặc định của Streamlit (không liên quan sidebar) */
-    .stDeployButton {display:none;}          /* Nút Deploy */
-    #MainMenu {visibility: hidden;}          /* Menu 3 chấm */
-    footer {visibility: hidden;}             /* Footer */
+    /* Ẩn nút Deploy */
+    .stDeployButton {display:none;}
 
-    /* CHỈ ẨN LOGO TRONG stDecoration, KHÔNG ẨN CẢ KHUNG
-       → vẫn giữ được nút mũi tên / menu sidebar */
-    [data-testid="stDecoration"] svg,
-    [data-testid="stDecoration"] img {
-        display: none !important;
-    }
+    /* Ẩn menu 3 chấm & footer */
+    #MainMenu {visibility: hidden;}
+    footer {visibility: hidden;}
 
-    /* Ẩn 2 nút bút & GitHub trên toolbar */
+    /* Ẩn 2 nút (bút & GitHub) trên thanh toolbar */
     [data-testid="stToolbar"] button,
     [data-testid="stToolbar"] a {
         display: none !important;
     }
 
-    /* 2. STYLE CHUNG CHO NÚT MỞ SIDEBAR KHI BỊ THU GỌN */
-    [data-testid="stSidebarCollapsedControl"] {
-        display: flex !important;
-        visibility: visible !important;
-        align-items: center;
-        justify-content: center;
-
-        background-color: #0078FF !important;
-        color: white !important;
-        border-radius: 999px;
-        border: 2px solid white;
-        box-shadow: 2px 2px 10px rgba(0,0,0,0.3);
-
-        position: fixed;
-        z-index: 1000001;
-        cursor: pointer;
-    }
-
-    /* 2.1. Vị trí & kích thước trên MÁY TÍNH */
-    @media (min-width: 769px) {
-        [data-testid="stSidebarCollapsedControl"] {
-            top: 15px;
-            left: 15px;
-            width: 40px;
-            height: 40px;
-        }
-    }
-
-    /* 2.2. Vị trí & kích thước trên ĐIỆN THOẠI / MÀN HÌNH NHỎ */
-    @media (max-width: 768px) {
-        [data-testid="stSidebarCollapsedControl"] {
-            top: 10px;
-            left: 10px;
-            width: 36px;
-            height: 36px;
-        }
-    }
-
-    /* 3. Đẩy nội dung xuống một chút để nút không che mất chữ đầu trang */
-    .block-container {
-        padding-top: 60px !important;
-    }
+    /* KHÔNG ĐỤNG TỚI: stSidebar, stSidebarCollapsedControl, stDecoration
+       → để Streamlit tự hiện mũi tên / icon menu */
     </style>
 """, unsafe_allow_html=True)
-
 
 # -------------------------------------------------------------
 # HÀM HỖ TRỢ
