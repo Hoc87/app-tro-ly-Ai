@@ -150,10 +150,6 @@ EXPERTS: Dict[str, Dict[str, Any]] = {
         ],
         "extra": "",
     },
-      "🎨 Thiết Kế & Media (Ảnh/Video/Voice)": {
-        ...
-        "extra": "",
-    },
 
     "📖 Trợ Lý Kể Chuyện": {
         "role": "Trợ lý kể chuyện – giọng đọc truyền cảm, phù hợp mọi lứa tuổi.",
@@ -185,10 +181,7 @@ EXPERTS: Dict[str, Dict[str, Any]] = {
         "extra": "",
     },
 
-    "🖥️ Chuyên Gia Tin Học Văn Phòng (Office)": {
-        ...
-
-    # ------------------------------------------------------
+      # ------------------------------------------------------
     # OFFICE
     # ------------------------------------------------------
     "🖥️ Chuyên Gia Tin Học Văn Phòng (Office)": {
