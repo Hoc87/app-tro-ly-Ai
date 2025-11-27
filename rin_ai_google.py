@@ -651,6 +651,18 @@ else:
 
     # Lấy cấu hình chuyên gia từ prompts.py
     expert_instruction = get_expert_prompt(menu)
+        # Tạo / lấy session chat thật sự cho từng chuyên gia (có memory)
+    if "expert_chats" not in st.session_state:
+        st.session_state.expert_chats = {}
+
+    if menu not in st.session_state.expert_chats:
+        # Tạo model với system_instruction riêng cho chuyên gia này
+        expert_model = genai.GenerativeModel(
+            current_model_name,
+            system_instruction=expert_instruction,
+        )
+        # Khởi tạo chat trống, nhưng sẽ được giữ lại trong session_state
+        st.session_state.expert_chats[menu] = expert_model.start_chat(history=[])
 
     # Tuỳ chỉnh thêm cho Giáo dục (chọn bộ sách / vai trò)
     system_append = ""
@@ -915,9 +927,8 @@ else:
                     else:
                         message_payload = [final_prompt]
 
-                    # Tạo model & start_chat để có memory trong từng lần hỏi
-                    model = get_model(current_model_name, expert_instruction)
-                    chat = model.start_chat(history=[])
+                    # Lấy lại session chat đã tạo cho chuyên gia này
+                    chat = st.session_state.expert_chats[menu]
 
                     response = chat.send_message(message_payload)
                     full_txt = response.text or ""
