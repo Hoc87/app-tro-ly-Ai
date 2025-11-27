@@ -652,7 +652,7 @@ else:
 
     # Lấy cấu hình chuyên gia từ prompts.py
     expert_instruction = get_expert_prompt(menu)
-        # Tạo / lấy session chat thật sự cho từng chuyên gia (có memory)
+    # Tạo / lấy session chat thật sự cho từng chuyên gia (có memory)
     if "expert_chats" not in st.session_state:
         st.session_state.expert_chats = {}
 
