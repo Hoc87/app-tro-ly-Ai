@@ -315,6 +315,7 @@ with st.sidebar:
             "🏠 Trang Chủ & Giới Thiệu",
             "✨ Trợ Lý Đa Lĩnh Vực (Chung)",
             "📰 Đọc Báo & Tóm Tắt Sách",
+            "📖 Trợ Lý Kể Chuyện",
             "🎨 Thiết Kế & Media (Ảnh/Video/Voice)",
             "🖥️ Chuyên Gia Tin Học Văn Phòng (Office)",
             "🏗️ Kiến Trúc - Nội Thất - Xây Dựng",
