@@ -686,6 +686,35 @@ else:
         )
         system_append = f"\n(Bộ sách: {sach}, Đối tượng: {role})."
         
+    # Tuỳ chỉnh thêm cho Trợ Lý Kể Chuyện: chọn giọng miền & cảm xúc
+    if menu == "📖 Trợ Lý Kể Chuyện":
+        c1, c2 = st.columns(2)
+        story_region = c1.radio(
+            "Chọn giọng đọc:",
+            ["Miền Bắc", "Miền Trung", "Miền Nam"],
+            horizontal=True,
+            key="story_region",
+        )
+        story_emotion = c2.selectbox(
+            "Tông cảm xúc chính:",
+            [
+                "Ấm áp, chậm rãi, ru ngủ",
+                "Sôi nổi, hào hứng, tạo động lực",
+                "Trầm lắng, chữa lành, nhiều cảm xúc nội tâm",
+            ],
+            key="story_emotion",
+        )
+
+        # Đưa cấu hình này vào system_append để Gemini viết truyện phù hợp
+        system_append += (
+            "\n\nCẤU HÌNH GIỌNG ĐỌC ƯU TIÊN CHO TRUYỆN:\n"
+            f"- Vùng miền: {story_region}.\n"
+            f"- Phong cách cảm xúc: {story_emotion}.\n"
+            "- Hãy kể chuyện bằng giọng văn giàu cảm xúc, có nhịp nghỉ tự nhiên, câu ngắn vừa phải, "
+            "phù hợp để đọc thành voiceover cho người nghe.\n"
+            "- Cuối câu trả lời, đừng thêm bất kỳ hướng dẫn kỹ thuật nào, chỉ có nội dung truyện và phần bài học."
+        )
+        
     # Tuỳ chỉnh thêm cho Thiết Kế & Media: cho chọn loại nội dung
         # Tuỳ chỉnh thêm cho Thiết Kế & Media: Ảnh / Video / Voice
     if menu == "🎨 Thiết Kế & Media (Ảnh/Video/Voice)":
@@ -960,6 +989,33 @@ else:
 
                     # Hiển thị nội dung trả lời chính
                     st.markdown(txt_show.strip())
+                    
+                    # Nếu là Trợ Lý Kể Chuyện -> thêm nút nghe truyện
+                    if menu == "📖 Trợ Lý Kể Chuyện":
+                        # Lấy lại cấu hình giọng kể (nếu có)
+                        story_region = st.session_state.get("story_region", "Miền Bắc")
+
+                        col_voice1, col_voice2 = st.columns(2)
+                        with col_voice1:
+                            if st.button(
+                                "🔊 Nghe truyện (tốc độ thường)",
+                                key=f"tts_story_normal_{len(st.session_state.history[menu])}",
+                            ):
+                                play_text_to_speech(
+                                    txt_show,
+                                    speed_slow=False,
+                                    region=story_region,
+                                )
+                        with col_voice2:
+                            if st.button(
+                                "🐢 Nghe truyện (chậm, dễ ru ngủ)",
+                                key=f"tts_story_slow_{len(st.session_state.history[menu])}",
+                            ):
+                                play_text_to_speech(
+                                    txt_show,
+                                    speed_slow=True,
+                                    region=story_region,
+                                )
 
                     # Nếu có prompt vẽ 2D/3D → demo thêm ảnh minh hoạ (tuỳ chọn)
                     if p2d or p3d:
