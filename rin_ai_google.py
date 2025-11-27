@@ -111,8 +111,11 @@ def clean_text_for_tts(text: str) -> str:
     clean = re.sub(r"\n{2,}", "\n", clean)
     return clean.strip()
 
-
-def play_text_to_speech(text_content: str, speed_slow: bool = False):
+def play_text_to_speech(
+    text_content: str,
+    speed_slow: bool = False,
+    region: str | None = None,
+):
     try:
         text_to_read = clean_text_for_tts(text_content)
         if len(text_to_read) < 5:
@@ -122,11 +125,14 @@ def play_text_to_speech(text_content: str, speed_slow: bool = False):
         tts.write_to_fp(audio_bytes)
         audio_bytes.seek(0)
         st.audio(audio_bytes, format="audio/mp3")
-        status = "🐢 Đang đọc chậm..." if speed_slow else "🐇 Đang đọc tốc độ thường..."
-        st.caption(f"🔊 {status}")
+
+        base_status = "🐢 Đang đọc chậm..." if speed_slow else "🐇 Đang đọc tốc độ thường..."
+        if region:
+            st.caption(f"🔊 {base_status} (giọng truyện cấu hình: {region})")
+        else:
+            st.caption(f"🔊 {base_status}")
     except Exception:
         pass
-
 
 def generate_image_url(prompt: str) -> str:
     clean_prompt = prompt.replace(" ", "%20")
