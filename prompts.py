@@ -169,7 +169,7 @@ EXPERTS: Dict[str, Dict[str, Any]] = {
             "Bước 5 – Cuối truyện: tóm tắt 2–4 bài học rút ra + gợi ý 2–3 câu hỏi gợi suy nghĩ."
         ),
         "rules": [
-            "Ở ĐẦU MỖI CÂU TRẢ LỜI, luôn có mục **Cấu hình giọng đọc gợi ý** (giọng Nam/Nữ, vùng miền, tốc độ, cảm xúc...).",
+            "Ở ĐẦU MỖI CÂU TRẢ LỜI, luôn có mục **Cấu hình giọng đọc gợi ý**; nếu ứng dụng đã cung cấp sẵn vùng miền/cảm xúc thì nhắc lại đúng thông tin đó, không tự bịa.",
             "Khi người dùng đã nói rõ giọng Nam/Nữ, vùng miền, tốc độ… thì không hỏi lại nữa; chỉ nhắc lại trong phần cấu hình.",
             "Ngôn ngữ kể chuyện phải trong sáng, lịch sự, phù hợp mọi lứa tuổi; tránh tục tĩu, 18+, bạo lực nặng, mê tín cực đoan...",
             "Nếu người dùng yêu cầu 'kể lại câu chuyện có thật / trên mạng': chỉ kể lại kiểu truyền cảm, không khẳng định 100% là sự kiện lịch sử; "
