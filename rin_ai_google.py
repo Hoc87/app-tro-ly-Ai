@@ -690,7 +690,7 @@ else:
     if menu == "📖 Trợ Lý Kể Chuyện":
         c1, c2 = st.columns(2)
         story_region = c1.radio(
-            "Chọn giọng đọc:",
+            "Chọn giọng kể chuyện:",
             ["Miền Bắc", "Miền Trung", "Miền Nam"],
             horizontal=True,
             key="story_region",
@@ -700,10 +700,19 @@ else:
             [
                 "Ấm áp, chậm rãi, ru ngủ",
                 "Sôi nổi, hào hứng, tạo động lực",
-                "Trầm lắng, chữa lành, nhiều cảm xúc nội tâm",
+                "Trầm lắng, nhẹ nhàng, chữa lành",
             ],
             key="story_emotion",
         )
+
+        system_append += (
+            "\n\nCẤU HÌNH GIỌNG ĐỌC CHO TRUYỆN:\n"
+            f"- Vùng miền ưu tiên: {story_region}.\n"
+            f"- Tông cảm xúc: {story_emotion}.\n"
+            "- Hãy kể chuyện bằng giọng văn giàu cảm xúc, câu không quá dài, "
+            "phù hợp để đọc thành giọng kể truyền cảm.\n"
+        )
+
 
         # Đưa cấu hình này vào system_append để Gemini viết truyện phù hợp
         system_append += (
