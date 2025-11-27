@@ -988,7 +988,7 @@ else:
                     )
 
                     # Hiển thị nội dung trả lời chính
-                    st.markdown(txt_show.strip())
+                    st.session_state["__story_last_text"] = txt_show.strip()
                     
                     # Nếu là Trợ Lý Kể Chuyện -> thêm nút nghe truyện
                     if menu == "📖 Trợ Lý Kể Chuyện":
